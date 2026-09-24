@@ -1,12 +1,12 @@
 <title>England Welfare Tracker</title>
-<meta name="description" content="Adam Smith Institute England Welfare Tracker 2026: employee tax and DWP welfare spending for all 543 English constituencies, by party of sitting MP.">
+<meta name="description" content="Adam Smith Institute England Welfare Tracker 2026: income tax, National Insurance and DWP welfare spending for all 543 English constituencies, by party of sitting MP.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Josefin+Sans:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap">
 <style>
   /* Loosely after the ASI Design System: flat #224191 field for the masthead, Josefin Sans,
-     letter-spaced eyebrows, lavender highlights, amber chart accent, no radii, no shadows.
-     Data sits on a light print ground (as in ASI's own charts) so party colours read cleanly. */
+     lavender highlight, no radii, no shadows. Data sits on a light print ground, as in
+     ASI's own charts, so party colours read cleanly. */
   :root {
     --field: #224191;
     --field-ink: #ffffff;
@@ -21,9 +21,8 @@
     --rule: #e1e4ec;
     --rule-2: #c7ccd9;
     --track: #eceef4;
+    --fade: #e3e6ee;
     --accent: #224191;
-    --amber: #c67a2e;
-    --amber-ink: #9a5a1c;
     --dot: #c3c8d4;
     --map-edge: #ffffff;
     --tip-bg: #1b2a4a;
@@ -52,6 +51,13 @@
     --fs-5: #3e9a5a;
     --fs-6: #17613a;
 
+    /* share of England's total: one purple hue, light to dark */
+    --sq-0: #f0edf8;
+    --sq-1: #cbc2e6;
+    --sq-2: #9a89c9;
+    --sq-3: #6a4fa8;
+    --sq-4: #3e1d78;
+
     --font: "Josefin Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
     --gutter: clamp(16px, 4vw, 48px);
   }
@@ -65,9 +71,8 @@
       --rule: #243049;
       --rule-2: #34415f;
       --track: #1b2438;
+      --fade: #1d2639;
       --accent: #8ea6f0;
-      --amber: #e0954a;
-      --amber-ink: #e9a865;
       --dot: #3a465f;
       --map-edge: #0e1524;
       --tip-bg: #eef1f8;
@@ -79,6 +84,7 @@
       --p-yp: #b35ccc; --p-rb: #b7b0e8; --p-ind: #8d94a3; --p-spk: #d0d4dc;
       --fs-0: #ff6b57; --fs-1: #d4513f; --fs-2: #8a4440; --fs-3: #3a4254;
       --fs-4: #3f6e4c; --fs-5: #3f9e5d; --fs-6: #62d08a;
+      --sq-0: #221b3a; --sq-1: #3d2f6b; --sq-2: #6650a6; --sq-3: #9b86dc; --sq-4: #d6caff;
     }
   }
   :root[data-theme="dark"] {
@@ -90,9 +96,8 @@
     --rule: #243049;
     --rule-2: #34415f;
     --track: #1b2438;
+    --fade: #1d2639;
     --accent: #8ea6f0;
-    --amber: #e0954a;
-    --amber-ink: #e9a865;
     --dot: #3a465f;
     --map-edge: #0e1524;
     --tip-bg: #eef1f8;
@@ -104,6 +109,7 @@
     --p-yp: #b35ccc; --p-rb: #b7b0e8; --p-ind: #8d94a3; --p-spk: #d0d4dc;
     --fs-0: #ff6b57; --fs-1: #d4513f; --fs-2: #8a4440; --fs-3: #3a4254;
     --fs-4: #3f6e4c; --fs-5: #3f9e5d; --fs-6: #62d08a;
+    --sq-0: #221b3a; --sq-1: #3d2f6b; --sq-2: #6650a6; --sq-3: #9b86dc; --sq-4: #d6caff;
   }
 
   * { box-sizing: border-box; }
@@ -122,14 +128,10 @@
   .wrap { max-width: 1440px; margin-inline: auto; padding-inline: var(--gutter); }
   h1, h2, h3 { font-weight: 600; text-wrap: balance; margin: 0; }
   p { margin: 0; }
-  button { font: inherit; color: inherit; }
+  button, select { font: inherit; color: inherit; }
   :focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
   .num { font-variant-numeric: tabular-nums lining-nums; }
   .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
-  .eyebrow {
-    font-weight: 600; font-size: 0.82rem; letter-spacing: 0.42em; text-transform: uppercase;
-    color: var(--accent); line-height: 1.3; margin: 0;
-  }
   .muted { color: var(--ink-3); }
   .sw { display: inline-block; width: 12px; height: 12px; flex: none; }
 
@@ -138,20 +140,12 @@
   .mast :focus-visible { outline-color: var(--field-ink); }
   .mast-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 24px; }
   .mast-text { display: grid; gap: 18px; max-width: 62rem; }
-  .mast .eyebrow { color: var(--field-ink-2); }
+  .eyebrow { font-weight: 600; font-size: 0.82rem; letter-spacing: 0.42em; text-transform: uppercase; color: var(--field-ink-2); line-height: 1.3; }
   .mark { width: clamp(56px, 6.5vw, 88px); height: auto; flex: none; display: block; }
   h1 { font-size: clamp(2rem, 4.4vw, 3.6rem); line-height: 1.2; letter-spacing: -0.005em; }
   h1 .hl { color: var(--field-hl); }
-  .lead { font-weight: 300; font-size: clamp(1.1rem, 1.5vw, 1.3rem); line-height: 1.4; max-width: 60ch; }
-  .strip {
-    margin-top: clamp(24px, 3vw, 40px); display: grid; grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 20px clamp(20px, 3vw, 48px); padding-top: 18px; border-top: 1px solid var(--field-rule);
-  }
-  .stat { display: grid; gap: 2px; align-content: start; }
-  .stat .k { font-size: 0.95rem; color: var(--field-ink-2); }
-  .stat .v { font-weight: 600; font-size: clamp(1.7rem, 3vw, 2.6rem); line-height: 1.15; }
-  .stat .r { font-weight: 300; font-size: 0.92rem; color: var(--field-ink-2); }
-  .tabs { display: flex; gap: 4px 32px; margin-top: clamp(22px, 3vw, 36px); flex-wrap: wrap; }
+  .lead { font-weight: 300; font-size: clamp(1.1rem, 1.5vw, 1.3rem); line-height: 1.4; max-width: 62ch; }
+  .tabs { display: flex; gap: 4px 32px; margin-top: clamp(26px, 3.5vw, 44px); flex-wrap: wrap; }
   .tabs button {
     background: none; border: 0; padding: 10px 0 12px; cursor: pointer; color: var(--field-ink-2);
     font-size: 1.12rem; font-weight: 400; border-bottom: 4px solid transparent; min-height: 44px;
@@ -161,9 +155,9 @@
 
   /* ---------- Controls ---------- */
   .toolbar { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 14px 32px; padding-block: 22px 16px; }
-  .controls { display: flex; flex-wrap: wrap; gap: 14px 36px; align-items: flex-end; }
-  .ctl { display: grid; gap: 4px; }
-  .ctl-label { font-weight: 600; font-size: 0.74rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--ink-3); }
+  .controls { display: flex; flex-wrap: wrap; gap: 14px 40px; align-items: flex-end; }
+  .ctl { display: grid; gap: 2px; }
+  .ctl-label { font-weight: 600; font-size: 0.92rem; color: var(--ink-2); }
   .seg { display: flex; flex-wrap: wrap; gap: 2px 20px; }
   .seg button {
     background: none; border: 0; padding: 6px 0 5px; cursor: pointer; color: var(--ink-2);
@@ -177,7 +171,7 @@
     border: 0; border-bottom: 2px solid var(--ink); border-radius: 0; padding: 7px 2px 6px;
   }
   .search input::placeholder { color: var(--ink-3); opacity: 1; }
-  .search .note { position: absolute; left: 0; top: 100%; font-size: 0.85rem; color: var(--amber-ink); padding-top: 3px; }
+  .search .note { position: absolute; left: 0; top: 100%; font-size: 0.85rem; color: var(--fs-1); padding-top: 3px; }
 
   /* ---------- Map ---------- */
   .map-layout { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(360px, 1fr); gap: clamp(24px, 3.5vw, 56px); align-items: start; padding-bottom: 56px; }
@@ -186,17 +180,25 @@
   #map { width: 100%; height: 100%; display: block; cursor: grab; touch-action: pan-y; }
   #map:active { cursor: grabbing; }
   #map path.seat { stroke: var(--map-edge); stroke-width: 0.6; stroke-linejoin: round; vector-effect: non-scaling-stroke; cursor: pointer; transition: fill 0.3s, opacity 0.3s; }
-  #map path.seat.faded { opacity: 0.16; }
+  #map path.seat.on { stroke: var(--ink); stroke-width: 1; }
+  #map path.seat.out { opacity: 0.25; }
   #map path.seat.dim { opacity: 0.5; }
   #map .hov { fill: none; stroke: var(--ink); stroke-width: 1.6; vector-effect: non-scaling-stroke; pointer-events: none; }
   #map .sel { fill: none; stroke: var(--ink); stroke-width: 3; stroke-linejoin: round; vector-effect: non-scaling-stroke; pointer-events: none; }
-  .zoom { position: absolute; right: 0; top: 0; display: flex; flex-direction: column; gap: 6px; align-items: flex-end; }
-  .zoom button {
-    background: var(--ground); border: 1px solid var(--rule-2); color: var(--ink); cursor: pointer;
-    min-width: 36px; height: 36px; padding: 0 10px; font-size: 0.95rem;
+  .zoom { position: absolute; right: 0; top: 0; display: flex; gap: 6px; align-items: flex-start; }
+  .zoom button, .zoom select {
+    background-color: var(--ground); border: 1px solid var(--rule-2); color: var(--ink); cursor: pointer;
+    height: 36px; font-size: 0.95rem; border-radius: 0;
   }
-  .zoom button.sq { font-size: 1.3rem; line-height: 1; padding: 0; width: 36px; }
-  .zoom button:hover { background: var(--ink); color: var(--ground); border-color: var(--ink); }
+  .zoom button { width: 36px; padding: 0; font-size: 1.3rem; line-height: 1; }
+  .zoom button:hover { background-color: var(--ink); color: var(--ground); border-color: var(--ink); }
+  .zoom select {
+    -webkit-appearance: none; appearance: none; padding: 0 30px 0 10px; max-width: 220px;
+    background-image: linear-gradient(45deg, transparent 50%, currentColor 50%), linear-gradient(135deg, currentColor 50%, transparent 50%);
+    background-position: calc(100% - 16px) 50%, calc(100% - 11px) 50%;
+    background-size: 5px 5px; background-repeat: no-repeat;
+  }
+  .zoom select:hover { border-color: var(--ink); }
   .wheel-hint {
     position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); pointer-events: none;
     background: var(--tip-bg); color: var(--tip-ink); padding: 10px 16px 8px; font-size: 0.95rem;
@@ -211,7 +213,7 @@
   .tip b { font-weight: 600; display: block; font-size: 1.02rem; }
   .tip .t-row { display: flex; align-items: center; gap: 8px; color: var(--tip-ink-2); }
   .tip .t-val { font-weight: 600; font-size: 1.3rem; line-height: 1.25; margin-top: 3px; }
-  .tip .t-sub { color: var(--tip-ink-2); font-size: 0.85rem; }
+  .tip .t-sub { color: var(--tip-ink-2); font-size: 0.85rem; font-weight: 400; }
   .legend { display: flex; flex-wrap: wrap; gap: 4px 18px; font-size: 0.95rem; }
   .legend button {
     display: inline-flex; align-items: center; gap: 7px; background: none; border: 0; padding: 4px 0;
@@ -222,18 +224,19 @@
   .legend.isolating button[aria-pressed="false"] { color: var(--ink-3); }
   .legend .n { color: var(--ink-3); font-weight: 400; }
   .ramp { display: grid; gap: 4px; max-width: 460px; }
-  .ramp-bar { height: 12px; }
+  .ramp-bar { height: 12px; position: relative; }
+  .ramp-bar i { position: absolute; top: -5px; width: 3px; height: 22px; margin-left: -1.5px; background: var(--ink); }
   .ramp-ticks { position: relative; height: 1.3em; font-size: 0.85rem; color: var(--ink-3); }
-  .ramp-ticks span { position: absolute; transform: translateX(-50%); white-space: nowrap; }
-  .ramp-ticks span:first-child { transform: none; }
-  .ramp-ticks span:last-child { transform: translateX(-100%); }
-  .ramp-ends { display: flex; justify-content: space-between; font-size: 0.85rem; font-weight: 600; }
+  .ramp-ticks span { position: absolute; white-space: nowrap; }
+  .ramp-ends { display: flex; justify-content: space-between; font-size: 0.88rem; color: var(--ink-2); }
   .caption { font-size: 0.92rem; color: var(--ink-2); max-width: 70ch; }
 
-  /* ---------- Seat panel ---------- */
+  /* ---------- Side panel ---------- */
   .panel { display: grid; gap: 28px; align-content: start; min-width: 0; }
-  .p-head { display: grid; gap: 10px; }
+  .p-head { display: grid; gap: 8px; }
+  .p-kind { color: var(--ink-2); font-size: 1rem; }
   .p-head h2 { font-size: clamp(1.8rem, 2.6vw, 2.4rem); line-height: 1.2; }
+  .p-head .intro { color: var(--ink-2); }
   .p-mp { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; font-size: 1.05rem; }
   .p-mp .party { display: inline-flex; align-items: center; gap: 7px; font-weight: 600; }
   .p-mp .since { color: var(--ink-3); font-size: 0.95rem; }
@@ -246,10 +249,11 @@
   .verdict { display: grid; gap: 12px; }
   .big { font-weight: 600; font-size: clamp(3rem, 5vw, 4.2rem); line-height: 1; letter-spacing: -0.01em; }
   .big small { font-size: 0.3em; font-weight: 400; letter-spacing: 0; color: var(--ink-2); margin-left: 8px; }
-  .verdict p { font-size: 1.08rem; max-width: 46ch; }
+  .verdict p { font-size: 1.08rem; max-width: 48ch; }
+  .verdict .rank { font-size: 0.95rem; color: var(--ink-2); }
   .gauge { position: relative; height: 12px; margin-top: 6px; }
   .gauge i { position: absolute; top: -6px; width: 4px; height: 24px; margin-left: -2px; background: var(--ink); outline: 2px solid var(--ground); }
-  .gauge-lab { display: flex; justify-content: space-between; font-size: 0.82rem; color: var(--ink-3); margin-top: 4px; }
+  .gauge-lab { display: flex; justify-content: space-between; font-size: 0.85rem; color: var(--ink-3); margin-top: 4px; }
   .sec { display: grid; gap: 12px; padding-top: 18px; border-top: 1px solid var(--rule); }
   .sec h3 { font-size: 1.2rem; line-height: 1.3; }
   .sec .sub { font-size: 0.92rem; color: var(--ink-2); margin-top: -6px; }
@@ -258,7 +262,9 @@
   .ledger dt { font-weight: 400; }
   .ledger dd { margin: 0; font-weight: 600; text-align: right; white-space: nowrap; }
   .ledger .ctx { grid-column: 1 / -1; font-size: 0.86rem; color: var(--ink-3); }
-  .key { display: flex; flex-wrap: wrap; gap: 4px 18px; font-size: 0.86rem; color: var(--ink-2); align-items: center; }
+  .ledger button { background: none; border: 0; padding: 0; cursor: pointer; text-align: left; text-decoration: underline; text-decoration-color: var(--rule-2); text-underline-offset: 3px; }
+  .ledger button:hover { text-decoration-color: var(--ink); }
+  .key { display: flex; flex-wrap: wrap; gap: 4px 18px; font-size: 0.88rem; color: var(--ink-2); align-items: center; }
   .key span { display: inline-flex; align-items: center; gap: 6px; }
   .key .tick { width: 3px; height: 14px; background: var(--ink); display: inline-block; }
   .key .ln { width: 18px; height: 2px; display: inline-block; }
@@ -267,27 +273,31 @@
   .bar-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 3px 12px; font-size: 0.95rem; }
   .bar-row .val { font-weight: 600; text-align: right; white-space: nowrap; }
   .bar-row .val .muted { font-weight: 400; font-size: 0.86rem; }
-  .bar-row .trk { grid-column: 1 / -1; position: relative; height: 10px; }
+  .bar-row .trk { grid-column: 1 / -1; position: relative; height: 10px; background: var(--track); }
   .bar-row .fill { position: absolute; left: 0; top: 0; bottom: 0; background: var(--accent); }
   .bar-row .ref { position: absolute; top: -4px; bottom: -4px; width: 3px; margin-left: -1.5px; background: var(--ink); outline: 1.5px solid var(--ground); }
+  .stack { display: flex; height: 14px; gap: 2px; }
+  .stack span { display: block; height: 100%; min-width: 2px; }
+  .counts { display: flex; flex-wrap: wrap; gap: 4px 18px; font-size: 0.92rem; }
+  .counts span { display: inline-flex; align-items: center; gap: 7px; }
   .strips { display: grid; gap: 16px; }
   .strip-g { display: grid; gap: 10px; }
-  .strip-g > .ctl-label { margin-bottom: -2px; }
+  .strip-g h4 { margin: 0 0 -2px; font-size: 0.95rem; font-weight: 600; color: var(--ink-2); }
   .srow { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 0 12px; font-size: 0.95rem; }
   .srow .val { font-weight: 600; text-align: right; white-space: nowrap; }
   .srow .val .muted { font-weight: 400; font-size: 0.86rem; }
   .srow svg { grid-column: 1 / -1; display: block; width: 100%; height: 26px; overflow: visible; }
-  .note-flag { font-size: 0.9rem; color: var(--ink-2); border-left: 3px solid var(--amber); padding: 2px 0 2px 12px; }
   .chart { position: relative; width: 100%; }
   .chart svg { display: block; overflow: visible; }
   .chart text { font-family: var(--font); fill: var(--ink-3); font-size: 12px; }
   .chart .lab { fill: var(--ink); font-size: 13px; font-weight: 600; }
   .chart .lab-2 { fill: var(--ink-2); font-size: 12.5px; }
+  .chart .halo { paint-order: stroke; stroke: var(--ground); stroke-width: 4px; stroke-linejoin: round; }
   .chart .grid line { stroke: var(--rule); }
   .chart .axis-line { stroke: var(--rule-2); }
   .chart .base { stroke: var(--ink); stroke-width: 1.5; }
   .chart .be { stroke: var(--ink); stroke-width: 1.5; stroke-dasharray: 6 5; fill: none; }
-  .chart .be-amber { stroke: var(--amber); stroke-width: 2; stroke-dasharray: 6 5; fill: none; }
+  .chart .leader { stroke: var(--ink-2); stroke-width: 1; fill: none; }
   .chart .hit { cursor: pointer; }
   .list { display: grid; margin: 0; padding: 0; list-style: none; }
   .list li { border-bottom: 1px solid var(--rule); }
@@ -298,12 +308,11 @@
   .list button:hover { background: var(--track); }
   .list .v { font-weight: 600; white-space: nowrap; }
   .list .r { font-size: 0.85rem; color: var(--ink-3); display: block; }
-  .two { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; }
 
   /* ---------- National ---------- */
-  .nat { display: grid; gap: clamp(44px, 5vw, 72px); padding-block: 36px 64px; }
+  .nat { display: grid; gap: clamp(48px, 5.5vw, 80px); padding-block: 40px 64px; }
   .block { display: grid; gap: 16px; }
-  .block-head { display: grid; gap: 10px; max-width: 70ch; }
+  .block-head { display: grid; gap: 8px; max-width: 70ch; }
   .block-head h2 { font-size: clamp(1.5rem, 2.6vw, 2.2rem); line-height: 1.25; }
   .block-head p { color: var(--ink-2); }
   .block-foot { font-size: 0.9rem; color: var(--ink-2); max-width: 80ch; }
@@ -316,15 +325,16 @@
   table { width: 100%; border-collapse: collapse; font-size: 0.95rem; min-width: 760px; }
   thead th {
     position: sticky; top: 0; background: var(--ground); z-index: 1;
-    text-align: right; font-weight: 600; font-size: 0.74rem; letter-spacing: 0.12em; text-transform: uppercase;
-    color: var(--ink-2); border-bottom: 1px solid var(--rule-2); padding: 0; vertical-align: bottom;
+    text-align: right; font-weight: 600; font-size: 0.88rem; color: var(--ink-2);
+    border-bottom: 1px solid var(--rule-2); padding: 0; vertical-align: bottom;
   }
   thead th.l { text-align: left; }
   thead th button, thead th span {
     display: block; width: 100%; background: none; border: 0; padding: 10px 10px 9px 0; cursor: pointer;
-    text-align: inherit; letter-spacing: inherit; text-transform: inherit; font-weight: 600; color: inherit;
+    text-align: inherit; font-weight: 600; color: inherit;
   }
   thead th span { cursor: default; }
+  thead th button:hover { color: var(--ink); }
   thead th button::after { content: ""; display: inline-block; margin-left: 5px; vertical-align: 2px; border-left: 4px solid transparent; border-right: 4px solid transparent; }
   thead th[aria-sort="ascending"] button::after { border-bottom: 6px solid currentColor; }
   thead th[aria-sort="descending"] button::after { border-top: 6px solid currentColor; }
@@ -358,11 +368,10 @@
     .multiples { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   }
   @media (max-width: 720px) {
-    .strip { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     .multiples { grid-template-columns: 1fr; }
-    .two { grid-template-columns: 1fr; }
     .method dl div { grid-template-columns: 1fr; }
     .mark { width: 52px; }
+    .zoom select { max-width: 150px; }
   }
   @media (prefers-reduced-motion: reduce) {
     #map path.seat, .wheel-hint { transition: none; }
@@ -380,12 +389,11 @@
     <div class="mast-top">
       <div class="mast-text">
         <p class="eyebrow">England Welfare Tracker 2026</p>
-        <h1 id="headline">Only <span class="hl">145 of 543</span> English seats pay more in employee tax than they receive in welfare.</h1>
-        <p class="lead" id="lead">Employees in England pay &pound;213.0bn a year in income tax and National Insurance. The ten DWP benefits in this model cost &pound;266.1bn: &pound;1.25 in welfare for every &pound;1 of employee tax.</p>
+        <h1 id="headline">Only <span class="hl">145 of 543</span> English seats pay more in income tax and NI than they receive in welfare.</h1>
+        <p class="lead" id="lead">Workers in England pay &pound;213.0bn a year in income tax and National Insurance on their wages. The ten DWP benefits in this model cost &pound;266.1bn: &pound;1.25 in welfare for every &pound;1 of that tax.</p>
       </div>
       <img class="mark" src="asi_logo_white.svg" alt="Adam Smith Institute" width="88" height="88">
     </div>
-    <div class="strip" id="strip" aria-label="England summary"></div>
     <div class="tabs" role="tablist" aria-label="Tracker views">
       <button type="button" role="tab" id="tab-map" aria-controls="view-map" aria-selected="true">Constituency map</button>
       <button type="button" role="tab" id="tab-nat" aria-controls="view-nat" aria-selected="false" tabindex="-1">National picture</button>
@@ -403,6 +411,7 @@
             <div class="seg" role="group" aria-labelledby="mode-l">
               <button type="button" data-mode="party" aria-pressed="true">Party of sitting MP</button>
               <button type="button" data-mode="fiscal" aria-pressed="false">Fiscal balance</button>
+              <button type="button" data-mode="share" aria-pressed="false">Share of England&rsquo;s total</button>
             </div>
           </div>
           <div class="ctl" id="metric-ctl" hidden>
@@ -410,6 +419,13 @@
             <div class="seg" role="group" aria-labelledby="metric-l">
               <button type="button" data-metric="npa" aria-pressed="true">Net per adult</button>
               <button type="button" data-metric="ratio" aria-pressed="false">Welfare per &pound;1 of tax</button>
+            </div>
+          </div>
+          <div class="ctl" id="share-ctl" hidden>
+            <span class="ctl-label" id="share-l">Measure</span>
+            <div class="seg" role="group" aria-labelledby="share-l">
+              <button type="button" data-share="tax" aria-pressed="true">Income tax and NI</button>
+              <button type="button" data-share="wel" aria-pressed="false">Welfare spending</button>
             </div>
           </div>
         </div>
@@ -425,11 +441,11 @@
         <div class="map-col">
           <div class="map-box" id="map-box">
             <svg id="map" role="img" aria-label="Map of England's 543 parliamentary constituencies"></svg>
-            <div class="zoom" aria-label="Map zoom">
-              <button type="button" class="sq" id="z-in" aria-label="Zoom in">+</button>
-              <button type="button" class="sq" id="z-out" aria-label="Zoom out">&minus;</button>
-              <button type="button" id="z-eng">England</button>
-              <button type="button" id="z-lon">London</button>
+            <div class="zoom">
+              <label class="sr-only" for="region">Show region</label>
+              <select id="region"></select>
+              <button type="button" id="z-in" aria-label="Zoom in">+</button>
+              <button type="button" id="z-out" aria-label="Zoom out">&minus;</button>
             </div>
             <div class="wheel-hint" id="wheel-hint">Hold Ctrl or &#8984; and scroll to zoom</div>
             <div class="tip" id="map-tip" hidden></div>
@@ -444,40 +460,35 @@
 
   <section id="view-nat" role="tabpanel" aria-labelledby="tab-nat" hidden>
     <div class="wrap nat">
-      <div class="block" id="b-regions">
+      <div class="block">
         <div class="block-head">
-          <p class="eyebrow">Regions</p>
-          <h2>London is the only region where employee tax clearly covers welfare.</h2>
-          <p>Welfare spending for every &pound;1 of employee income tax and National Insurance.</p>
+          <h2>London is the only region where income tax and NI clearly cover welfare.</h2>
+          <p>Welfare spending for every &pound;1 of income tax and National Insurance paid on wages, by region.</p>
         </div>
         <div class="chart" id="c-regions"></div>
-        <p class="block-foot" id="regions-foot"></p>
       </div>
 
-      <div class="block" id="b-scatter">
+      <div class="block">
         <div class="block-head">
-          <p class="eyebrow">Every seat</p>
           <h2>Seats below the line pay in more than they take out.</h2>
-          <p>Employee tax per worker against welfare spending per adult, all 543 English constituencies. Hover for detail; click a seat to open it on the map.</p>
+          <p>Income tax and NI per worker against welfare spending per adult, all 543 English constituencies. Click a party to pick out its seats; click a seat to open it on the map.</p>
         </div>
         <div id="scatter-legend" class="legend"></div>
         <div class="chart" id="c-scatter"></div>
-        <p class="block-foot">The break-even line assumes England&rsquo;s average of 0.51 employee jobs per adult. A seat with more jobs per adult breaks even above the line; one with fewer, below it.</p>
+        <p class="block-foot">The break-even line assumes England&rsquo;s average of 0.51 jobs per adult. A seat with more jobs per adult breaks even above the line; one with fewer, below it.</p>
       </div>
 
-      <div class="block" id="b-parties">
+      <div class="block">
         <div class="block-head">
-          <p class="eyebrow">By party</p>
           <h2 id="party-h">Of the larger parties, only Liberal Democrat seats pay in more than they receive.</h2>
-          <p>Each panel highlights one party&rsquo;s seats against all 543. Axes as above.</p>
+          <p>Each panel picks out one party&rsquo;s seats against all 543. Axes as above.</p>
         </div>
         <div class="multiples" id="c-mult"></div>
         <div class="table-scroll short"><table id="t-party"></table></div>
       </div>
 
-      <div class="block" id="b-dumb">
+      <div class="block">
         <div class="block-head">
-          <p class="eyebrow">Two Englands</p>
           <h2>High-welfare seats have fewer people in work and more in poor health.</h2>
           <p>The ten English seats with the highest welfare spending per adult against the ten with the lowest, measured as the difference from the England average. Labels give each group&rsquo;s actual value.</p>
         </div>
@@ -486,18 +497,16 @@
         <p class="block-foot" id="dumb-foot"></p>
       </div>
 
-      <div class="block" id="b-ben">
+      <div class="block">
         <div class="block-head">
-          <p class="eyebrow">Where it goes</p>
           <h2 id="ben-h">State Pension and Universal Credit make up most of the bill.</h2>
           <p>Annual spending across England on the ten DWP benefits in the model.</p>
         </div>
         <div class="bars" id="c-ben" style="max-width: 820px"></div>
       </div>
 
-      <div class="block" id="b-table">
+      <div class="block">
         <div class="block-head">
-          <p class="eyebrow">All seats</p>
           <h2>Every constituency, ranked by net contribution per adult.</h2>
           <p>Sort by any column. Click a row to open the seat on the map.</p>
         </div>
@@ -511,9 +520,8 @@
         <div class="table-scroll"><table id="t-seats"></table></div>
       </div>
 
-      <div class="block" id="b-method">
+      <div class="block">
         <div class="block-head">
-          <p class="eyebrow">Method</p>
           <h2>What the model counts, and what it leaves out.</h2>
         </div>
         <div class="method" id="method"></div>
@@ -542,6 +550,7 @@
   const seats = W.seats;
   const byCode = new Map(seats.map(s => [s.code, s]));
   const REDUCED = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const REGIONS = W.regions.map(r => r.name);
 
   // ---------- parties ----------
   const GROUPS = [
@@ -564,12 +573,20 @@
   seats.forEach(s => { s.g = PARTY_G[s.party]; });
   GROUPS.forEach(x => { x.n = seats.filter(s => s.g === x.g).length; x.surplus = seats.filter(s => s.g === x.g && s.net > 0).length; });
   const pc = g => `var(--p-${g})`;
+  const groupName = g => g === "lab" ? GROUP.lab.long : GROUP[g].name;
 
   // rank by net contribution per adult (1 = largest net contributor)
   seats.slice().sort((a, b) => b.npa - a.npa).forEach((s, i) => { s.rank = i + 1; });
 
   const BEN_SHORT = ["JSA", "Universal Credit", "State Pension", "Pension Credit", "Housing Benefit", "PIP", "DLA", "ESA", "Carer's Allowance", "Attendance Allowance"];
   const JOBS_PER_ADULT = E.jobs / E.adults;
+
+  function agg(list) {
+    const tax = d3.sum(list, s => s.tax), wel = d3.sum(list, s => s.wel);
+    const adults = d3.sum(list, s => s.adults), jobs = d3.sum(list, s => s.jobs);
+    return { seats: list.length, tax, wel, net: tax - wel, adults, jobs, ratio: wel / tax, tpw: tax / jobs, wpa: wel / adults,
+      npa: (tax - wel) / adults, surplus: list.filter(s => s.net > 0).length, ben: d3.range(10).map(i => d3.sum(list, s => s.ben[i])) };
+  }
 
   // ---------- formatting ----------
   const MINUS = "−";
@@ -579,42 +596,50 @@
   const sgbp = n => (n > 0 ? "+" : n < 0 ? MINUS : "") + "£" + f0(Math.abs(n));
   const money = n => {
     const a = Math.abs(n), sign = n < 0 ? MINUS : "";
-    if (a >= 1e9) return sign + "£" + (a / 1e9).toFixed(a >= 1e11 ? 0 : 1) + "bn";
+    if (a >= 1e9) return sign + "£" + (a / 1e9).toFixed(1) + "bn";
     if (a >= 1e8) return sign + "£" + Math.round(a / 1e6) + "m";
     return sign + "£" + (a / 1e6).toFixed(1) + "m";
   };
   const bn = n => (n < 0 ? MINUS : "") + "£" + (Math.abs(n) / 1e9).toFixed(1) + "bn";
   const ratio = r => "£" + r.toFixed(2);
   const pct = (x, dp = 0) => (x * 100).toFixed(dp) + "%";
+  const share = v => (v * 100).toFixed(v < 0.01 ? 2 : 1) + "%";
   const ord = n => { const s = ["th", "st", "nd", "rd"], v = n % 100; return n + (s[(v - 20) % 10] || s[v] || s[0]); };
   const kfmt = v => "£" + (v / 1000) + "k";
   const monthYear = iso => { if (!iso) return ""; const d = new Date(iso + "T00:00:00"); return d.toLocaleDateString("en-GB", { month: "long", year: "numeric" }); };
   const cssVar = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
 
-  // ---------- fiscal colour scale ----------
-  let fiscalScale;
-  function buildFiscal() {
-    const stops = [0, 1, 2, 3, 4, 5, 6].map(i => cssVar("--fs-" + i));
-    fiscalScale = d3.scaleLinear().domain([-1, -2 / 3, -1 / 3, 0, 1 / 3, 2 / 3, 1]).range(stops).interpolate(d3.interpolateLab).clamp(true);
+  // ---------- colour scales ----------
+  let fiscalScale, shareScale;
+  function buildScales() {
+    fiscalScale = d3.scaleLinear().domain([-1, -2 / 3, -1 / 3, 0, 1 / 3, 2 / 3, 1])
+      .range([0, 1, 2, 3, 4, 5, 6].map(i => cssVar("--fs-" + i))).interpolate(d3.interpolateLab).clamp(true);
+    shareScale = d3.scaleLinear().domain([0, 0.25, 0.5, 0.75, 1])
+      .range([0, 1, 2, 3, 4].map(i => cssVar("--sq-" + i))).interpolate(d3.interpolateLab).clamp(true);
   }
   const NPA_MAX = 5000, RATIO_MAX = 3;
-  const fiscalT = (s, metric) => metric === "ratio" ? -Math.log(s.ratio) / Math.log(RATIO_MAX) : s.npa / NPA_MAX;
   const clampT = t => Math.max(-1, Math.min(1, t));
-  const rampCSS = () => "linear-gradient(90deg," + [0, 1, 2, 3, 4, 5, 6].map(i => `var(--fs-${i}) ${(i / 6 * 100).toFixed(1)}%`).join(",") + ")";
+  const fiscalT = (o, metric) => clampT(metric === "ratio" ? -Math.log(o.ratio) / Math.log(RATIO_MAX) : o.npa / NPA_MAX);
+  const SHARE = {
+    tax: { of: o => o.tax / E.tax, noun: "income tax and NI" },
+    wel: { of: o => o.wel / E.wel, noun: "welfare spending" },
+  };
+  for (const k of Object.keys(SHARE)) {
+    const vals = seats.map(SHARE[k].of);
+    SHARE[k].log = d3.scaleLog(d3.extent(vals), [0, 1]).clamp(true);
+  }
+  const shareT = (o, k) => SHARE[k].log(SHARE[k].of(o));
+  const gradCSS = (prefix, n) => "linear-gradient(90deg," + d3.range(n).map(i => `var(--${prefix}-${i}) ${(i / (n - 1) * 100).toFixed(1)}%`).join(",") + ")";
+  const fiscalCSS = () => gradCSS("fs", 7), shareCSS = () => gradCSS("sq", 5);
 
   // ---------- state ----------
-  const state = { mode: "party", metric: "npa", sel: null, iso: null, tab: "map" };
+  // scope: a selected seat beats an isolated party, which beats a region, which beats England
+  const state = { mode: "party", metric: "npa", share: "tax", sel: null, iso: null, region: null, tab: "map" };
 
   // ---------- masthead ----------
   const surplusSeats = seats.filter(s => s.net > 0).length;
-  document.getElementById("headline").innerHTML = `Only <span class="hl">${surplusSeats} of ${seats.length}</span> English seats pay more in employee tax than they receive in welfare.`;
-  document.getElementById("lead").textContent = `Employees in England pay ${bn(E.tax)} a year in income tax and National Insurance. The ten DWP benefits in this model cost ${bn(E.wel)}: ${ratio(E.ratio)} in welfare for every £1 of employee tax.`;
-  document.getElementById("strip").innerHTML = [
-    ["Employee tax", bn(E.tax), "Income tax and employee NI"],
-    ["Welfare spending", bn(E.wel), "Ten DWP benefits, annualised"],
-    ["Net balance", bn(E.net), gbp(E.npa) + " per adult"],
-    ["Welfare per £1 of tax", ratio(E.ratio), "Break-even is £1.00"],
-  ].map(([k, v, r]) => `<div class="stat"><span class="k">${k}</span><span class="v">${v}</span><span class="r">${r}</span></div>`).join("");
+  document.getElementById("headline").innerHTML = `Only <span class="hl">${surplusSeats} of ${seats.length}</span> English seats pay more in income tax and NI than they receive in welfare.`;
+  document.getElementById("lead").textContent = `Workers in England pay ${bn(E.tax)} a year in income tax and National Insurance on their wages. The ten DWP benefits in this model cost ${bn(E.wel)}: ${ratio(E.ratio)} in welfare for every £1 of that tax.`;
 
   // ---------- tabs ----------
   const tabs = { map: document.getElementById("tab-map"), nat: document.getElementById("tab-nat") };
@@ -630,7 +655,6 @@
     }
     if (focus) tabs[t].focus();
     if (t === "nat" && !natDrawn) { natDrawn = true; drawNational(); }
-    if (t === "map") mapResize();
     writeHash();
   }
   tabs.map.addEventListener("click", () => showTab("map"));
@@ -640,8 +664,8 @@
   });
 
   function writeHash() {
-    const h = state.tab === "nat" ? "#national" : state.sel ? "#seat=" + state.sel : "";
-    try { history.replaceState(null, "", h || location.pathname + location.search); } catch (e) { /* sandboxed */ }
+    const h = state.tab === "nat" ? "#national" : state.sel ? "#seat=" + state.sel : state.region ? "#region=" + encodeURIComponent(state.region) : "";
+    try { history.replaceState(null, "", h || location.pathname + location.search); } catch (e) { /* sandboxed viewer */ }
   }
 
   // ---------- map ----------
@@ -655,8 +679,7 @@
   const selPath = gRoot.append("path").attr("class", "sel");
   const feats = GEO.features.filter(f => byCode.has(f.id));
   const featBy = new Map(feats.map(f => [f.id, f]));
-  const seatPaths = gSeats.selectAll("path").data(feats, d => d.id).join("path")
-    .attr("class", "seat").attr("d", path);
+  const seatPaths = gSeats.selectAll("path").data(feats, d => d.id).join("path").attr("class", "seat").attr("d", path);
 
   const mapBox = document.getElementById("map-box");
   const tip = document.getElementById("map-tip");
@@ -666,7 +689,7 @@
     .filter(ev => {
       if (ev.type === "wheel") { if (ev.ctrlKey || ev.metaKey) return true; wheelHint(); return false; }
       if (ev.type === "touchstart") return ev.touches.length > 1 || curK > 1.01;
-      return (!ev.ctrlKey || ev.type === "wheel") && !ev.button;
+      return !ev.ctrlKey && !ev.button;
     })
     .on("zoom", ev => { gRoot.attr("transform", ev.transform); curK = ev.transform.k; });
   svg.call(zoom).on("dblclick.zoom", null);
@@ -679,28 +702,36 @@
     hintTimer = setTimeout(() => h.classList.remove("on"), 1100);
   }
   const dur = ms => REDUCED ? 0 : ms;
+  const boundsOf = list => path.bounds({ type: "FeatureCollection", features: list.map(s => featBy.get(s.code)) });
   function zoomToBounds([[x0, y0], [x1, y1]], maxK = 40, fill = 0.72) {
-    const k = Math.min(maxK, fill / Math.max((x1 - x0) / VW, (y1 - y0) / VH));
+    const k = Math.max(1, Math.min(maxK, fill / Math.max((x1 - x0) / VW, (y1 - y0) / VH)));
     const t = d3.zoomIdentity.translate(VW / 2, VH / 2).scale(k).translate(-(x0 + x1) / 2, -(y0 + y1) / 2);
     svg.transition().duration(dur(750)).call(zoom.transform, t);
   }
-  function zoomReset() { svg.transition().duration(dur(650)).call(zoom.transform, d3.zoomIdentity); }
+  // frame whatever scope is active once a seat is let go
+  function zoomScope() {
+    if (state.iso) zoomToBounds(boundsOf(seats.filter(s => s.g === state.iso)), 12, 0.9);
+    else if (state.region) zoomToBounds(boundsOf(seats.filter(s => s.region === state.region)), 12, 0.92);
+    else svg.transition().duration(dur(650)).call(zoom.transform, d3.zoomIdentity);
+  }
   document.getElementById("z-in").addEventListener("click", () => svg.transition().duration(dur(300)).call(zoom.scaleBy, 1.8));
   document.getElementById("z-out").addEventListener("click", () => svg.transition().duration(dur(300)).call(zoom.scaleBy, 1 / 1.8));
-  document.getElementById("z-eng").addEventListener("click", () => { selectSeat(null); zoomReset(); });
-  document.getElementById("z-lon").addEventListener("click", () => {
-    const lon = { type: "FeatureCollection", features: feats.filter(f => byCode.get(f.id).region === "London") };
-    zoomToBounds(path.bounds(lon), 40, 0.92);
-  });
+
+  const regionSel = document.getElementById("region");
+  regionSel.innerHTML = `<option value="">England</option>` + REGIONS.map(r => `<option value="${esc(r)}">${esc(r)}</option>`).join("");
+  regionSel.addEventListener("change", () => setRegion(regionSel.value || null));
 
   function fillFor(s) {
-    if (state.mode === "party") return pc(s.g);
-    return fiscalScale(clampT(fiscalT(s, state.metric)));
+    if (state.mode === "party") return state.iso && s.g !== state.iso ? "var(--fade)" : pc(s.g);
+    if (state.mode === "share") return shareScale(shareT(s, state.share));
+    return fiscalScale(fiscalT(s, state.metric));
   }
   function paint() {
     seatPaths.style("fill", d => fillFor(byCode.get(d.id)))
-      .classed("faded", d => state.mode === "party" && state.iso && byCode.get(d.id).g !== state.iso)
-      .classed("dim", d => state.sel && d.id !== state.sel && !(state.mode === "party" && state.iso && byCode.get(d.id).g !== state.iso));
+      .classed("on", d => state.mode === "party" && !!state.iso && byCode.get(d.id).g === state.iso)
+      .classed("out", d => !!state.region && byCode.get(d.id).region !== state.region)
+      .classed("dim", d => !!state.sel && d.id !== state.sel);
+    if (state.iso && state.mode === "party") seatPaths.filter(".on").raise();
   }
 
   function placeTip(el, box, x, y) {
@@ -713,26 +744,27 @@
     el.style.transform = `translate(${Math.round(left)}px, ${Math.round(top)}px)`;
   }
   function seatTipHTML(s) {
-    const primary = state.mode === "fiscal" && state.metric === "ratio"
-      ? `<div class="t-val">${ratio(s.ratio)} <span class="t-sub">welfare per £1 of tax</span></div>`
-      : `<div class="t-val">${sgbp(s.npa)} <span class="t-sub">net per adult</span></div>`;
+    let primary;
+    if (state.mode === "share") primary = `<div class="t-val">${share(SHARE[state.share].of(s))} <span class="t-sub">of England&rsquo;s ${SHARE[state.share].noun}</span></div>`;
+    else if (state.mode === "fiscal" && state.metric === "ratio") primary = `<div class="t-val">${ratio(s.ratio)} <span class="t-sub">welfare per £1 of tax</span></div>`;
+    else primary = `<div class="t-val">${sgbp(s.npa)} <span class="t-sub">net per adult</span></div>`;
     return `<b>${esc(s.name)}</b>
-      <div class="t-row"><span class="sw" style="background:${pc(s.g)}"></span>${esc(s.party)}${s.mp ? " · " + esc(s.mp) : ""}</div>
-      ${primary}<div class="t-sub">${esc(s.region)} · ${ord(s.rank)} of ${seats.length}</div>`;
+      <div class="t-row"><span class="sw" style="background:${pc(s.g)}"></span>${esc(s.party)} · ${s.mp ? esc(s.mp) : "Seat vacant"}</div>
+      ${primary}<div class="t-sub">${esc(s.region)}</div>`;
   }
   seatPaths
     .on("pointermove", function (ev, d) {
-      const s = byCode.get(d.id);
       hov.attr("d", path(d));
-      tip.innerHTML = seatTipHTML(s);
+      tip.innerHTML = seatTipHTML(byCode.get(d.id));
       const [x, y] = d3.pointer(ev, mapBox);
       placeTip(tip, mapBox, x, y);
     })
     .on("pointerleave", () => { hov.attr("d", null); tip.hidden = true; })
-    .on("click", (ev, d) => { selectSeat(d.id === state.sel ? null : d.id, { zoom: true }); });
-  svg.on("click", ev => { if (ev.target === svg.node() && state.sel) { selectSeat(null); zoomReset(); } });
-
-  function mapResize() { /* the SVG scales with its viewBox; nothing to recompute */ }
+    .on("click", (ev, d) => {
+      if (d.id === state.sel) { selectSeat(null); zoomScope(); }
+      else selectSeat(d.id, { zoom: true });
+    });
+  svg.on("click", ev => { if (ev.target === svg.node() && state.sel) { selectSeat(null); zoomScope(); } });
 
   // ---------- legend ----------
   function drawLegend() {
@@ -741,37 +773,57 @@
     if (state.mode === "party") {
       el.className = "legend" + (state.iso ? " isolating" : "");
       el.innerHTML = GROUPS.filter(x => x.n).map(x =>
-        `<button type="button" data-g="${x.g}" aria-pressed="${state.iso === x.g}"><span class="sw" style="background:${pc(x.g)}"></span>${esc(x.g === "lab" ? x.long : x.name)} <span class="n">${x.n}</span></button>`).join("");
-      el.querySelectorAll("button").forEach(b => b.addEventListener("click", () => {
-        state.iso = state.iso === b.dataset.g ? null : b.dataset.g;
-        paint(); drawLegend();
-      }));
-      cap.textContent = `Party of sitting MP, ${W.partyAsOf}. Click a party to isolate its seats. Click a seat to zoom in and open its detail.`;
-    } else {
-      el.className = "ramp";
-      const ticks = state.metric === "npa"
-        ? [[-1, MINUS + "£5k"], [-0.5, MINUS + "£2.5k"], [0, "£0"], [0.5, "+£2.5k"], [1, "+£5k"]]
-        : [[1, "£0.33"], [Math.log(2) / Math.log(3), "£0.50"], [0, "£1.00"], [-Math.log(2) / Math.log(3), "£2.00"], [-1, "£3.00"]].sort((a, b) => a[0] - b[0]);
-      el.innerHTML = `<div class="ramp-ends"><span>Deficit</span><span>Surplus</span></div>
-        <div class="ramp-bar" style="background:${rampCSS()}"></div>
-        <div class="ramp-ticks">${ticks.map(([t, l]) => `<span style="left:${((t + 1) / 2 * 100).toFixed(1)}%">${l}</span>`).join("")}</div>`;
-      cap.textContent = state.metric === "npa"
-        ? "Employee tax minus welfare spending, per adult. Seats beyond ±£5,000 take the end colour. Click a seat to zoom in."
-        : "Welfare spending for every £1 of employee tax, on a log scale. Above £1.00 a seat receives more than it pays in. Click a seat to zoom in.";
+        `<button type="button" data-g="${x.g}" aria-pressed="${state.iso === x.g}"><span class="sw" style="background:${pc(x.g)}"></span>${esc(groupName(x.g))} <span class="n">${x.n}</span></button>`).join("");
+      el.querySelectorAll("button").forEach(b => b.addEventListener("click", () => setParty(state.iso === b.dataset.g ? null : b.dataset.g)));
+      cap.textContent = `Party of sitting MP, ${W.partyAsOf}. Click a party to show only its seats. Click a seat to zoom in and open its detail.`;
+      return;
     }
+    el.className = "ramp";
+    let ticks, ends, marker = "";
+    if (state.mode === "share") {
+      const k = state.share, sc = SHARE[k].log, [lo, hi] = sc.domain();
+      const cands = [0.0005, 0.001, 0.0015, 0.002, 0.003, 0.004, 0.005, 0.0075, 0.01].filter(v => v >= lo && v <= hi);
+      ticks = [];
+      cands.forEach(v => { const t = sc(v); if (!ticks.length || t - ticks[ticks.length - 1][0] >= 0.16) ticks.push([t, share(v)]); });
+      const avg = 1 / seats.length;
+      marker = `<i style="left:${(sc(avg) * 100).toFixed(1)}%" title="Average seat"></i>`;
+      ends = ["Smaller share", "Larger share"];
+      cap.textContent = `Each seat’s share of England’s ${SHARE[k].noun}, on a log scale. The black mark is an average seat’s share (${share(avg)}). Click a seat to zoom in.`;
+    } else if (state.metric === "npa") {
+      ticks = [[0, MINUS + "£5k"], [0.25, MINUS + "£2.5k"], [0.5, "£0"], [0.75, "+£2.5k"], [1, "+£5k"]];
+      ends = ["Deficit", "Surplus"];
+      cap.textContent = "Income tax and NI minus welfare spending, per adult. Seats beyond ±£5,000 take the end colour. Click a seat to zoom in.";
+    } else {
+      const at = r => (clampT(-Math.log(r) / Math.log(RATIO_MAX)) + 1) / 2;
+      ticks = [3, 2, 1, 0.5, 1 / 3].map(r => [at(r), "£" + r.toFixed(2)]);
+      ends = ["Deficit", "Surplus"];
+      cap.textContent = "Welfare spending for every £1 of income tax and NI, on a log scale. Above £1.00 a seat receives more than it pays in. Click a seat to zoom in.";
+    }
+    const tickSpan = ([t, l]) => {
+      const tf = t < 0.06 ? "none" : t > 0.94 ? "translateX(-100%)" : "translateX(-50%)";
+      return `<span style="left:${(t * 100).toFixed(1)}%;transform:${tf}">${l}</span>`;
+    };
+    el.innerHTML = `<div class="ramp-ends"><span>${ends[0]}</span><span>${ends[1]}</span></div>
+      <div class="ramp-bar" style="background:${state.mode === "share" ? shareCSS() : fiscalCSS()}">${marker}</div>
+      <div class="ramp-ticks">${ticks.map(tickSpan).join("")}</div>`;
   }
 
+  function setSeg(attr, val) { document.querySelectorAll(`[data-${attr}]`).forEach(x => x.setAttribute("aria-pressed", x.dataset[attr] === val)); }
   document.querySelectorAll("[data-mode]").forEach(b => b.addEventListener("click", () => {
     state.mode = b.dataset.mode;
-    document.querySelectorAll("[data-mode]").forEach(x => x.setAttribute("aria-pressed", x === b));
+    setSeg("mode", state.mode);
     document.getElementById("metric-ctl").hidden = state.mode !== "fiscal";
-    paint(); drawLegend();
+    document.getElementById("share-ctl").hidden = state.mode !== "share";
+    if (state.mode !== "party" && state.iso) { state.iso = null; if (!state.sel) zoomScope(); }
+    paint(); drawLegend(); renderPanel();
   }));
   document.querySelectorAll("[data-metric]").forEach(b => b.addEventListener("click", () => {
-    state.metric = b.dataset.metric;
-    document.querySelectorAll("[data-metric]").forEach(x => x.setAttribute("aria-pressed", x === b));
-    paint(); drawLegend();
-    if (state.sel) renderPanel();
+    state.metric = b.dataset.metric; setSeg("metric", state.metric);
+    paint(); drawLegend(); renderPanel();
+  }));
+  document.querySelectorAll("[data-share]").forEach(b => b.addEventListener("click", () => {
+    state.share = b.dataset.share; setSeg("share", state.share);
+    paint(); drawLegend(); renderPanel();
   }));
 
   // ---------- search ----------
@@ -804,134 +856,215 @@
   q.addEventListener("input", () => { qNote.textContent = ""; runSearch(false); });
   q.addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); runSearch(true); } });
 
-  // ---------- selection ----------
+  // ---------- scope changes ----------
   function selectSeat(code, opts = {}) {
+    const s = code ? byCode.get(code) : null;
     state.sel = code;
-    const f = code ? featBy.get(code) : null;
-    selPath.attr("d", f ? path(f) : null);
+    if (s && state.region && s.region !== state.region) { state.region = null; regionSel.value = ""; }
+    if (s && state.iso && s.g !== state.iso) { state.iso = null; drawLegend(); }
+    selPath.attr("d", s ? path(featBy.get(code)) : null);
     paint();
     renderPanel();
-    if (f && opts.zoom) zoomToBounds(path.bounds(f));
-    if (!code && opts.zoom) zoomReset();
+    if (s && opts.zoom) zoomToBounds(path.bounds(featBy.get(code)));
     writeHash();
   }
+  function setParty(g) {
+    state.iso = g; state.sel = null; state.region = null; regionSel.value = "";
+    selPath.attr("d", null);
+    paint(); drawLegend(); renderPanel(); zoomScope(); writeHash();
+  }
+  function setRegion(r) {
+    state.region = r; state.sel = null; state.iso = null; regionSel.value = r || "";
+    selPath.attr("d", null);
+    paint(); drawLegend(); renderPanel(); zoomScope(); writeHash();
+  }
+  function toEngland() { setRegion(null); }
 
   // ---------- panel ----------
   const panel = document.getElementById("panel");
   const arrow = '<svg aria-hidden="true"><use href="#i-arrow"/></svg>';
 
+  // headline figure and gauge follow whatever the map is showing
+  function figure(o, isSeat) {
+    if (state.mode === "share") {
+      const k = state.share;
+      return { big: share(SHARE[k].of(o)), small: `of England’s ${SHARE[k].noun}`,
+        gauge: isSeat ? { css: shareCSS(), t: shareT(o, k), labels: ["Smaller share", "Larger share"] } : null };
+    }
+    const t = (fiscalT(o, state.metric) + 1) / 2;
+    const gauge = { css: fiscalCSS(), t, labels: ["Deficit", "Break-even", "Surplus"] };
+    return state.metric === "ratio" && state.mode === "fiscal"
+      ? { big: ratio(o.ratio), small: "welfare per £1 of tax", gauge }
+      : { big: sgbp(o.npa), small: "net per adult", gauge };
+  }
+  const gaugeHTML = gg => gg ? `<div><div class="gauge" style="background:${gg.css}"><i style="left:${(gg.t * 100).toFixed(1)}%"></i></div>
+    <div class="gauge-lab">${gg.labels.map(l => `<span>${l}</span>`).join("")}</div></div>` : "";
+
   function renderPanel() {
-    const s = state.sel ? byCode.get(state.sel) : null;
-    if (!s) return renderEngland();
-    const t = clampT(fiscalT(s, state.metric));
-    const deficit = s.net < 0;
-    const verdict = deficit
-      ? `Welfare spending here exceeds employee tax by <strong>${money(-s.net)}</strong> a year.`
-      : `Employee tax here exceeds welfare spending by <strong>${money(s.net)}</strong> a year.`;
-    const big = state.metric === "ratio"
-      ? `${ratio(s.ratio)}<small>welfare per £1 of tax</small>`
-      : `${sgbp(s.npa)}<small>net per adult</small>`;
-    const rankLine = `${ord(s.rank)} of ${seats.length} for net contribution per adult. England: ${sgbp(E.npa)} per adult, ${ratio(E.ratio)} of welfare per £1 of tax.`;
+    if (state.sel) return renderSeat(byCode.get(state.sel));
+    if (state.iso && state.mode === "party") return renderGroup("party", state.iso);
+    if (state.region) return renderGroup("region", state.region);
+    return renderEngland();
+  }
+
+  function renderSeat(s) {
+    const fig = figure(s, true);
+    const verdict = s.net < 0
+      ? `Welfare spending here exceeds income tax and NI by <strong>${money(-s.net)}</strong> a year.`
+      : `Income tax and NI here exceed welfare spending by <strong>${money(s.net)}</strong> a year.`;
     const mpLine = s.mp
       ? `<span>${esc(s.mp)}</span><span class="since">MP since ${monthYear(s.mpSince)}</span>`
-      : `<span>Seat vacant</span><span class="since">UK Parliament lists no sitting MP (${monthYear(W.mpAsOf)})</span>`;
-    let flag = "";
-    if (s.flag || s.meanEst) {
-      const bits = [];
-      if (s.meanEst) bits.push("its ASHE mean pay is estimated from the median");
-      if (s.imputed >= 2) bits.push(`${s.imputed} of its 8 pay percentile points (P10–P75) are imputed`);
-      flag = `<p class="note-flag">Treat this seat&rsquo;s ranking as indicative: ${bits.join(", and ")}.</p>`;
-    }
+      : `<span>Seat vacant (${monthYear(W.mpAsOf)})</span>`;
+    const back = state.iso ? `Back to ${esc(groupName(state.iso))}` : state.region ? `Back to ${esc(state.region)}` : "Back to England";
     const jpa = s.jobs / s.adults;
     panel.innerHTML = `
       <div class="p-head">
-        <button type="button" class="back" id="back">${arrow}Back to England</button>
-        <p class="eyebrow">${esc(s.region)}</p>
+        <button type="button" class="back" id="back">${arrow}${back}</button>
+        <p class="p-kind">${esc(s.region)}</p>
         <h2>${esc(s.name)}</h2>
         <div class="p-mp"><span class="party"><span class="sw" style="background:${pc(s.g)}"></span>${esc(s.party)}</span>${mpLine}</div>
       </div>
       <div class="verdict">
-        <div class="big">${big}</div>
+        <div class="big">${fig.big}<small>${fig.small}</small></div>
         <p>${verdict}</p>
-        <div>
-          <div class="gauge" style="background:${rampCSS()}"><i style="left:${((t + 1) / 2 * 100).toFixed(1)}%"></i></div>
-          <div class="gauge-lab"><span>Deficit</span><span>Break-even</span><span>Surplus</span></div>
-        </div>
-        <p class="muted" style="font-size:0.92rem">${rankLine}</p>
-        ${flag}
+        ${gaugeHTML(fig.gauge)}
+        <p class="rank">${ord(s.rank)} of ${seats.length} for net contribution per adult.</p>
       </div>
       <div class="sec">
-        <h3>The ledger</h3>
+        <h3>Tax and welfare</h3>
         <dl class="ledger">
-          <div><dt>Employee tax paid</dt><dd>${money(s.tax)}</dd><span class="ctx">${gbp(s.tpw)} per worker · England ${gbp(E.tpw)}</span></div>
-          <div><dt>Welfare received</dt><dd>${money(s.wel)}</dd><span class="ctx">${gbp(s.wpa)} per adult · England ${gbp(E.wpa)}</span></div>
+          <div><dt>Income tax and NI paid</dt><dd>${money(s.tax)}</dd><span class="ctx">${gbp(s.tpw)} per worker (England ${gbp(E.tpw)}) · ${share(s.tax / E.tax)} of England&rsquo;s total</span></div>
+          <div><dt>Welfare spending</dt><dd>${money(s.wel)}</dd><span class="ctx">${gbp(s.wpa)} per adult (England ${gbp(E.wpa)}) · ${share(s.wel / E.wel)} of England&rsquo;s total</span></div>
           <div><dt>Welfare per £1 of tax</dt><dd>${ratio(s.ratio)}</dd><span class="ctx">England ${ratio(E.ratio)}</span></div>
-          <div><dt>Employee jobs per adult</dt><dd>${jpa.toFixed(2)}</dd><span class="ctx">${f0(s.jobs)} jobs, ${f0(s.adults)} adults · England ${JOBS_PER_ADULT.toFixed(2)}</span></div>
+          <div><dt>Jobs per adult</dt><dd>${jpa.toFixed(2)}</dd><span class="ctx">${f0(s.jobs)} jobs, ${f0(s.adults)} adults (England ${JOBS_PER_ADULT.toFixed(2)})</span></div>
         </dl>
       </div>
       <div class="sec">
-        <h3>Where it sits</h3>
-        <p class="sub">Employee tax per worker against welfare per adult. Grey dots are the other 542 seats.</p>
+        <h3>Compared with every seat</h3>
+        <p class="sub">Income tax and NI per worker against welfare spending per adult. Grey dots are the other 542 seats.</p>
         <div class="chart" id="p-scatter"></div>
       </div>
       <div class="sec">
-        <h3>Where the welfare goes</h3>
+        <h3>Welfare by benefit</h3>
         <p class="sub">Spending per adult on each benefit.</p>
         <div class="key"><span><span class="sw" style="background:var(--accent)"></span>${esc(s.name)}</span><span><span class="tick"></span>England average</span></div>
         <div class="bars" id="p-ben"></div>
       </div>
       <div class="sec">
-        <h3>Against England</h3>
+        <h3>Compared with England</h3>
         <p class="sub">Each track spans all 543 seats; faint ticks mark every seat.</p>
         <div class="key"><span><span class="dot" style="background:var(--accent)"></span>${esc(s.name)}</span><span><span class="tick"></span>England</span></div>
         <div class="strips" id="p-strips"></div>
       </div>
       <div class="sec">
-        <h3>The pay ladder</h3>
-        <p class="sub">Annual pay at each percentile of employee jobs, the base of the tax estimate.</p>
+        <h3>Pay by percentile</h3>
+        <p class="sub">Annual pay at each percentile of jobs held by residents, the base of the tax estimate.</p>
         <div class="key"><span><span class="ln" style="background:var(--accent)"></span>${esc(s.name)}</span><span><span class="ln" style="background:var(--ink-3)"></span>${esc(s.region)}</span></div>
         <div class="chart" id="p-pay"></div>
       </div>`;
-    document.getElementById("back").addEventListener("click", () => { selectSeat(null); zoomReset(); });
-    drawPanelCharts(s);
+    document.getElementById("back").addEventListener("click", () => { selectSeat(null); zoomScope(); });
+    drawSeatCharts(s);
   }
-
-  function drawPanelCharts(s) {
+  function drawSeatCharts(s) {
     miniScatter(document.getElementById("p-scatter"), s);
     benefitBars(document.getElementById("p-ben"), s);
     strips(document.getElementById("p-strips"), s);
     payLadder(document.getElementById("p-pay"), s);
   }
 
-  function renderEngland() {
-    const top = seats.slice().sort((a, b) => b.npa - a.npa).slice(0, 5);
-    const bottom = seats.slice().sort((a, b) => a.npa - b.npa).slice(0, 5);
-    const li = s => `<li><button type="button" data-code="${s.code}"><span class="sw" style="background:${pc(s.g)}"></span><span>${esc(s.name)}<span class="r">${esc(s.party)} · ${esc(s.region)}</span></span><span class="v">${sgbp(s.npa)}</span></button></li>`;
-    const reg = W.regions.slice().sort((a, b) => b.npa - a.npa);
+  const seatLi = s => `<li><button type="button" data-code="${s.code}"><span class="sw" style="background:${pc(s.g)}"></span><span>${esc(s.name)}<span class="r">${esc(s.party)} · ${esc(s.region)}</span></span><span class="v">${sgbp(s.npa)}</span></button></li>`;
+  function wireSeatButtons() { panel.querySelectorAll("[data-code]").forEach(b => b.addEventListener("click", () => selectSeat(b.dataset.code, { zoom: true }))); }
+
+  function renderGroup(kind, key) {
+    const list = seats.filter(s => kind === "region" ? s.region === key : s.g === key);
+    const A = agg(list);
+    const fig = figure(A, false);
+    const title = kind === "region" ? key : groupName(key);
+    const where = kind === "region" ? `across the region’s ${A.seats} seats` : `across the ${A.seats} seats it holds`;
+    const verdict = A.net < 0
+      ? `Welfare spending exceeds income tax and NI by <strong>${bn(-A.net)}</strong> a year ${where}.`
+      : `Income tax and NI exceed welfare spending by <strong>${bn(A.net)}</strong> a year ${where}.`;
+    const byNpa = list.slice().sort((a, b) => b.npa - a.npa);
+    const n = Math.min(5, Math.floor(list.length / 2)) || 1;
+    let mix;
+    if (kind === "region") {
+      const counts = GROUPS.map(G => ({ G, c: list.filter(s => s.g === G.g).length })).filter(x => x.c);
+      mix = `<div class="sec"><h3>Seats by party</h3>
+        <div class="stack" aria-hidden="true">${counts.map(x => `<span style="flex:${x.c};background:${pc(x.G.g)}"></span>`).join("")}</div>
+        <div class="counts">${counts.map(x => `<span><span class="sw" style="background:${pc(x.G.g)}"></span>${esc(groupName(x.G.g))} ${x.c}</span>`).join("")}</div></div>`;
+    } else {
+      const counts = REGIONS.map(r => ({ r, c: list.filter(s => s.region === r).length })).filter(x => x.c).sort((a, b) => b.c - a.c);
+      const max = counts[0].c;
+      mix = `<div class="sec"><h3>Seats by region</h3><div class="bars">${counts.map(x => `<div class="bar-row"><span>${esc(x.r)}</span><span class="val num">${x.c}</span>
+        <span class="trk"><span class="fill" style="width:${(x.c / max * 100).toFixed(1)}%;background:${pc(key)}"></span></span></div>`).join("")}</div></div>`;
+    }
+    const lists = list.length > 1 ? `
+      <div class="sec"><h3>Largest net contributors</h3><p class="sub">Income tax and NI minus welfare, per adult.</p><ul class="list">${byNpa.slice(0, n).map(seatLi).join("")}</ul></div>
+      <div class="sec"><h3>Largest net recipients</h3><ul class="list">${byNpa.slice(-n).reverse().map(seatLi).join("")}</ul></div>`
+      : `<div class="sec"><h3>Seat</h3><ul class="list">${list.map(seatLi).join("")}</ul></div>`;
     panel.innerHTML = `
       <div class="p-head">
-        <p class="eyebrow">England</p>
-        <h2>Select a constituency</h2>
-        <p style="color:var(--ink-2)">Click any seat on the map, or search above. The panel shows the seat&rsquo;s tax and welfare ledger, its sitting MP and how it compares with the rest of England.</p>
+        <button type="button" class="back" id="back">${arrow}Back to England</button>
+        <p class="p-kind">${kind === "region" ? "Region" : "Party of sitting MP"}</p>
+        <h2>${esc(title)}</h2>
       </div>
       <div class="verdict">
-        <div class="big">${sgbp(E.npa)}<small>net per adult, England</small></div>
-        <p>Welfare spending exceeds employee tax by <strong>${bn(-E.net)}</strong> a year. ${surplusSeats} seats pay in more than they receive; ${seats.length - surplusSeats} receive more than they pay in.</p>
+        <div class="big">${fig.big}<small>${fig.small}</small></div>
+        <p>${verdict}</p>
+        <p class="rank">${A.surplus} of ${A.seats} seats pay in more than they receive.</p>
+      </div>
+      <div class="sec">
+        <h3>Tax and welfare</h3>
+        <dl class="ledger">
+          <div><dt>Income tax and NI paid</dt><dd>${bn(A.tax)}</dd><span class="ctx">${gbp(A.tpw)} per worker (England ${gbp(E.tpw)}) · ${share(A.tax / E.tax)} of England&rsquo;s total</span></div>
+          <div><dt>Welfare spending</dt><dd>${bn(A.wel)}</dd><span class="ctx">${gbp(A.wpa)} per adult (England ${gbp(E.wpa)}) · ${share(A.wel / E.wel)} of England&rsquo;s total</span></div>
+          <div><dt>Welfare per £1 of tax</dt><dd>${ratio(A.ratio)}</dd><span class="ctx">England ${ratio(E.ratio)}</span></div>
+          <div><dt>Jobs per adult</dt><dd>${(A.jobs / A.adults).toFixed(2)}</dd><span class="ctx">England ${JOBS_PER_ADULT.toFixed(2)}</span></div>
+        </dl>
+      </div>
+      ${mix}
+      ${lists}
+      <div class="sec">
+        <h3>Welfare by benefit</h3>
+        <p class="sub">Spending per adult on each benefit.</p>
+        <div class="key"><span><span class="sw" style="background:var(--accent)"></span>${esc(title)}</span><span><span class="tick"></span>England average</span></div>
+        <div class="bars" id="p-ben"></div>
+      </div>`;
+    document.getElementById("back").addEventListener("click", toEngland);
+    wireSeatButtons();
+    benefitBars(document.getElementById("p-ben"), A);
+  }
+
+  function renderEngland() {
+    const byNpa = seats.slice().sort((a, b) => b.npa - a.npa);
+    const reg = W.regions.slice().sort((a, b) => b.npa - a.npa);
+    const fig = figure(E, false);
+    const big = state.mode === "share" ? `${sgbp(E.npa)}<small>net per adult, England</small>` : `${fig.big}<small>${fig.small}, England</small>`;
+    panel.innerHTML = `
+      <div class="p-head">
+        <p class="p-kind">England</p>
+        <h2>Select a constituency</h2>
+        <p class="intro">Click any seat on the map, search above, or pick a region from the menu on the map. The panel shows the seat&rsquo;s tax and welfare, its sitting MP and how it compares with the rest of England.</p>
+      </div>
+      <div class="verdict">
+        <div class="big">${big}</div>
+        <p>Welfare spending exceeds income tax and NI by <strong>${bn(-E.net)}</strong> a year. ${surplusSeats} seats pay in more than they receive; ${seats.length - surplusSeats} receive more than they pay in.</p>
+      </div>
+      <div class="sec">
+        <h3>Regions</h3>
+        <dl class="ledger">${reg.map(r => `<div><dt><button type="button" data-region="${esc(r.name)}">${esc(r.name)}</button></dt><dd>${sgbp(r.npa)}</dd><span class="ctx">${r.surplus} of ${r.seats} seats in surplus · ${ratio(r.ratio)} welfare per £1 of tax</span></div>`).join("")}</dl>
       </div>
       <div class="sec">
         <h3>Largest net contributors</h3>
-        <p class="sub">Employee tax minus welfare, per adult.</p>
-        <ul class="list">${top.map(li).join("")}</ul>
+        <p class="sub">Income tax and NI minus welfare, per adult.</p>
+        <ul class="list">${byNpa.slice(0, 5).map(seatLi).join("")}</ul>
       </div>
       <div class="sec">
         <h3>Largest net recipients</h3>
-        <ul class="list">${bottom.map(li).join("")}</ul>
-      </div>
-      <div class="sec">
-        <h3>By region</h3>
-        <dl class="ledger">${reg.map(r => `<div><dt>${esc(r.name)}</dt><dd>${sgbp(r.npa)}</dd><span class="ctx">${r.surplus} of ${r.seats} seats in surplus · ${ratio(r.ratio)} welfare per £1 of tax</span></div>`).join("")}</dl>
+        <ul class="list">${byNpa.slice(-5).reverse().map(seatLi).join("")}</ul>
       </div>`;
-    panel.querySelectorAll("[data-code]").forEach(b => b.addEventListener("click", () => selectSeat(b.dataset.code, { zoom: true })));
+    wireSeatButtons();
+    panel.querySelectorAll("[data-region]").forEach(b => b.addEventListener("click", () => setRegion(b.dataset.region)));
   }
 
   // ---------- shared scatter pieces ----------
@@ -944,27 +1077,23 @@
     grid.selectAll("line.y").data(yt.slice(1)).join("line").attr("x1", 0).attr("x2", w).attr("y1", d => y(d)).attr("y2", d => y(d));
     g.append("line").attr("class", "base").attr("x1", 0).attr("x2", w).attr("y1", h).attr("y2", h);
     g.append("line").attr("class", "axis-line").attr("x1", 0).attr("x2", 0).attr("y1", 0).attr("y2", h);
-    if (!opts.noX) g.append("g").selectAll("text").data(xt).join("text").attr("x", d => x(d)).attr("y", h + 18).attr("text-anchor", (d, i) => i === 0 ? "start" : "middle").text(kfmt);
-    if (!opts.noY) g.append("g").selectAll("text").data(yt).join("text").attr("x", -8).attr("y", d => y(d) + 4).attr("text-anchor", "end").text(kfmt);
+    g.append("g").selectAll("text").data(xt).join("text").attr("x", d => x(d)).attr("y", h + 18).attr("text-anchor", (d, i) => i === 0 ? "start" : "middle").text(kfmt);
+    g.append("g").selectAll("text").data(yt).join("text").attr("x", -8).attr("y", d => y(d) + 4).attr("text-anchor", "end").text(kfmt);
     const bx = Math.min(X_MAX, Y_MAX / JOBS_PER_ADULT);
-    g.append("line").attr("class", opts.amber ? "be-amber" : "be").attr("x1", x(0)).attr("y1", y(0)).attr("x2", x(bx)).attr("y2", y(bx * JOBS_PER_ADULT));
+    g.append("line").attr("class", "be").attr("x1", x(0)).attr("y1", y(0)).attr("x2", x(bx)).attr("y2", y(bx * JOBS_PER_ADULT));
     return bx;
   }
   function voronoiHover(g, pts, w, h, onMove, onLeave, onClick, radius = 26) {
     const del = d3.Delaunay.from(pts, p => p.px, p => p.py);
+    const near = (el, ev) => {
+      const [mx, my] = d3.pointer(ev, el);
+      const p = pts[del.find(mx, my)];
+      return p && Math.hypot(p.px - mx, p.py - my) <= radius ? p : null;
+    };
     g.append("rect").attr("class", "hit").attr("width", w).attr("height", h).attr("fill", "transparent")
-      .on("pointermove", function (ev) {
-        const [mx, my] = d3.pointer(ev, this);
-        const i = del.find(mx, my);
-        const p = pts[i];
-        if (p && Math.hypot(p.px - mx, p.py - my) <= radius) onMove(p, ev); else onLeave();
-      })
+      .on("pointermove", function (ev) { const p = near(this, ev); if (p) onMove(p, ev); else onLeave(); })
       .on("pointerleave", onLeave)
-      .on("click", function (ev) {
-        const [mx, my] = d3.pointer(ev, this);
-        const p = pts[del.find(mx, my)];
-        if (p && Math.hypot(p.px - mx, p.py - my) <= radius) onClick(p);
-      });
+      .on("click", function (ev) { const p = near(this, ev); if (p) onClick(p); });
   }
   function chartTip(container) {
     let el = container.querySelector(".tip");
@@ -974,54 +1103,84 @@
   function scatterTipHTML(s) {
     return `<b>${esc(s.name)}</b><div class="t-row"><span class="sw" style="background:${pc(s.g)}"></span>${esc(s.party)}</div>
       <div class="t-val">${sgbp(s.npa)} <span class="t-sub">net per adult</span></div>
-      <div class="t-sub">${gbp(s.tpw)} tax per worker · ${gbp(s.wpa)} welfare per adult</div>`;
+      <div class="t-sub">${gbp(s.tpw)} tax and NI per worker · ${gbp(s.wpa)} welfare per adult</div>`;
+  }
+  // hover ring that follows the nearest point
+  function hoverRing(g) {
+    const ring = g.append("circle").attr("r", 8).attr("fill", "none").style("stroke", "var(--ink)").attr("stroke-width", 2).attr("pointer-events", "none").attr("visibility", "hidden");
+    return { at: p => ring.attr("cx", p.px).attr("cy", p.py).attr("visibility", "visible"), hide: () => ring.attr("visibility", "hidden") };
   }
 
-  // ---------- panel: mini scatter ----------
+  // Place each label where it covers the fewest points, with a leader line when pushed away.
+  function placeLabels(g, items, pts, w, h) {
+    const boxes = [];
+    const layer = g.append("g");
+    items.forEach(it => {
+      const t = layer.append("text").attr("class", "lab halo").text(it.text);
+      const tw = t.node().getComputedTextLength(), th = 15;
+      let best = null;
+      for (const dist of [12, 30, 52, 76]) {
+        for (const ang of [-30, 30, -150, 150, 0, 180, -90, 90, -60, 60, -120, 120]) {
+          const rad = ang * Math.PI / 180, dx = Math.cos(rad) * dist, dy = Math.sin(rad) * dist;
+          const ax = it.px + dx, ay = it.py + dy;
+          const x0 = dx >= -0.01 ? ax : ax - tw;
+          const y0 = Math.abs(dy) < 4 ? ay - th / 2 : dy < 0 ? ay - th : ay;
+          const b = { x0, y0, x1: x0 + tw, y1: y0 + th };
+          let score = dist * 0.05;
+          if (b.x0 < 0 || b.x1 > w || b.y0 < 0 || b.y1 > h) score += 1000;
+          for (const o of boxes) if (b.x0 < o.x1 + 4 && b.x1 > o.x0 - 4 && b.y0 < o.y1 + 2 && b.y1 > o.y0 - 2) score += 500;
+          for (const p of pts) if (p.px > b.x0 - 3 && p.px < b.x1 + 3 && p.py > b.y0 - 3 && p.py < b.y1 + 3) score += 3;
+          if (!best || score < best.score) best = { score, b, dist, ax, ay };
+        }
+      }
+      boxes.push(best.b);
+      t.attr("x", best.b.x0).attr("y", best.b.y1 - 3.5);
+      if (best.dist > 12) {
+        const cx = Math.max(best.b.x0, Math.min(it.px, best.b.x1)), cy = Math.max(best.b.y0, Math.min(it.py, best.b.y1));
+        const ang = Math.atan2(cy - it.py, cx - it.px);
+        layer.insert("line", "text").attr("class", "leader")
+          .attr("x1", it.px + Math.cos(ang) * 6).attr("y1", it.py + Math.sin(ang) * 6).attr("x2", cx).attr("y2", cy);
+      }
+    });
+  }
+
+  // ---------- seat panel: charts ----------
   function miniScatter(el, s) {
     el.innerHTML = "";
     const W0 = el.clientWidth || 360, m = { t: 10, r: 14, b: 26, l: 40 };
     const w = W0 - m.l - m.r, h = Math.round(Math.min(300, w * 0.7));
     const x = d3.scaleLinear([0, X_MAX], [0, w]), y = d3.scaleLinear([0, Y_MAX], [h, 0]);
-    const root = d3.select(el).append("svg").attr("width", W0).attr("height", h + m.t + m.b);
-    const g = root.append("g").attr("transform", `translate(${m.l},${m.t})`);
+    const g = d3.select(el).append("svg").attr("width", W0).attr("height", h + m.t + m.b).append("g").attr("transform", `translate(${m.l},${m.t})`);
     const bx = scatterFrame(g, x, y, w, h);
     g.append("text").attr("class", "lab-2").attr("x", x(bx) - 6).attr("y", 12).attr("text-anchor", "end").text("Break-even");
-    const others = seats.filter(o => o !== s);
-    g.append("g").selectAll("circle").data(others).join("circle")
+    g.append("g").selectAll("circle").data(seats.filter(o => o !== s)).join("circle")
       .attr("cx", o => x(o.tpw)).attr("cy", o => y(o.wpa)).attr("r", 2.4).style("fill", "var(--dot)");
-    // England average
     g.append("circle").attr("cx", x(E.tpw)).attr("cy", y(E.wpa)).attr("r", 5).attr("fill", "none").style("stroke", "var(--ink)").attr("stroke-width", 1.5);
-    g.append("text").attr("class", "lab-2").attr("x", x(E.tpw) + 8).attr("y", y(E.wpa) - 7).text("England");
-    const sx = x(s.tpw), sy = y(s.wpa);
-    g.append("circle").attr("cx", sx).attr("cy", sy).attr("r", 7).style("fill", pc(s.g)).style("stroke", "var(--ground)").attr("stroke-width", 2);
-    const right = sx < w * 0.62;
-    g.append("text").attr("class", "lab").attr("x", sx + (right ? 11 : -11)).attr("y", sy + 4).attr("text-anchor", right ? "start" : "end").text(s.name);
-    const tipEl = chartTip(el);
+    g.append("circle").attr("cx", x(s.tpw)).attr("cy", y(s.wpa)).attr("r", 7).style("fill", pc(s.g)).style("stroke", "var(--ground)").attr("stroke-width", 2);
     const pts = seats.map(o => ({ s: o, px: x(o.tpw), py: y(o.wpa) }));
+    placeLabels(g, [{ text: s.name, px: x(s.tpw), py: y(s.wpa) }, { text: "England", px: x(E.tpw), py: y(E.wpa) }], pts, w, h);
+    const tipEl = chartTip(el), ring = hoverRing(g);
     voronoiHover(g, pts, w, h, (p, ev) => {
+      ring.at(p);
       tipEl.innerHTML = scatterTipHTML(p.s);
       const [cx, cy] = d3.pointer(ev, el);
       placeTip(tipEl, el, cx, cy);
-    }, () => { tipEl.hidden = true; }, p => { tipEl.hidden = true; if (p.s !== s) selectSeat(p.s.code, { zoom: true }); }, 18);
+    }, () => { tipEl.hidden = true; ring.hide(); }, p => { tipEl.hidden = true; if (p.s !== s) selectSeat(p.s.code, { zoom: true }); }, 18);
   }
 
-  // ---------- panel: benefits ----------
-  function benefitBars(el, s) {
-    const rows = BEN_SHORT.map((name, i) => ({ name, seat: s.ben[i] / s.adults, eng: E.ben[i] / E.adults }))
-      .sort((a, b) => b.eng - a.eng);
-    const max = d3.max(rows, r => Math.max(r.seat, r.eng)) * 1.04;
+  function benefitBars(el, o) {
+    const rows = BEN_SHORT.map((name, i) => ({ name, v: o.ben[i] / o.adults, eng: E.ben[i] / E.adults })).sort((a, b) => b.eng - a.eng);
+    const max = d3.max(rows, r => Math.max(r.v, r.eng)) * 1.04;
     el.innerHTML = rows.map(r => `<div class="bar-row"><span>${esc(r.name)}</span>
-      <span class="val num">${gbp(r.seat)} <span class="muted">/ ${gbp(r.eng)}</span></span>
-      <span class="trk" style="background:var(--track)"><span class="fill" style="width:${(r.seat / max * 100).toFixed(2)}%"></span><span class="ref" style="left:${(r.eng / max * 100).toFixed(2)}%"></span></span></div>`).join("");
+      <span class="val num">${gbp(r.v)} <span class="muted">/ ${gbp(r.eng)}</span></span>
+      <span class="trk"><span class="fill" style="width:${(r.v / max * 100).toFixed(2)}%"></span><span class="ref" style="left:${(r.eng / max * 100).toFixed(2)}%"></span></span></div>`).join("");
   }
 
-  // ---------- panel: indicator strips ----------
   const INDICATORS = [
     { grp: "Money", items: [
-      { label: "Employee tax per worker", get: s => s.tpw, eng: E.tpw, fmt: gbp },
+      { label: "Income tax and NI per worker", get: s => s.tpw, eng: E.tpw, fmt: gbp },
       { label: "Welfare spending per adult", get: s => s.wpa, eng: E.wpa, fmt: gbp },
-      { label: "Median annual pay", get: s => s.medPay, eng: E.medPay, fmt: gbp, engLabel: "seat average" },
+      { label: "Median annual pay", get: s => s.medPay, eng: E.medPay, fmt: gbp },
     ] },
     { grp: "Work", items: [
       { label: "Employment rate", get: s => s.h && s.h.emp, eng: E.h.emp, fmt: v => pct(v, 1) },
@@ -1040,7 +1199,7 @@
     it.ext = d3.extent(it.vals);
   }));
   function strips(el, s) {
-    el.innerHTML = INDICATORS.map((G, gi) => `<div class="strip-g"><span class="ctl-label">${G.grp}</span>${G.items.map((it, ii) => {
+    el.innerHTML = INDICATORS.map((G, gi) => `<div class="strip-g"><h4>${G.grp}</h4>${G.items.map((it, ii) => {
       const v = it.get(s);
       return `<div class="srow"><span>${it.label}</span><span class="val num">${v == null ? "n/a" : it.fmt(v)} <span class="muted">/ ${it.fmt(it.eng)}</span></span><svg data-i="${gi}-${ii}" aria-hidden="true"></svg></div>`;
     }).join("")}</div>`).join("");
@@ -1058,7 +1217,6 @@
     });
   }
 
-  // ---------- panel: pay ladder ----------
   function payLadder(el, s) {
     el.innerHTML = "";
     const reg = W.regions.find(r => r.name === s.region);
@@ -1068,8 +1226,7 @@
     const all = s.pay.concat(reg && reg.pay ? reg.pay : []).filter(v => v != null);
     const ymax = Math.ceil(d3.max(all) / 10000) * 10000;
     const x = d3.scaleLinear([10, 75], [0, w]), y = d3.scaleLinear([0, ymax], [h, 0]);
-    const root = d3.select(el).append("svg").attr("width", W0).attr("height", h + m.t + m.b);
-    const g = root.append("g").attr("transform", `translate(${m.l},${m.t})`);
+    const g = d3.select(el).append("svg").attr("width", W0).attr("height", h + m.t + m.b).append("g").attr("transform", `translate(${m.l},${m.t})`);
     const yt = d3.range(0, ymax + 1, ymax > 60000 ? 20000 : 10000);
     g.append("g").attr("class", "grid").selectAll("line").data(yt.slice(1)).join("line").attr("x1", 0).attr("x2", w).attr("y1", d => y(d)).attr("y2", d => y(d));
     g.append("line").attr("class", "base").attr("x1", 0).attr("x2", w).attr("y1", h).attr("y2", h);
@@ -1081,19 +1238,12 @@
     g.append("path").attr("d", line(sp)).attr("fill", "none").style("stroke", "var(--accent)").attr("stroke-width", 2).attr("stroke-linejoin", "round");
     g.append("g").selectAll("circle").data(sp.filter(d => d[1] != null)).join("circle").attr("cx", d => x(d[0])).attr("cy", d => y(d[1])).attr("r", 4).style("fill", "var(--accent)").style("stroke", "var(--ground)").attr("stroke-width", 2);
     const last = sp[sp.length - 1];
-    if (last[1] != null) g.append("text").attr("class", "lab").attr("x", x(last[0]) - 8).attr("y", y(last[1]) - 10).attr("text-anchor", "end").text(gbp(last[1]));
+    if (last[1] != null) g.append("text").attr("class", "lab halo").attr("x", x(last[0]) - 8).attr("y", y(last[1]) - 10).attr("text-anchor", "end").text(gbp(last[1]));
   }
 
-  // ---------- national charts ----------
+  // ---------- national ----------
   function drawNational() {
-    regionsChart();
-    bigScatter();
-    multiples();
-    partyTable();
-    dumbbell();
-    benefitsNational();
-    seatsTable();
-    methodology();
+    regionsChart(); bigScatter(); multiples(); partyTable(); dumbbell(); benefitsNational(); seatsTable(); methodology();
   }
   function redrawNationalCharts() {
     if (!natDrawn || state.tab !== "nat") return;
@@ -1109,8 +1259,7 @@
     const band = narrow ? 50 : 38;
     const w = W0 - m.l - m.r, h = data.length * band;
     const x = d3.scaleLinear([0, Math.max(2.4, d3.max(data, d => d.ratio) * 1.08)], [0, w]);
-    const root = d3.select(el).append("svg").attr("width", W0).attr("height", h + m.t + m.b);
-    const g = root.append("g").attr("transform", `translate(${m.l},${m.t})`);
+    const g = d3.select(el).append("svg").attr("width", W0).attr("height", h + m.t + m.b).append("g").attr("transform", `translate(${m.l},${m.t})`);
     const xt = [0, 0.5, 1, 1.5, 2];
     g.append("g").attr("class", "grid").selectAll("line").data(xt.slice(1)).join("line").attr("x1", d => x(d)).attr("x2", d => x(d)).attr("y1", 0).attr("y2", h);
     g.append("line").attr("class", "axis-line").attr("x1", 0).attr("x2", w).attr("y1", h).attr("y2", h);
@@ -1118,36 +1267,29 @@
     const barH = 22;
     const row = g.append("g").selectAll("g").data(data).join("g").attr("transform", (d, i) => `translate(0,${i * band})`);
     const by = narrow ? band - barH - 4 : (band - barH) / 2;
-    row.append("text").attr("class", "lab-2").attr("x", narrow ? 0 : -12).attr("y", narrow ? by - 6 : by + barH / 2 + 5).attr("text-anchor", narrow ? "start" : "end").style("font-size", "14px").style("fill", "var(--ink)").text(d => d.name);
-    row.append("rect").attr("x", 0).attr("y", by).attr("height", barH).attr("width", d => x(d.ratio)).style("fill", d => d.ratio > 1 ? "var(--amber)" : "var(--accent)");
+    row.append("text").attr("x", narrow ? 0 : -12).attr("y", narrow ? by - 6 : by + barH / 2 + 5).attr("text-anchor", narrow ? "start" : "end").style("font-size", "14px").style("fill", "var(--ink)").text(d => d.name);
+    row.append("rect").attr("x", 0).attr("y", by).attr("height", barH).attr("width", d => x(d.ratio)).style("fill", d => d.ratio > 1 ? "var(--fs-1)" : "var(--fs-5)");
     row.append("text").attr("class", "lab").attr("x", d => x(d.ratio) + 8).attr("y", by + barH / 2 + 5).style("font-size", "14px").text(d => ratio(d.ratio));
-    // reference lines
     g.append("line").attr("class", "be").attr("x1", x(1)).attr("x2", x(1)).attr("y1", -6).attr("y2", h);
     g.append("text").attr("class", "lab").attr("x", x(1) - 6).attr("y", -12).attr("text-anchor", "end").text("Break-even £1.00");
     g.append("line").style("stroke", "var(--ink-3)").attr("stroke-width", 2).attr("x1", x(E.ratio)).attr("x2", x(E.ratio)).attr("y1", -6).attr("y2", h);
     g.append("text").attr("class", "lab-2").attr("x", x(E.ratio) + 6).attr("y", -12).text("England " + ratio(E.ratio));
-    // hover
     const tipEl = chartTip(el);
-    row.append("rect").attr("class", "hit").attr("x", narrow ? 0 : -m.l).attr("y", 0).attr("width", w + m.l).attr("height", band).attr("fill", "transparent")
+    row.append("rect").attr("class", "hit").attr("x", narrow ? 0 : -m.l).attr("y", 0).attr("width", w + (narrow ? 0 : m.l)).attr("height", band).attr("fill", "transparent")
       .on("pointermove", function (ev, d) {
         tipEl.innerHTML = `<b>${esc(d.name)}</b><div class="t-val">${ratio(d.ratio)} <span class="t-sub">welfare per £1 of tax</span></div>
-          <div class="t-sub">Tax ${bn(d.tax)} · welfare ${bn(d.wel)} · net ${bn(d.net)}</div><div class="t-sub">${d.surplus} of ${d.seats} seats in surplus</div>`;
+          <div class="t-sub">Income tax and NI ${bn(d.tax)} · welfare ${bn(d.wel)}</div><div class="t-sub">${d.surplus} of ${d.seats} seats in surplus</div>`;
         const [cx, cy] = d3.pointer(ev, el); placeTip(tipEl, el, cx, cy);
       }).on("pointerleave", () => { tipEl.hidden = true; });
-    const close = W.regions.filter(r => Math.abs(r.net / r.tax) < 0.05);
-    document.getElementById("regions-foot").textContent = close.length
-      ? `${close.map(r => r.name).join(" and ")}: net balance within 5% of the tax take (${close.map(r => bn(r.net)).join(", ")}), too close to call on this model.`
-      : "";
   }
 
-  // scatter legend (shared by the big scatter)
   let scatterIso = null;
   function scatterLegend() {
     const el = document.getElementById("scatter-legend");
     el.className = "legend" + (scatterIso ? " isolating" : "");
     el.innerHTML = GROUPS.filter(x => x.n).map(x => {
       const sym = d3.symbol(x.shape, 80)();
-      return `<button type="button" data-g="${x.g}" aria-pressed="${scatterIso === x.g}"><svg width="14" height="14" viewBox="-7 -7 14 14" aria-hidden="true"><path d="${sym}" style="fill:${pc(x.g)}"/></svg>${esc(x.g === "lab" ? x.long : x.name)} <span class="n">${x.n}</span></button>`;
+      return `<button type="button" data-g="${x.g}" aria-pressed="${scatterIso === x.g}"><svg width="14" height="14" viewBox="-7 -7 14 14" aria-hidden="true"><path d="${sym}" style="fill:${pc(x.g)}"/></svg>${esc(groupName(x.g))} <span class="n">${x.n}</span></button>`;
     }).join("");
     el.querySelectorAll("button").forEach(b => b.addEventListener("click", () => {
       scatterIso = scatterIso === b.dataset.g ? null : b.dataset.g;
@@ -1162,68 +1304,59 @@
     const W0 = el.clientWidth, m = { t: 16, r: 20, b: 46, l: 58 };
     const w = W0 - m.l - m.r, h = Math.round(Math.max(300, Math.min(560, w * 0.56)));
     const x = d3.scaleLinear([0, X_MAX], [0, w]), y = d3.scaleLinear([0, Y_MAX], [h, 0]);
-    const root = d3.select(el).append("svg").attr("width", W0).attr("height", h + m.t + m.b);
-    const g = root.append("g").attr("transform", `translate(${m.l},${m.t})`);
+    const g = d3.select(el).append("svg").attr("width", W0).attr("height", h + m.t + m.b).append("g").attr("transform", `translate(${m.l},${m.t})`);
     const xt = w > 520 ? [0, 5000, 10000, 15000, 20000, 25000, 30000, 35000] : [0, 10000, 20000, 30000];
-    const yt = [0, 2000, 4000, 6000, 8000];
-    const bx = scatterFrame(g, x, y, w, h, { xticks: xt, yticks: yt, amber: true });
-    g.append("text").attr("x", x(bx) + 8).attr("y", y(bx * JOBS_PER_ADULT) + 14).style("fill", "var(--amber-ink)").style("font-size", "13px").style("font-weight", 600).text("Break-even");
-    g.append("text").attr("x", w / 2).attr("y", h + 40).attr("text-anchor", "middle").style("font-size", "13px").style("fill", "var(--ink-2)").text("Employee tax per worker");
+    const bx = scatterFrame(g, x, y, w, h, { xticks: xt, yticks: [0, 2000, 4000, 6000, 8000] });
+    g.append("text").attr("class", "lab halo").attr("x", x(bx) + 8).attr("y", y(bx * JOBS_PER_ADULT) + 14).text("Break-even");
+    g.append("text").attr("x", w / 2).attr("y", h + 40).attr("text-anchor", "middle").style("font-size", "13px").style("fill", "var(--ink-2)").text("Income tax and NI per worker");
     g.append("text").attr("transform", `translate(${-46},${h / 2}) rotate(-90)`).attr("text-anchor", "middle").style("font-size", "13px").style("fill", "var(--ink-2)").text("Welfare spending per adult");
     const order = GROUPS.map(x => x.g).reverse();
-    const data = seats.slice().sort((a, b) => order.indexOf(a.g) - order.indexOf(b.g));
+    const iso = scatterIso;
+    const data = seats.slice().sort((a, b) => (iso ? (a.g === iso) - (b.g === iso) : 0) || order.indexOf(a.g) - order.indexOf(b.g));
     const sym = d3.symbol().size(62);
     g.append("g").selectAll("path").data(data).join("path")
       .attr("transform", s => `translate(${x(s.tpw)},${y(s.wpa)})`)
       .attr("d", s => sym.type(GROUP[s.g].shape)())
-      .style("fill", s => scatterIso && s.g !== scatterIso ? "var(--dot)" : pc(s.g))
-      .style("stroke", "var(--ground)").attr("stroke-width", 1.2)
-      .attr("opacity", s => scatterIso && s.g !== scatterIso ? 0.55 : 1);
-    if (scatterIso) {
-      g.append("g").selectAll("path").data(data.filter(s => s.g === scatterIso)).join("path")
-        .attr("transform", s => `translate(${x(s.tpw)},${y(s.wpa)})`).attr("d", s => sym.type(GROUP[s.g].shape)())
-        .style("fill", s => pc(s.g)).style("stroke", "var(--ground)").attr("stroke-width", 1.2);
-    }
-    // labels
-    const lab = g.append("g");
-    SCATTER_LABELS.map(n => seats.find(s => s.name === n)).filter(Boolean).forEach(s => {
-      const px = x(s.tpw), py = y(s.wpa), right = px < w * 0.7;
-      const dy = s.name === "Chelsea and Fulham" ? 18 : s.name === "Richmond Park" ? -12 : 4;
-      lab.append("text").attr("class", "lab").attr("x", px + (right ? 10 : -10)).attr("y", py + dy).attr("text-anchor", right ? "start" : "end").text(s.name);
-    });
-    const tipEl = chartTip(el);
+      .style("fill", s => iso && s.g !== iso ? "var(--dot)" : pc(s.g))
+      .style("stroke", "var(--ground)").attr("stroke-width", 1.2);
     const pts = data.map(s => ({ s, px: x(s.tpw), py: y(s.wpa) }));
-    voronoiHover(g, pts, w, h, (p, ev) => {
+    if (!iso) {
+      const items = SCATTER_LABELS.map(n => seats.find(s => s.name === n)).filter(Boolean).map(s => ({ text: s.name, px: x(s.tpw), py: y(s.wpa) }));
+      placeLabels(g, items, pts, w, h);
+    }
+    const hoverPts = iso ? pts.filter(p => p.s.g === iso) : pts;
+    const tipEl = chartTip(el), ring = hoverRing(g);
+    voronoiHover(g, hoverPts, w, h, (p, ev) => {
+      ring.at(p);
       tipEl.innerHTML = scatterTipHTML(p.s);
       const [cx, cy] = d3.pointer(ev, el); placeTip(tipEl, el, cx, cy);
-    }, () => { tipEl.hidden = true; }, p => openSeat(p.s.code));
+    }, () => { tipEl.hidden = true; ring.hide(); }, p => openSeat(p.s.code));
   }
 
   function multiples() {
     const el = document.getElementById("c-mult");
     el.innerHTML = "";
-    const groups = ["lab", "con", "ld", "ref", "ind", "grn"].map(g => GROUP[g]).filter(x => x.n);
-    groups.forEach(G => {
+    ["lab", "con", "ld", "ref", "ind", "grn"].map(g => GROUP[g]).filter(x => x.n).forEach(G => {
       const div = document.createElement("div");
       div.className = "mult chart";
-      div.innerHTML = `<h3><span class="sw" style="background:${pc(G.g)}"></span>${esc(G.g === "lab" ? G.long : G.name)}</h3><p>${G.n} seats · ${G.surplus} in surplus</p>`;
+      div.innerHTML = `<h3><span class="sw" style="background:${pc(G.g)}"></span>${esc(groupName(G.g))}</h3><p>${G.n} seats · ${G.surplus} in surplus</p>`;
       el.appendChild(div);
       const W0 = div.clientWidth, m = { t: 8, r: 10, b: 24, l: 40 };
       const w = W0 - m.l - m.r, h = Math.round(w * 0.72);
       const x = d3.scaleLinear([0, X_MAX], [0, w]), y = d3.scaleLinear([0, Y_MAX], [h, 0]);
-      const root = d3.select(div).append("svg").attr("width", W0).attr("height", h + m.t + m.b);
-      const g = root.append("g").attr("transform", `translate(${m.l},${m.t})`);
+      const g = d3.select(div).append("svg").attr("width", W0).attr("height", h + m.t + m.b).append("g").attr("transform", `translate(${m.l},${m.t})`);
       scatterFrame(g, x, y, w, h);
       g.append("g").selectAll("circle").data(seats.filter(s => s.g !== G.g)).join("circle")
         .attr("cx", s => x(s.tpw)).attr("cy", s => y(s.wpa)).attr("r", 2.2).style("fill", "var(--dot)");
       const mine = seats.filter(s => s.g === G.g);
       g.append("g").selectAll("circle").data(mine).join("circle")
         .attr("cx", s => x(s.tpw)).attr("cy", s => y(s.wpa)).attr("r", 4.2).style("fill", pc(G.g)).style("stroke", "var(--ground)").attr("stroke-width", 1.3);
-      const tipEl = chartTip(div);
+      const tipEl = chartTip(div), ring = hoverRing(g);
       voronoiHover(g, mine.map(s => ({ s, px: x(s.tpw), py: y(s.wpa) })), w, h, (p, ev) => {
+        ring.at(p);
         tipEl.innerHTML = scatterTipHTML(p.s);
         const [cx, cy] = d3.pointer(ev, div); placeTip(tipEl, div, cx, cy);
-      }, () => { tipEl.hidden = true; }, p => openSeat(p.s.code), 16);
+      }, () => { tipEl.hidden = true; ring.hide(); }, p => openSeat(p.s.code), 16);
     });
     const ld = W.parties.find(p => p.name === "Liberal Democrat");
     if (ld && ld.net <= 0) document.getElementById("party-h").textContent = "Seats by party of sitting MP.";
@@ -1231,7 +1364,7 @@
 
   function partyTable() {
     const t = document.getElementById("t-party");
-    const cols = ["Party", "Seats", "In surplus", "Employee tax", "Welfare", "Net", "Welfare per £1 of tax", "Net per adult"];
+    const cols = ["Party", "Seats", "In surplus", "Income tax and NI", "Welfare", "Net", "Welfare per £1 of tax", "Net per adult"];
     const row = p => `<tr><td class="l nm"><span class="pc"><span class="sw" style="background:${pc(PARTY_G[p.name] || "ind")}"></span>${esc(p.name)}</span></td>
       <td>${p.seats}</td><td>${p.surplus} <span class="muted">(${pct(p.surplus / p.seats)})</span></td><td>${bn(p.tax)}</td><td>${bn(p.wel)}</td>
       <td class="${p.net < 0 ? "neg" : ""}">${bn(p.net)}</td><td>${ratio(p.ratio)}</td><td class="${p.npa < 0 ? "neg" : ""}">${sgbp(p.npa)}</td></tr>`;
@@ -1245,8 +1378,8 @@
     el.innerHTML = "";
     const D = W.dumbbell;
     document.getElementById("dumb-key").innerHTML = `<span><span class="dot" style="background:var(--hi)"></span>10 highest-welfare seats</span><span><span class="dot" style="background:var(--lo)"></span>10 lowest-welfare seats</span><span><span class="tick"></span>England average</span>`;
-    document.getElementById("dumb-foot").textContent = `Highest welfare per adult: ${D.hiSeats.join(", ")}. Lowest: ${D.loSeats.join(", ")}. Demographic figures from the Census 2021, ONS APS and NHS QOF 2024/25; England averages as given in the workbook.`;
-    const fmt = (v, f) => f === "age" ? v.toFixed(1) : f === "yrs" ? v.toFixed(1) : f === "gbp" ? "£" + Math.round(v) : f === "pct1" ? v.toFixed(1) + "%" : Math.round(v * 100) + "%";
+    document.getElementById("dumb-foot").textContent = `Highest welfare per adult: ${D.hiSeats.join(", ")}. Lowest: ${D.loSeats.join(", ")}. Figures from the Census 2021, ONS APS and NHS QOF 2024/25.`;
+    const fmt = (v, f) => f === "age" || f === "yrs" ? v.toFixed(1) : f === "gbp" ? "£" + Math.round(v) : f === "pct1" ? v.toFixed(1) + "%" : Math.round(v * 100) + "%";
     const rows = [];
     D.groups.forEach(G => { rows.push({ head: G.name }); G.rows.forEach(r => rows.push({ ...r, rh: r.hi / r.eng - 1, rl: r.lo / r.eng - 1 })); });
     const maxRel = d3.max(rows.filter(r => !r.head), r => Math.max(Math.abs(r.rh), Math.abs(r.rl)));
@@ -1254,67 +1387,63 @@
     const W0 = el.clientWidth, stacked = W0 < 620;
     const m = { t: 34, r: 16, b: 10, l: stacked ? 8 : Math.min(300, W0 * 0.32) };
     const w = W0 - m.l - m.r;
-    const RH = stacked ? 54 : 38, HH = 50;
+    const RH = stacked ? 54 : 40, HH = 48;
     let yy = 0;
     rows.forEach(r => { r.y = yy; yy += r.head ? HH : RH; });
     const h = yy;
     const x = d3.scaleLinear([-lim, lim], [0, w]);
-    const root = d3.select(el).append("svg").attr("width", W0).attr("height", h + m.t + m.b);
-    const g = root.append("g").attr("transform", `translate(${m.l},${m.t})`);
-    const ticks = d3.range(-lim, lim + 0.001, lim >= 0.75 ? 0.25 : 0.25).filter(t => Math.abs(t) <= lim + 1e-9);
+    const g = d3.select(el).append("svg").attr("width", W0).attr("height", h + m.t + m.b).append("g").attr("transform", `translate(${m.l},${m.t})`);
+    const ticks = d3.range(-lim, lim + 0.001, 0.25);
     g.append("g").selectAll("text").data(ticks).join("text").attr("x", d => x(d)).attr("y", -16).attr("text-anchor", "middle")
       .text(d => Math.abs(d) < 1e-9 ? "England" : (d > 0 ? "+" : MINUS) + Math.round(Math.abs(d) * 100) + "%");
     g.append("g").attr("class", "grid").selectAll("line").data(ticks.filter(t => Math.abs(t) > 1e-9)).join("line").attr("x1", d => x(d)).attr("x2", d => x(d)).attr("y1", -6).attr("y2", h);
     g.append("line").style("stroke", "var(--ink)").attr("stroke-width", 2).attr("x1", x(0)).attr("x2", x(0)).attr("y1", -6).attr("y2", h);
     const rg = g.append("g").selectAll("g").data(rows).join("g").attr("transform", r => `translate(0,${r.y})`);
     rg.filter(r => r.head).each(function (r) {
-      const s = d3.select(this);
-      s.append("text").attr("x", -m.l + (stacked ? 8 : 0)).attr("y", HH - 16).style("font-size", "12.5px").style("font-weight", 600).style("letter-spacing", "0.42em").style("fill", "var(--accent)").text(r.head.toUpperCase());
-      s.append("line").style("stroke", "var(--rule-2)").attr("x1", -m.l + (stacked ? 8 : 0)).attr("x2", w).attr("y1", HH - 6).attr("y2", HH - 6);
+      const s = d3.select(this), x0 = stacked ? 0 : -m.l;
+      s.append("text").attr("x", x0).attr("y", HH - 14).style("font-size", "16px").style("font-weight", 600).style("fill", "var(--ink)").text(r.head);
+      s.append("line").style("stroke", "var(--rule-2)").attr("x1", x0).attr("x2", w).attr("y1", HH - 5).attr("y2", HH - 5);
     });
     rg.filter(r => !r.head).each(function (r) {
       const s = d3.select(this);
       const cy = stacked ? RH - 14 : RH / 2;
-      s.append("text").attr("x", stacked ? 0 : -14).attr("y", stacked ? 16 : cy + 5).attr("text-anchor", stacked ? "start" : "end").style("font-size", "14.5px").style("fill", "var(--ink)").text(r.label);
-      s.append("text").attr("x", stacked ? w : -14).attr("y", stacked ? 16 : cy + 20).attr("text-anchor", "end").style("font-size", "11.5px").text(stacked ? "England " + fmt(r.eng, r.fmt) : "England " + fmt(r.eng, r.fmt));
+      s.append("text").attr("x", stacked ? 0 : -14).attr("y", stacked ? 16 : cy - 1).attr("text-anchor", stacked ? "start" : "end").style("font-size", "14.5px").style("fill", "var(--ink)").text(r.label);
+      s.append("text").attr("x", stacked ? w : -14).attr("y", stacked ? 16 : cy + 14).attr("text-anchor", "end").style("font-size", "12px").text("England " + fmt(r.eng, r.fmt));
       s.append("line").style("stroke", "var(--rule)").attr("x1", 0).attr("x2", w).attr("y1", cy).attr("y2", cy);
       const a = Math.min(r.rh, r.rl), b = Math.max(r.rh, r.rl);
       s.append("line").style("stroke", "var(--rule-2)").attr("stroke-width", 4).attr("x1", x(a)).attr("x2", x(b)).attr("y1", cy).attr("y2", cy);
       [["hi", r.rh, r.hi], ["lo", r.rl, r.lo]].forEach(([k, rel, v]) => {
         const leftSide = rel === a && a !== b;
         s.append("circle").attr("cx", x(rel)).attr("cy", cy).attr("r", 6.5).style("fill", `var(--${k})`).style("stroke", "var(--ground)").attr("stroke-width", 2);
-        s.append("text").attr("class", "lab").attr("x", x(rel) + (leftSide ? -11 : 11)).attr("y", cy + 4.5).attr("text-anchor", leftSide ? "end" : "start").text(fmt(v, r.fmt));
+        s.append("text").attr("class", "lab halo").attr("x", x(rel) + (leftSide ? -11 : 11)).attr("y", cy + 4.5).attr("text-anchor", leftSide ? "end" : "start").text(fmt(v, r.fmt));
       });
     });
   }
 
   function benefitsNational() {
     const el = document.getElementById("c-ben");
-    const rows = BEN_SHORT.map((name, i) => ({ name: W.benefits[i], v: E.ben[i] })).sort((a, b) => b.v - a.v);
+    const rows = W.benefits.map((name, i) => ({ name, v: E.ben[i] })).sort((a, b) => b.v - a.v);
     const max = rows[0].v * 1.02;
     el.innerHTML = rows.map(r => `<div class="bar-row"><span>${esc(r.name)}</span>
       <span class="val num">${bn(r.v)} <span class="muted">${pct(r.v / E.wel, 1)}</span></span>
-      <span class="trk" style="background:var(--track)"><span class="fill" style="width:${(r.v / max * 100).toFixed(2)}%"></span></span></div>`).join("");
-    const top2 = rows[0].v + rows[1].v;
-    document.getElementById("ben-h").textContent = `${rows[0].name} and ${rows[1].name} make up ${pct(top2 / E.wel)} of the bill.`;
+      <span class="trk"><span class="fill" style="width:${(r.v / max * 100).toFixed(2)}%"></span></span></div>`).join("");
+    document.getElementById("ben-h").textContent = `${rows[0].name} and ${rows[1].name} make up ${pct((rows[0].v + rows[1].v) / E.wel)} of the bill.`;
   }
 
-  // ---------- all-seats table ----------
   const TCOLS = [
     { k: "rank", label: "Rank", get: s => s.rank, fmt: s => s.rank },
     { k: "name", label: "Constituency", get: s => s.name, fmt: s => esc(s.name), l: true, cls: "nm" },
     { k: "region", label: "Region", get: s => s.region, fmt: s => esc(s.region), l: true },
     { k: "party", label: "Party", get: s => s.party, fmt: s => `<span class="pc"><span class="sw" style="background:${pc(s.g)}"></span>${esc(s.party)}</span>`, l: true },
-    { k: "mp", label: "MP", get: s => s.mp || "", fmt: s => s.mp ? esc(s.mp) : '<span class="muted">Vacant</span>', l: true },
-    { k: "tpw", label: "Tax per worker", get: s => s.tpw, fmt: s => gbp(s.tpw) },
+    { k: "mp", label: "MP", get: s => s.mp || "", fmt: s => s.mp ? esc(s.mp) : '<span class="muted">Seat vacant</span>', l: true },
+    { k: "tpw", label: "Tax and NI per worker", get: s => s.tpw, fmt: s => gbp(s.tpw) },
     { k: "wpa", label: "Welfare per adult", get: s => s.wpa, fmt: s => gbp(s.wpa) },
-    { k: "ratio", label: "Welfare per £1 tax", get: s => s.ratio, fmt: s => ratio(s.ratio) },
+    { k: "ratio", label: "Welfare per £1 of tax", get: s => s.ratio, fmt: s => ratio(s.ratio) },
     { k: "npa", label: "Net per adult", get: s => s.npa, fmt: s => `<span class="${s.npa < 0 ? "neg" : ""}">${sgbp(s.npa)}</span>` },
   ];
   const tsort = { k: "rank", dir: 1 };
   function seatsTable() {
-    const t = document.getElementById("t-seats");
-    const tq = document.getElementById("tq");
+    const t = document.getElementById("t-seats"), tq = document.getElementById("tq");
     const draw = () => {
       const term = tq.value.trim().toLowerCase();
       const col = TCOLS.find(c => c.k === tsort.k);
@@ -1354,32 +1483,34 @@
     document.getElementById("view-map").scrollIntoView({ behavior: REDUCED ? "auto" : "smooth", block: "start" });
   }
 
-  // ---------- sources ----------
   document.getElementById("sources").textContent =
-    `Data: ASI, A Tale of Two Cities (Welfare Analysis) 2026, built from DWP Stat-Xplore, ONS ASHE 2025, ONS mid-2024 population estimates, Census 2021, ONS APS and NHS QOF 2024/25. Party of sitting MP as at ${W.partyAsOf}; MP names from the UK Parliament Members API, ${monthYear(W.mpAsOf)}. Boundaries: ONS Westminster Parliamentary Constituencies (July 2024), Open Government Licence v3.0; contains OS data © Crown copyright and database right 2024.`;
+    `Data: Adam Smith Institute modelling, using DWP Stat-Xplore, ONS ASHE 2025, ONS mid-2024 population estimates, Census 2021, ONS APS and NHS QOF 2024/25. Party of sitting MP as at ${W.partyAsOf}; MP names from the UK Parliament Members API, ${monthYear(W.mpAsOf)}. Boundaries: ONS Westminster Parliamentary Constituencies (July 2024), Open Government Licence v3.0; contains OS data © Crown copyright and database right 2024.`;
 
   // ---------- resize & theme ----------
-  let rT;
-  const ro = new ResizeObserver(() => {
+  let rT, lastW = 0;
+  new ResizeObserver(entries => {
+    const wNow = Math.round(entries[0].contentRect.width);
+    if (wNow === lastW) return;
+    lastW = wNow;
     clearTimeout(rT);
     rT = setTimeout(() => {
       if (state.tab === "nat") redrawNationalCharts();
-      else if (state.sel) drawPanelCharts(byCode.get(state.sel));
+      else if (state.sel) drawSeatCharts(byCode.get(state.sel));
     }, 150);
-  });
-  ro.observe(document.querySelector("main"));
-  function onTheme() { buildFiscal(); paint(); }
+  }).observe(document.querySelector("main"));
+  function onTheme() { buildScales(); paint(); }
   window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", onTheme);
   new MutationObserver(onTheme).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
 
   // ---------- boot ----------
-  buildFiscal();
+  buildScales();
   paint();
   drawLegend();
   const h = location.hash;
-  const m = h.match(/^#seat=(E\d+)/);
-  if (h === "#national") showTab("nat");
-  else if (m && byCode.has(m[1])) { selectSeat(m[1], { zoom: true }); }
+  const mSeat = h.match(/^#seat=(E\d+)/), mReg = h.match(/^#region=(.+)$/);
+  if (h === "#national") { renderPanel(); showTab("nat"); }
+  else if (mSeat && byCode.has(mSeat[1])) selectSeat(mSeat[1], { zoom: true });
+  else if (mReg && REGIONS.includes(decodeURIComponent(mReg[1]))) setRegion(decodeURIComponent(mReg[1]));
   else renderPanel();
 })();
 </script>

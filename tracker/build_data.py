@@ -122,7 +122,9 @@ while True:
     for it in page["items"]:
         v = it["value"]
         m = v["latestHouseMembership"]
-        mps[key(m["membershipFrom"])] = {"name": v["nameDisplayAs"], "party": v["latestParty"]["name"],
+        # Drop courtesy prefixes (Mr, Mrs, Ms, Miss, Mx); keep titles such as Sir, Dame and Dr.
+        name = re.sub(r"^(Mr|Mrs|Ms|Miss|Mx)\.?\s+", "", v["nameDisplayAs"])
+        mps[key(m["membershipFrom"])] = {"name": name, "party": v["latestParty"]["name"],
                                          "since": m["membershipStartDate"][:10], "id": v["id"]}
     skip += 20
     if skip >= page["totalResults"]:
