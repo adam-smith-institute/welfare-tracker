@@ -1,0 +1,1385 @@
+<title>England Welfare Tracker</title>
+<meta name="description" content="Adam Smith Institute England Welfare Tracker 2026: employee tax and DWP welfare spending for all 543 English constituencies, by party of sitting MP.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Josefin+Sans:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap">
+<style>
+  /* Loosely after the ASI Design System: flat #224191 field for the masthead, Josefin Sans,
+     letter-spaced eyebrows, lavender highlights, amber chart accent, no radii, no shadows.
+     Data sits on a light print ground (as in ASI's own charts) so party colours read cleanly. */
+  :root {
+    --field: #224191;
+    --field-ink: #ffffff;
+    --field-ink-2: #c9cde0;
+    --field-hl: #b3b6e6;
+    --field-rule: #4d66a8;
+
+    --ground: #fcfcfd;
+    --ink: #1b2a4a;
+    --ink-2: #46536f;
+    --ink-3: #657089;
+    --rule: #e1e4ec;
+    --rule-2: #c7ccd9;
+    --track: #eceef4;
+    --accent: #224191;
+    --amber: #c67a2e;
+    --amber-ink: #9a5a1c;
+    --dot: #c3c8d4;
+    --map-edge: #ffffff;
+    --tip-bg: #1b2a4a;
+    --tip-ink: #ffffff;
+    --tip-ink-2: #c9cde0;
+    --lo: #224191;
+    --hi: #c67a2e;
+
+    /* party of sitting MP: conventional party hues, validated for normal vision all-pairs */
+    --p-lab: #d7263d;
+    --p-con: #0a6fc2;
+    --p-ld: #f29a1b;
+    --p-ref: #12a9c0;
+    --p-grn: #2e9a4e;
+    --p-yp: #9b3a9a;
+    --p-rb: #2d3a70;
+    --p-ind: #8b919c;
+    --p-spk: #4a5160;
+
+    /* fiscal balance: red (deficit) to green (surplus), neutral grey midpoint */
+    --fs-0: #9e1b28;
+    --fs-1: #d24b3e;
+    --fs-2: #eea08a;
+    --fs-3: #e5e4e1;
+    --fs-4: #9ccf97;
+    --fs-5: #3e9a5a;
+    --fs-6: #17613a;
+
+    --font: "Josefin Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --gutter: clamp(16px, 4vw, 48px);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      color-scheme: dark;
+      --ground: #0e1524;
+      --ink: #edf0f7;
+      --ink-2: #b9c1d4;
+      --ink-3: #8f99b0;
+      --rule: #243049;
+      --rule-2: #34415f;
+      --track: #1b2438;
+      --accent: #8ea6f0;
+      --amber: #e0954a;
+      --amber-ink: #e9a865;
+      --dot: #3a465f;
+      --map-edge: #0e1524;
+      --tip-bg: #eef1f8;
+      --tip-ink: #1b2a4a;
+      --tip-ink-2: #46536f;
+      --lo: #7f9cf0;
+      --hi: #e0954a;
+      --p-lab: #e23a4f; --p-con: #3d74e0; --p-ld: #f29a1b; --p-ref: #16b3c9; --p-grn: #3aa85a;
+      --p-yp: #b35ccc; --p-rb: #b7b0e8; --p-ind: #8d94a3; --p-spk: #d0d4dc;
+      --fs-0: #ff6b57; --fs-1: #d4513f; --fs-2: #8a4440; --fs-3: #3a4254;
+      --fs-4: #3f6e4c; --fs-5: #3f9e5d; --fs-6: #62d08a;
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --ground: #0e1524;
+    --ink: #edf0f7;
+    --ink-2: #b9c1d4;
+    --ink-3: #8f99b0;
+    --rule: #243049;
+    --rule-2: #34415f;
+    --track: #1b2438;
+    --accent: #8ea6f0;
+    --amber: #e0954a;
+    --amber-ink: #e9a865;
+    --dot: #3a465f;
+    --map-edge: #0e1524;
+    --tip-bg: #eef1f8;
+    --tip-ink: #1b2a4a;
+    --tip-ink-2: #46536f;
+    --lo: #7f9cf0;
+    --hi: #e0954a;
+    --p-lab: #e23a4f; --p-con: #3d74e0; --p-ld: #f29a1b; --p-ref: #16b3c9; --p-grn: #3aa85a;
+    --p-yp: #b35ccc; --p-rb: #b7b0e8; --p-ind: #8d94a3; --p-spk: #d0d4dc;
+    --fs-0: #ff6b57; --fs-1: #d4513f; --fs-2: #8a4440; --fs-3: #3a4254;
+    --fs-4: #3f6e4c; --fs-5: #3f9e5d; --fs-6: #62d08a;
+  }
+
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    background: var(--ground);
+    color: var(--ink);
+    font-family: var(--font);
+    font-weight: 400;
+    font-size: 17px;
+    line-height: 1.45;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 1440px; margin-inline: auto; padding-inline: var(--gutter); }
+  h1, h2, h3 { font-weight: 600; text-wrap: balance; margin: 0; }
+  p { margin: 0; }
+  button { font: inherit; color: inherit; }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+  .num { font-variant-numeric: tabular-nums lining-nums; }
+  .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  .eyebrow {
+    font-weight: 600; font-size: 0.82rem; letter-spacing: 0.42em; text-transform: uppercase;
+    color: var(--accent); line-height: 1.3; margin: 0;
+  }
+  .muted { color: var(--ink-3); }
+  .sw { display: inline-block; width: 12px; height: 12px; flex: none; }
+
+  /* ---------- Masthead: the flat ASI field ---------- */
+  .mast { background: var(--field); color: var(--field-ink); padding-top: clamp(22px, 3vw, 40px); }
+  .mast :focus-visible { outline-color: var(--field-ink); }
+  .mast-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 24px; }
+  .mast-text { display: grid; gap: 18px; max-width: 62rem; }
+  .mast .eyebrow { color: var(--field-ink-2); }
+  .mark { width: clamp(56px, 6.5vw, 88px); height: auto; flex: none; display: block; }
+  h1 { font-size: clamp(2rem, 4.4vw, 3.6rem); line-height: 1.2; letter-spacing: -0.005em; }
+  h1 .hl { color: var(--field-hl); }
+  .lead { font-weight: 300; font-size: clamp(1.1rem, 1.5vw, 1.3rem); line-height: 1.4; max-width: 60ch; }
+  .strip {
+    margin-top: clamp(24px, 3vw, 40px); display: grid; grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 20px clamp(20px, 3vw, 48px); padding-top: 18px; border-top: 1px solid var(--field-rule);
+  }
+  .stat { display: grid; gap: 2px; align-content: start; }
+  .stat .k { font-size: 0.95rem; color: var(--field-ink-2); }
+  .stat .v { font-weight: 600; font-size: clamp(1.7rem, 3vw, 2.6rem); line-height: 1.15; }
+  .stat .r { font-weight: 300; font-size: 0.92rem; color: var(--field-ink-2); }
+  .tabs { display: flex; gap: 4px 32px; margin-top: clamp(22px, 3vw, 36px); flex-wrap: wrap; }
+  .tabs button {
+    background: none; border: 0; padding: 10px 0 12px; cursor: pointer; color: var(--field-ink-2);
+    font-size: 1.12rem; font-weight: 400; border-bottom: 4px solid transparent; min-height: 44px;
+  }
+  .tabs button:hover { color: var(--field-ink); border-bottom-color: var(--field-rule); }
+  .tabs button[aria-selected="true"] { color: var(--field-ink); font-weight: 600; border-bottom-color: var(--field-ink); }
+
+  /* ---------- Controls ---------- */
+  .toolbar { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 14px 32px; padding-block: 22px 16px; }
+  .controls { display: flex; flex-wrap: wrap; gap: 14px 36px; align-items: flex-end; }
+  .ctl { display: grid; gap: 4px; }
+  .ctl-label { font-weight: 600; font-size: 0.74rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--ink-3); }
+  .seg { display: flex; flex-wrap: wrap; gap: 2px 20px; }
+  .seg button {
+    background: none; border: 0; padding: 6px 0 5px; cursor: pointer; color: var(--ink-2);
+    font-size: 1rem; border-bottom: 3px solid transparent; min-height: 36px;
+  }
+  .seg button:hover { border-bottom-color: var(--rule-2); color: var(--ink); }
+  .seg button[aria-pressed="true"] { color: var(--ink); font-weight: 600; border-bottom-color: var(--accent); }
+  .search { position: relative; width: min(100%, 340px); }
+  .search input {
+    font: inherit; font-size: 1rem; color: var(--ink); background: transparent; width: 100%;
+    border: 0; border-bottom: 2px solid var(--ink); border-radius: 0; padding: 7px 2px 6px;
+  }
+  .search input::placeholder { color: var(--ink-3); opacity: 1; }
+  .search .note { position: absolute; left: 0; top: 100%; font-size: 0.85rem; color: var(--amber-ink); padding-top: 3px; }
+
+  /* ---------- Map ---------- */
+  .map-layout { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(360px, 1fr); gap: clamp(24px, 3.5vw, 56px); align-items: start; padding-bottom: 56px; }
+  .map-col { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 12px); display: grid; gap: 12px; }
+  .map-box { position: relative; height: min(calc(100vh - 150px), 880px); min-height: 440px; }
+  #map { width: 100%; height: 100%; display: block; cursor: grab; touch-action: pan-y; }
+  #map:active { cursor: grabbing; }
+  #map path.seat { stroke: var(--map-edge); stroke-width: 0.6; stroke-linejoin: round; vector-effect: non-scaling-stroke; cursor: pointer; transition: fill 0.3s, opacity 0.3s; }
+  #map path.seat.faded { opacity: 0.16; }
+  #map path.seat.dim { opacity: 0.5; }
+  #map .hov { fill: none; stroke: var(--ink); stroke-width: 1.6; vector-effect: non-scaling-stroke; pointer-events: none; }
+  #map .sel { fill: none; stroke: var(--ink); stroke-width: 3; stroke-linejoin: round; vector-effect: non-scaling-stroke; pointer-events: none; }
+  .zoom { position: absolute; right: 0; top: 0; display: flex; flex-direction: column; gap: 6px; align-items: flex-end; }
+  .zoom button {
+    background: var(--ground); border: 1px solid var(--rule-2); color: var(--ink); cursor: pointer;
+    min-width: 36px; height: 36px; padding: 0 10px; font-size: 0.95rem;
+  }
+  .zoom button.sq { font-size: 1.3rem; line-height: 1; padding: 0; width: 36px; }
+  .zoom button:hover { background: var(--ink); color: var(--ground); border-color: var(--ink); }
+  .wheel-hint {
+    position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); pointer-events: none;
+    background: var(--tip-bg); color: var(--tip-ink); padding: 10px 16px 8px; font-size: 0.95rem;
+    opacity: 0; transition: opacity 0.25s;
+  }
+  .wheel-hint.on { opacity: 1; }
+  .tip {
+    position: absolute; left: 0; top: 0; pointer-events: none; z-index: 5;
+    background: var(--tip-bg); color: var(--tip-ink); padding: 10px 14px 9px; width: max-content; max-width: 280px;
+    font-size: 0.92rem; line-height: 1.35;
+  }
+  .tip b { font-weight: 600; display: block; font-size: 1.02rem; }
+  .tip .t-row { display: flex; align-items: center; gap: 8px; color: var(--tip-ink-2); }
+  .tip .t-val { font-weight: 600; font-size: 1.3rem; line-height: 1.25; margin-top: 3px; }
+  .tip .t-sub { color: var(--tip-ink-2); font-size: 0.85rem; }
+  .legend { display: flex; flex-wrap: wrap; gap: 4px 18px; font-size: 0.95rem; }
+  .legend button {
+    display: inline-flex; align-items: center; gap: 7px; background: none; border: 0; padding: 4px 0;
+    cursor: pointer; color: var(--ink); min-height: 30px; border-bottom: 2px solid transparent;
+  }
+  .legend button:hover { border-bottom-color: var(--rule-2); }
+  .legend button[aria-pressed="true"] { border-bottom-color: var(--ink); font-weight: 600; }
+  .legend.isolating button[aria-pressed="false"] { color: var(--ink-3); }
+  .legend .n { color: var(--ink-3); font-weight: 400; }
+  .ramp { display: grid; gap: 4px; max-width: 460px; }
+  .ramp-bar { height: 12px; }
+  .ramp-ticks { position: relative; height: 1.3em; font-size: 0.85rem; color: var(--ink-3); }
+  .ramp-ticks span { position: absolute; transform: translateX(-50%); white-space: nowrap; }
+  .ramp-ticks span:first-child { transform: none; }
+  .ramp-ticks span:last-child { transform: translateX(-100%); }
+  .ramp-ends { display: flex; justify-content: space-between; font-size: 0.85rem; font-weight: 600; }
+  .caption { font-size: 0.92rem; color: var(--ink-2); max-width: 70ch; }
+
+  /* ---------- Seat panel ---------- */
+  .panel { display: grid; gap: 28px; align-content: start; min-width: 0; }
+  .p-head { display: grid; gap: 10px; }
+  .p-head h2 { font-size: clamp(1.8rem, 2.6vw, 2.4rem); line-height: 1.2; }
+  .p-mp { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; font-size: 1.05rem; }
+  .p-mp .party { display: inline-flex; align-items: center; gap: 7px; font-weight: 600; }
+  .p-mp .since { color: var(--ink-3); font-size: 0.95rem; }
+  .back {
+    justify-self: start; background: none; border: 0; padding: 4px 0; cursor: pointer; color: var(--ink-2);
+    font-size: 0.95rem; display: inline-flex; gap: 10px; align-items: center; min-height: 36px;
+  }
+  .back:hover { color: var(--ink); }
+  .back svg { width: 26px; height: 11px; transform: scaleX(-1); }
+  .verdict { display: grid; gap: 12px; }
+  .big { font-weight: 600; font-size: clamp(3rem, 5vw, 4.2rem); line-height: 1; letter-spacing: -0.01em; }
+  .big small { font-size: 0.3em; font-weight: 400; letter-spacing: 0; color: var(--ink-2); margin-left: 8px; }
+  .verdict p { font-size: 1.08rem; max-width: 46ch; }
+  .gauge { position: relative; height: 12px; margin-top: 6px; }
+  .gauge i { position: absolute; top: -6px; width: 4px; height: 24px; margin-left: -2px; background: var(--ink); outline: 2px solid var(--ground); }
+  .gauge-lab { display: flex; justify-content: space-between; font-size: 0.82rem; color: var(--ink-3); margin-top: 4px; }
+  .sec { display: grid; gap: 12px; padding-top: 18px; border-top: 1px solid var(--rule); }
+  .sec h3 { font-size: 1.2rem; line-height: 1.3; }
+  .sec .sub { font-size: 0.92rem; color: var(--ink-2); margin-top: -6px; }
+  .ledger { display: grid; margin: 0; }
+  .ledger div { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2px 16px; padding: 9px 0 8px; border-bottom: 1px solid var(--rule); }
+  .ledger dt { font-weight: 400; }
+  .ledger dd { margin: 0; font-weight: 600; text-align: right; white-space: nowrap; }
+  .ledger .ctx { grid-column: 1 / -1; font-size: 0.86rem; color: var(--ink-3); }
+  .key { display: flex; flex-wrap: wrap; gap: 4px 18px; font-size: 0.86rem; color: var(--ink-2); align-items: center; }
+  .key span { display: inline-flex; align-items: center; gap: 6px; }
+  .key .tick { width: 3px; height: 14px; background: var(--ink); display: inline-block; }
+  .key .ln { width: 18px; height: 2px; display: inline-block; }
+  .key .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+  .bars { display: grid; gap: 9px; }
+  .bar-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 3px 12px; font-size: 0.95rem; }
+  .bar-row .val { font-weight: 600; text-align: right; white-space: nowrap; }
+  .bar-row .val .muted { font-weight: 400; font-size: 0.86rem; }
+  .bar-row .trk { grid-column: 1 / -1; position: relative; height: 10px; }
+  .bar-row .fill { position: absolute; left: 0; top: 0; bottom: 0; background: var(--accent); }
+  .bar-row .ref { position: absolute; top: -4px; bottom: -4px; width: 3px; margin-left: -1.5px; background: var(--ink); outline: 1.5px solid var(--ground); }
+  .strips { display: grid; gap: 16px; }
+  .strip-g { display: grid; gap: 10px; }
+  .strip-g > .ctl-label { margin-bottom: -2px; }
+  .srow { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 0 12px; font-size: 0.95rem; }
+  .srow .val { font-weight: 600; text-align: right; white-space: nowrap; }
+  .srow .val .muted { font-weight: 400; font-size: 0.86rem; }
+  .srow svg { grid-column: 1 / -1; display: block; width: 100%; height: 26px; overflow: visible; }
+  .note-flag { font-size: 0.9rem; color: var(--ink-2); border-left: 3px solid var(--amber); padding: 2px 0 2px 12px; }
+  .chart { position: relative; width: 100%; }
+  .chart svg { display: block; overflow: visible; }
+  .chart text { font-family: var(--font); fill: var(--ink-3); font-size: 12px; }
+  .chart .lab { fill: var(--ink); font-size: 13px; font-weight: 600; }
+  .chart .lab-2 { fill: var(--ink-2); font-size: 12.5px; }
+  .chart .grid line { stroke: var(--rule); }
+  .chart .axis-line { stroke: var(--rule-2); }
+  .chart .base { stroke: var(--ink); stroke-width: 1.5; }
+  .chart .be { stroke: var(--ink); stroke-width: 1.5; stroke-dasharray: 6 5; fill: none; }
+  .chart .be-amber { stroke: var(--amber); stroke-width: 2; stroke-dasharray: 6 5; fill: none; }
+  .chart .hit { cursor: pointer; }
+  .list { display: grid; margin: 0; padding: 0; list-style: none; }
+  .list li { border-bottom: 1px solid var(--rule); }
+  .list button {
+    width: 100%; display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 10px; align-items: center;
+    background: none; border: 0; padding: 9px 0 8px; cursor: pointer; text-align: left; font-size: 0.98rem;
+  }
+  .list button:hover { background: var(--track); }
+  .list .v { font-weight: 600; white-space: nowrap; }
+  .list .r { font-size: 0.85rem; color: var(--ink-3); display: block; }
+  .two { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; }
+
+  /* ---------- National ---------- */
+  .nat { display: grid; gap: clamp(44px, 5vw, 72px); padding-block: 36px 64px; }
+  .block { display: grid; gap: 16px; }
+  .block-head { display: grid; gap: 10px; max-width: 70ch; }
+  .block-head h2 { font-size: clamp(1.5rem, 2.6vw, 2.2rem); line-height: 1.25; }
+  .block-head p { color: var(--ink-2); }
+  .block-foot { font-size: 0.9rem; color: var(--ink-2); max-width: 80ch; }
+  .multiples { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 32px 36px; }
+  .mult h3 { font-size: 1.15rem; display: flex; align-items: center; gap: 8px; }
+  .mult p { font-size: 0.9rem; color: var(--ink-2); margin-bottom: 4px; }
+  .table-tools { display: flex; flex-wrap: wrap; gap: 12px 32px; align-items: flex-end; justify-content: space-between; }
+  .table-scroll { overflow: auto; max-height: 72vh; border-top: 2px solid var(--ink); }
+  .table-scroll.short { max-height: none; }
+  table { width: 100%; border-collapse: collapse; font-size: 0.95rem; min-width: 760px; }
+  thead th {
+    position: sticky; top: 0; background: var(--ground); z-index: 1;
+    text-align: right; font-weight: 600; font-size: 0.74rem; letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--ink-2); border-bottom: 1px solid var(--rule-2); padding: 0; vertical-align: bottom;
+  }
+  thead th.l { text-align: left; }
+  thead th button, thead th span {
+    display: block; width: 100%; background: none; border: 0; padding: 10px 10px 9px 0; cursor: pointer;
+    text-align: inherit; letter-spacing: inherit; text-transform: inherit; font-weight: 600; color: inherit;
+  }
+  thead th span { cursor: default; }
+  thead th button::after { content: ""; display: inline-block; margin-left: 5px; vertical-align: 2px; border-left: 4px solid transparent; border-right: 4px solid transparent; }
+  thead th[aria-sort="ascending"] button::after { border-bottom: 6px solid currentColor; }
+  thead th[aria-sort="descending"] button::after { border-top: 6px solid currentColor; }
+  tbody td { padding: 8px 10px 7px 0; border-bottom: 1px solid var(--rule); text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums lining-nums; }
+  tbody td.l { text-align: left; }
+  tbody td.nm { font-weight: 600; white-space: normal; min-width: 180px; }
+  tbody td .pc { display: inline-flex; align-items: center; gap: 7px; }
+  tbody tr.click { cursor: pointer; }
+  tbody tr.click:hover { background: var(--track); }
+  tfoot td { padding: 10px 10px 9px 0; text-align: right; font-weight: 600; border-top: 2px solid var(--ink); font-variant-numeric: tabular-nums lining-nums; white-space: nowrap; }
+  tfoot td.l { text-align: left; }
+  .neg { color: var(--fs-1); }
+  .method { display: grid; gap: 22px; }
+  .method h3 { font-size: 1.1rem; }
+  .method dl { margin: 0; display: grid; gap: 10px; }
+  .method dl div { display: grid; grid-template-columns: 160px minmax(0, 1fr); gap: 4px 24px; padding-bottom: 10px; border-bottom: 1px solid var(--rule); }
+  .method dt { font-weight: 600; }
+  .method dd { margin: 0; color: var(--ink-2); max-width: 90ch; font-size: 0.96rem; }
+
+  /* ---------- Footer ---------- */
+  .foot { padding-block: 32px 48px; border-top: 1px solid var(--rule); }
+  .foot .rule { width: 160px; height: 4px; background: var(--ink); margin-bottom: 12px; }
+  .foot-row { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px 40px; font-size: 0.92rem; }
+  .foot-row strong { font-weight: 600; font-size: 1.05rem; }
+  .foot-row p { color: var(--ink-2); max-width: 90ch; }
+
+  @media (max-width: 1080px) {
+    .map-layout { grid-template-columns: 1fr; }
+    .map-col { position: static; }
+    .map-box { height: min(72vh, 680px); min-height: 380px; }
+    .multiples { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+  @media (max-width: 720px) {
+    .strip { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .multiples { grid-template-columns: 1fr; }
+    .two { grid-template-columns: 1fr; }
+    .method dl div { grid-template-columns: 1fr; }
+    .mark { width: 52px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    #map path.seat, .wheel-hint { transition: none; }
+  }
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-arrow" viewBox="0 0 40 16"><path d="M1 8h36M30 1.5l7 6.5-7 6.5" fill="none" stroke="currentColor" stroke-width="2.4"/></symbol>
+  </defs>
+</svg>
+
+<header class="mast">
+  <div class="wrap">
+    <div class="mast-top">
+      <div class="mast-text">
+        <p class="eyebrow">England Welfare Tracker 2026</p>
+        <h1 id="headline">Only <span class="hl">145 of 543</span> English seats pay more in employee tax than they receive in welfare.</h1>
+        <p class="lead" id="lead">Employees in England pay &pound;213.0bn a year in income tax and National Insurance. The ten DWP benefits in this model cost &pound;266.1bn: &pound;1.25 in welfare for every &pound;1 of employee tax.</p>
+      </div>
+      <img class="mark" src="asi_logo_white.svg" alt="Adam Smith Institute" width="88" height="88">
+    </div>
+    <div class="strip" id="strip" aria-label="England summary"></div>
+    <div class="tabs" role="tablist" aria-label="Tracker views">
+      <button type="button" role="tab" id="tab-map" aria-controls="view-map" aria-selected="true">Constituency map</button>
+      <button type="button" role="tab" id="tab-nat" aria-controls="view-nat" aria-selected="false" tabindex="-1">National picture</button>
+    </div>
+  </div>
+</header>
+
+<main>
+  <section id="view-map" role="tabpanel" aria-labelledby="tab-map">
+    <div class="wrap">
+      <div class="toolbar">
+        <div class="controls">
+          <div class="ctl">
+            <span class="ctl-label" id="mode-l">Colour seats by</span>
+            <div class="seg" role="group" aria-labelledby="mode-l">
+              <button type="button" data-mode="party" aria-pressed="true">Party of sitting MP</button>
+              <button type="button" data-mode="fiscal" aria-pressed="false">Fiscal balance</button>
+            </div>
+          </div>
+          <div class="ctl" id="metric-ctl" hidden>
+            <span class="ctl-label" id="metric-l">Measure</span>
+            <div class="seg" role="group" aria-labelledby="metric-l">
+              <button type="button" data-metric="npa" aria-pressed="true">Net per adult</button>
+              <button type="button" data-metric="ratio" aria-pressed="false">Welfare per &pound;1 of tax</button>
+            </div>
+          </div>
+        </div>
+        <div class="ctl search">
+          <label class="ctl-label" for="q">Find a constituency or MP</label>
+          <input type="search" id="q" list="seat-list" placeholder="e.g. Clacton, or Diane Abbott" autocomplete="off">
+          <datalist id="seat-list"></datalist>
+          <span class="note" id="q-note" aria-live="polite"></span>
+        </div>
+      </div>
+
+      <div class="map-layout">
+        <div class="map-col">
+          <div class="map-box" id="map-box">
+            <svg id="map" role="img" aria-label="Map of England's 543 parliamentary constituencies"></svg>
+            <div class="zoom" aria-label="Map zoom">
+              <button type="button" class="sq" id="z-in" aria-label="Zoom in">+</button>
+              <button type="button" class="sq" id="z-out" aria-label="Zoom out">&minus;</button>
+              <button type="button" id="z-eng">England</button>
+              <button type="button" id="z-lon">London</button>
+            </div>
+            <div class="wheel-hint" id="wheel-hint">Hold Ctrl or &#8984; and scroll to zoom</div>
+            <div class="tip" id="map-tip" hidden></div>
+          </div>
+          <div id="legend"></div>
+          <p class="caption" id="map-caption"></p>
+        </div>
+        <aside class="panel" id="panel" aria-live="polite"></aside>
+      </div>
+    </div>
+  </section>
+
+  <section id="view-nat" role="tabpanel" aria-labelledby="tab-nat" hidden>
+    <div class="wrap nat">
+      <div class="block" id="b-regions">
+        <div class="block-head">
+          <p class="eyebrow">Regions</p>
+          <h2>London is the only region where employee tax clearly covers welfare.</h2>
+          <p>Welfare spending for every &pound;1 of employee income tax and National Insurance.</p>
+        </div>
+        <div class="chart" id="c-regions"></div>
+        <p class="block-foot" id="regions-foot"></p>
+      </div>
+
+      <div class="block" id="b-scatter">
+        <div class="block-head">
+          <p class="eyebrow">Every seat</p>
+          <h2>Seats below the line pay in more than they take out.</h2>
+          <p>Employee tax per worker against welfare spending per adult, all 543 English constituencies. Hover for detail; click a seat to open it on the map.</p>
+        </div>
+        <div id="scatter-legend" class="legend"></div>
+        <div class="chart" id="c-scatter"></div>
+        <p class="block-foot">The break-even line assumes England&rsquo;s average of 0.51 employee jobs per adult. A seat with more jobs per adult breaks even above the line; one with fewer, below it.</p>
+      </div>
+
+      <div class="block" id="b-parties">
+        <div class="block-head">
+          <p class="eyebrow">By party</p>
+          <h2 id="party-h">Of the larger parties, only Liberal Democrat seats pay in more than they receive.</h2>
+          <p>Each panel highlights one party&rsquo;s seats against all 543. Axes as above.</p>
+        </div>
+        <div class="multiples" id="c-mult"></div>
+        <div class="table-scroll short"><table id="t-party"></table></div>
+      </div>
+
+      <div class="block" id="b-dumb">
+        <div class="block-head">
+          <p class="eyebrow">Two Englands</p>
+          <h2>High-welfare seats have fewer people in work and more in poor health.</h2>
+          <p>The ten English seats with the highest welfare spending per adult against the ten with the lowest, measured as the difference from the England average. Labels give each group&rsquo;s actual value.</p>
+        </div>
+        <div class="key" id="dumb-key"></div>
+        <div class="chart" id="c-dumb"></div>
+        <p class="block-foot" id="dumb-foot"></p>
+      </div>
+
+      <div class="block" id="b-ben">
+        <div class="block-head">
+          <p class="eyebrow">Where it goes</p>
+          <h2 id="ben-h">State Pension and Universal Credit make up most of the bill.</h2>
+          <p>Annual spending across England on the ten DWP benefits in the model.</p>
+        </div>
+        <div class="bars" id="c-ben" style="max-width: 820px"></div>
+      </div>
+
+      <div class="block" id="b-table">
+        <div class="block-head">
+          <p class="eyebrow">All seats</p>
+          <h2>Every constituency, ranked by net contribution per adult.</h2>
+          <p>Sort by any column. Click a row to open the seat on the map.</p>
+        </div>
+        <div class="table-tools">
+          <div class="ctl search">
+            <label class="ctl-label" for="tq">Filter by seat, MP, party or region</label>
+            <input type="search" id="tq" placeholder="e.g. North East" autocomplete="off">
+          </div>
+          <p class="caption" id="t-count"></p>
+        </div>
+        <div class="table-scroll"><table id="t-seats"></table></div>
+      </div>
+
+      <div class="block" id="b-method">
+        <div class="block-head">
+          <p class="eyebrow">Method</p>
+          <h2>What the model counts, and what it leaves out.</h2>
+        </div>
+        <div class="method" id="method"></div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="foot">
+  <div class="wrap">
+    <div class="rule"></div>
+    <div class="foot-row">
+      <strong>adamsmith.org</strong>
+      <p id="sources"></p>
+    </div>
+  </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<script src="data.js"></script>
+<script src="geo.js"></script>
+<script>
+(function () {
+  "use strict";
+  const W = window.WT, GEO = window.GEO, E = W.england;
+  const seats = W.seats;
+  const byCode = new Map(seats.map(s => [s.code, s]));
+  const REDUCED = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  // ---------- parties ----------
+  const GROUPS = [
+    { g: "lab", name: "Labour", long: "Labour (incl. Co-op)", shape: d3.symbolCircle },
+    { g: "con", name: "Conservative", shape: d3.symbolSquare },
+    { g: "ld", name: "Liberal Democrat", shape: d3.symbolTriangle },
+    { g: "ref", name: "Reform UK", shape: d3.symbolDiamond },
+    { g: "grn", name: "Green Party", shape: d3.symbolCircle },
+    { g: "ind", name: "Independent", shape: d3.symbolCircle },
+    { g: "yp", name: "Your Party", shape: d3.symbolCircle },
+    { g: "rb", name: "Restore Britain", shape: d3.symbolCircle },
+    { g: "spk", name: "Speaker", shape: d3.symbolCircle },
+  ];
+  const GROUP = Object.fromEntries(GROUPS.map(x => [x.g, x]));
+  const PARTY_G = {
+    "Labour": "lab", "Labour (Co-op)": "lab", "Conservative": "con", "Liberal Democrat": "ld",
+    "Reform UK": "ref", "Green Party": "grn", "Independent": "ind", "Your Party": "yp",
+    "Restore Britain": "rb", "Speaker": "spk",
+  };
+  seats.forEach(s => { s.g = PARTY_G[s.party]; });
+  GROUPS.forEach(x => { x.n = seats.filter(s => s.g === x.g).length; x.surplus = seats.filter(s => s.g === x.g && s.net > 0).length; });
+  const pc = g => `var(--p-${g})`;
+
+  // rank by net contribution per adult (1 = largest net contributor)
+  seats.slice().sort((a, b) => b.npa - a.npa).forEach((s, i) => { s.rank = i + 1; });
+
+  const BEN_SHORT = ["JSA", "Universal Credit", "State Pension", "Pension Credit", "Housing Benefit", "PIP", "DLA", "ESA", "Carer's Allowance", "Attendance Allowance"];
+  const JOBS_PER_ADULT = E.jobs / E.adults;
+
+  // ---------- formatting ----------
+  const MINUS = "−";
+  const f0 = d3.format(",.0f");
+  const esc = v => String(v == null ? "" : v).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  const gbp = n => (n < 0 ? MINUS : "") + "£" + f0(Math.abs(n));
+  const sgbp = n => (n > 0 ? "+" : n < 0 ? MINUS : "") + "£" + f0(Math.abs(n));
+  const money = n => {
+    const a = Math.abs(n), sign = n < 0 ? MINUS : "";
+    if (a >= 1e9) return sign + "£" + (a / 1e9).toFixed(a >= 1e11 ? 0 : 1) + "bn";
+    if (a >= 1e8) return sign + "£" + Math.round(a / 1e6) + "m";
+    return sign + "£" + (a / 1e6).toFixed(1) + "m";
+  };
+  const bn = n => (n < 0 ? MINUS : "") + "£" + (Math.abs(n) / 1e9).toFixed(1) + "bn";
+  const ratio = r => "£" + r.toFixed(2);
+  const pct = (x, dp = 0) => (x * 100).toFixed(dp) + "%";
+  const ord = n => { const s = ["th", "st", "nd", "rd"], v = n % 100; return n + (s[(v - 20) % 10] || s[v] || s[0]); };
+  const kfmt = v => "£" + (v / 1000) + "k";
+  const monthYear = iso => { if (!iso) return ""; const d = new Date(iso + "T00:00:00"); return d.toLocaleDateString("en-GB", { month: "long", year: "numeric" }); };
+  const cssVar = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+
+  // ---------- fiscal colour scale ----------
+  let fiscalScale;
+  function buildFiscal() {
+    const stops = [0, 1, 2, 3, 4, 5, 6].map(i => cssVar("--fs-" + i));
+    fiscalScale = d3.scaleLinear().domain([-1, -2 / 3, -1 / 3, 0, 1 / 3, 2 / 3, 1]).range(stops).interpolate(d3.interpolateLab).clamp(true);
+  }
+  const NPA_MAX = 5000, RATIO_MAX = 3;
+  const fiscalT = (s, metric) => metric === "ratio" ? -Math.log(s.ratio) / Math.log(RATIO_MAX) : s.npa / NPA_MAX;
+  const clampT = t => Math.max(-1, Math.min(1, t));
+  const rampCSS = () => "linear-gradient(90deg," + [0, 1, 2, 3, 4, 5, 6].map(i => `var(--fs-${i}) ${(i / 6 * 100).toFixed(1)}%`).join(",") + ")";
+
+  // ---------- state ----------
+  const state = { mode: "party", metric: "npa", sel: null, iso: null, tab: "map" };
+
+  // ---------- masthead ----------
+  const surplusSeats = seats.filter(s => s.net > 0).length;
+  document.getElementById("headline").innerHTML = `Only <span class="hl">${surplusSeats} of ${seats.length}</span> English seats pay more in employee tax than they receive in welfare.`;
+  document.getElementById("lead").textContent = `Employees in England pay ${bn(E.tax)} a year in income tax and National Insurance. The ten DWP benefits in this model cost ${bn(E.wel)}: ${ratio(E.ratio)} in welfare for every £1 of employee tax.`;
+  document.getElementById("strip").innerHTML = [
+    ["Employee tax", bn(E.tax), "Income tax and employee NI"],
+    ["Welfare spending", bn(E.wel), "Ten DWP benefits, annualised"],
+    ["Net balance", bn(E.net), gbp(E.npa) + " per adult"],
+    ["Welfare per £1 of tax", ratio(E.ratio), "Break-even is £1.00"],
+  ].map(([k, v, r]) => `<div class="stat"><span class="k">${k}</span><span class="v">${v}</span><span class="r">${r}</span></div>`).join("");
+
+  // ---------- tabs ----------
+  const tabs = { map: document.getElementById("tab-map"), nat: document.getElementById("tab-nat") };
+  const views = { map: document.getElementById("view-map"), nat: document.getElementById("view-nat") };
+  let natDrawn = false;
+  function showTab(t, focus) {
+    state.tab = t;
+    for (const k of Object.keys(tabs)) {
+      const on = k === t;
+      tabs[k].setAttribute("aria-selected", on);
+      tabs[k].tabIndex = on ? 0 : -1;
+      views[k].hidden = !on;
+    }
+    if (focus) tabs[t].focus();
+    if (t === "nat" && !natDrawn) { natDrawn = true; drawNational(); }
+    if (t === "map") mapResize();
+    writeHash();
+  }
+  tabs.map.addEventListener("click", () => showTab("map"));
+  tabs.nat.addEventListener("click", () => showTab("nat"));
+  document.querySelector(".tabs").addEventListener("keydown", e => {
+    if (e.key === "ArrowRight" || e.key === "ArrowLeft") { e.preventDefault(); showTab(state.tab === "map" ? "nat" : "map", true); }
+  });
+
+  function writeHash() {
+    const h = state.tab === "nat" ? "#national" : state.sel ? "#seat=" + state.sel : "";
+    try { history.replaceState(null, "", h || location.pathname + location.search); } catch (e) { /* sandboxed */ }
+  }
+
+  // ---------- map ----------
+  const VW = 800, VH = 900;
+  const svg = d3.select("#map").attr("viewBox", `0 0 ${VW} ${VH}`).attr("preserveAspectRatio", "xMidYMid meet");
+  const proj = d3.geoIdentity().reflectY(true).fitExtent([[10, 10], [VW - 10, VH - 10]], GEO);
+  const path = d3.geoPath(proj);
+  const gRoot = svg.append("g");
+  const gSeats = gRoot.append("g");
+  const hov = gRoot.append("path").attr("class", "hov");
+  const selPath = gRoot.append("path").attr("class", "sel");
+  const feats = GEO.features.filter(f => byCode.has(f.id));
+  const featBy = new Map(feats.map(f => [f.id, f]));
+  const seatPaths = gSeats.selectAll("path").data(feats, d => d.id).join("path")
+    .attr("class", "seat").attr("d", path);
+
+  const mapBox = document.getElementById("map-box");
+  const tip = document.getElementById("map-tip");
+  let curK = 1;
+  const zoom = d3.zoom().scaleExtent([1, 48]).clickDistance(5)
+    .translateExtent([[-200, -200], [VW + 200, VH + 200]])
+    .filter(ev => {
+      if (ev.type === "wheel") { if (ev.ctrlKey || ev.metaKey) return true; wheelHint(); return false; }
+      if (ev.type === "touchstart") return ev.touches.length > 1 || curK > 1.01;
+      return (!ev.ctrlKey || ev.type === "wheel") && !ev.button;
+    })
+    .on("zoom", ev => { gRoot.attr("transform", ev.transform); curK = ev.transform.k; });
+  svg.call(zoom).on("dblclick.zoom", null);
+
+  let hintTimer;
+  function wheelHint() {
+    const h = document.getElementById("wheel-hint");
+    h.classList.add("on");
+    clearTimeout(hintTimer);
+    hintTimer = setTimeout(() => h.classList.remove("on"), 1100);
+  }
+  const dur = ms => REDUCED ? 0 : ms;
+  function zoomToBounds([[x0, y0], [x1, y1]], maxK = 40, fill = 0.72) {
+    const k = Math.min(maxK, fill / Math.max((x1 - x0) / VW, (y1 - y0) / VH));
+    const t = d3.zoomIdentity.translate(VW / 2, VH / 2).scale(k).translate(-(x0 + x1) / 2, -(y0 + y1) / 2);
+    svg.transition().duration(dur(750)).call(zoom.transform, t);
+  }
+  function zoomReset() { svg.transition().duration(dur(650)).call(zoom.transform, d3.zoomIdentity); }
+  document.getElementById("z-in").addEventListener("click", () => svg.transition().duration(dur(300)).call(zoom.scaleBy, 1.8));
+  document.getElementById("z-out").addEventListener("click", () => svg.transition().duration(dur(300)).call(zoom.scaleBy, 1 / 1.8));
+  document.getElementById("z-eng").addEventListener("click", () => { selectSeat(null); zoomReset(); });
+  document.getElementById("z-lon").addEventListener("click", () => {
+    const lon = { type: "FeatureCollection", features: feats.filter(f => byCode.get(f.id).region === "London") };
+    zoomToBounds(path.bounds(lon), 40, 0.92);
+  });
+
+  function fillFor(s) {
+    if (state.mode === "party") return pc(s.g);
+    return fiscalScale(clampT(fiscalT(s, state.metric)));
+  }
+  function paint() {
+    seatPaths.style("fill", d => fillFor(byCode.get(d.id)))
+      .classed("faded", d => state.mode === "party" && state.iso && byCode.get(d.id).g !== state.iso)
+      .classed("dim", d => state.sel && d.id !== state.sel && !(state.mode === "party" && state.iso && byCode.get(d.id).g !== state.iso));
+  }
+
+  function placeTip(el, box, x, y) {
+    el.hidden = false;
+    const bw = box.clientWidth, tw = el.offsetWidth, th = el.offsetHeight;
+    let left = x + 16, top = y + 16;
+    if (left + tw > bw) left = x - tw - 16;
+    if (left < 0) left = 4;
+    if (top + th > box.clientHeight) top = y - th - 16;
+    el.style.transform = `translate(${Math.round(left)}px, ${Math.round(top)}px)`;
+  }
+  function seatTipHTML(s) {
+    const primary = state.mode === "fiscal" && state.metric === "ratio"
+      ? `<div class="t-val">${ratio(s.ratio)} <span class="t-sub">welfare per £1 of tax</span></div>`
+      : `<div class="t-val">${sgbp(s.npa)} <span class="t-sub">net per adult</span></div>`;
+    return `<b>${esc(s.name)}</b>
+      <div class="t-row"><span class="sw" style="background:${pc(s.g)}"></span>${esc(s.party)}${s.mp ? " · " + esc(s.mp) : ""}</div>
+      ${primary}<div class="t-sub">${esc(s.region)} · ${ord(s.rank)} of ${seats.length}</div>`;
+  }
+  seatPaths
+    .on("pointermove", function (ev, d) {
+      const s = byCode.get(d.id);
+      hov.attr("d", path(d));
+      tip.innerHTML = seatTipHTML(s);
+      const [x, y] = d3.pointer(ev, mapBox);
+      placeTip(tip, mapBox, x, y);
+    })
+    .on("pointerleave", () => { hov.attr("d", null); tip.hidden = true; })
+    .on("click", (ev, d) => { selectSeat(d.id === state.sel ? null : d.id, { zoom: true }); });
+  svg.on("click", ev => { if (ev.target === svg.node() && state.sel) { selectSeat(null); zoomReset(); } });
+
+  function mapResize() { /* the SVG scales with its viewBox; nothing to recompute */ }
+
+  // ---------- legend ----------
+  function drawLegend() {
+    const el = document.getElementById("legend");
+    const cap = document.getElementById("map-caption");
+    if (state.mode === "party") {
+      el.className = "legend" + (state.iso ? " isolating" : "");
+      el.innerHTML = GROUPS.filter(x => x.n).map(x =>
+        `<button type="button" data-g="${x.g}" aria-pressed="${state.iso === x.g}"><span class="sw" style="background:${pc(x.g)}"></span>${esc(x.g === "lab" ? x.long : x.name)} <span class="n">${x.n}</span></button>`).join("");
+      el.querySelectorAll("button").forEach(b => b.addEventListener("click", () => {
+        state.iso = state.iso === b.dataset.g ? null : b.dataset.g;
+        paint(); drawLegend();
+      }));
+      cap.textContent = `Party of sitting MP, ${W.partyAsOf}. Click a party to isolate its seats. Click a seat to zoom in and open its detail.`;
+    } else {
+      el.className = "ramp";
+      const ticks = state.metric === "npa"
+        ? [[-1, MINUS + "£5k"], [-0.5, MINUS + "£2.5k"], [0, "£0"], [0.5, "+£2.5k"], [1, "+£5k"]]
+        : [[1, "£0.33"], [Math.log(2) / Math.log(3), "£0.50"], [0, "£1.00"], [-Math.log(2) / Math.log(3), "£2.00"], [-1, "£3.00"]].sort((a, b) => a[0] - b[0]);
+      el.innerHTML = `<div class="ramp-ends"><span>Deficit</span><span>Surplus</span></div>
+        <div class="ramp-bar" style="background:${rampCSS()}"></div>
+        <div class="ramp-ticks">${ticks.map(([t, l]) => `<span style="left:${((t + 1) / 2 * 100).toFixed(1)}%">${l}</span>`).join("")}</div>`;
+      cap.textContent = state.metric === "npa"
+        ? "Employee tax minus welfare spending, per adult. Seats beyond ±£5,000 take the end colour. Click a seat to zoom in."
+        : "Welfare spending for every £1 of employee tax, on a log scale. Above £1.00 a seat receives more than it pays in. Click a seat to zoom in.";
+    }
+  }
+
+  document.querySelectorAll("[data-mode]").forEach(b => b.addEventListener("click", () => {
+    state.mode = b.dataset.mode;
+    document.querySelectorAll("[data-mode]").forEach(x => x.setAttribute("aria-pressed", x === b));
+    document.getElementById("metric-ctl").hidden = state.mode !== "fiscal";
+    paint(); drawLegend();
+  }));
+  document.querySelectorAll("[data-metric]").forEach(b => b.addEventListener("click", () => {
+    state.metric = b.dataset.metric;
+    document.querySelectorAll("[data-metric]").forEach(x => x.setAttribute("aria-pressed", x === b));
+    paint(); drawLegend();
+    if (state.sel) renderPanel();
+  }));
+
+  // ---------- search ----------
+  const dl = document.getElementById("seat-list");
+  seats.forEach(s => {
+    const o = document.createElement("option");
+    o.value = s.name;
+    o.label = (s.mp || "Seat vacant") + " · " + s.party;
+    dl.appendChild(o);
+  });
+  const q = document.getElementById("q"), qNote = document.getElementById("q-note");
+  function findSeat(v) {
+    const t = v.trim().toLowerCase();
+    if (!t) return null;
+    return seats.find(s => s.name.toLowerCase() === t)
+      || seats.find(s => (s.mp || "").toLowerCase() === t)
+      || seats.find(s => s.name.toLowerCase().startsWith(t))
+      || seats.find(s => s.name.toLowerCase().includes(t) || (s.mp || "").toLowerCase().includes(t));
+  }
+  function runSearch(commit) {
+    const s = findSeat(q.value);
+    if (s && (commit || s.name.toLowerCase() === q.value.trim().toLowerCase())) {
+      qNote.textContent = "";
+      selectSeat(s.code, { zoom: true });
+      q.blur();
+    } else if (commit && q.value.trim()) {
+      qNote.textContent = "No constituency or MP matches that name.";
+    }
+  }
+  q.addEventListener("input", () => { qNote.textContent = ""; runSearch(false); });
+  q.addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); runSearch(true); } });
+
+  // ---------- selection ----------
+  function selectSeat(code, opts = {}) {
+    state.sel = code;
+    const f = code ? featBy.get(code) : null;
+    selPath.attr("d", f ? path(f) : null);
+    paint();
+    renderPanel();
+    if (f && opts.zoom) zoomToBounds(path.bounds(f));
+    if (!code && opts.zoom) zoomReset();
+    writeHash();
+  }
+
+  // ---------- panel ----------
+  const panel = document.getElementById("panel");
+  const arrow = '<svg aria-hidden="true"><use href="#i-arrow"/></svg>';
+
+  function renderPanel() {
+    const s = state.sel ? byCode.get(state.sel) : null;
+    if (!s) return renderEngland();
+    const t = clampT(fiscalT(s, state.metric));
+    const deficit = s.net < 0;
+    const verdict = deficit
+      ? `Welfare spending here exceeds employee tax by <strong>${money(-s.net)}</strong> a year.`
+      : `Employee tax here exceeds welfare spending by <strong>${money(s.net)}</strong> a year.`;
+    const big = state.metric === "ratio"
+      ? `${ratio(s.ratio)}<small>welfare per £1 of tax</small>`
+      : `${sgbp(s.npa)}<small>net per adult</small>`;
+    const rankLine = `${ord(s.rank)} of ${seats.length} for net contribution per adult. England: ${sgbp(E.npa)} per adult, ${ratio(E.ratio)} of welfare per £1 of tax.`;
+    const mpLine = s.mp
+      ? `<span>${esc(s.mp)}</span><span class="since">MP since ${monthYear(s.mpSince)}</span>`
+      : `<span>Seat vacant</span><span class="since">UK Parliament lists no sitting MP (${monthYear(W.mpAsOf)})</span>`;
+    let flag = "";
+    if (s.flag || s.meanEst) {
+      const bits = [];
+      if (s.meanEst) bits.push("its ASHE mean pay is estimated from the median");
+      if (s.imputed >= 2) bits.push(`${s.imputed} of its 8 pay percentile points (P10–P75) are imputed`);
+      flag = `<p class="note-flag">Treat this seat&rsquo;s ranking as indicative: ${bits.join(", and ")}.</p>`;
+    }
+    const jpa = s.jobs / s.adults;
+    panel.innerHTML = `
+      <div class="p-head">
+        <button type="button" class="back" id="back">${arrow}Back to England</button>
+        <p class="eyebrow">${esc(s.region)}</p>
+        <h2>${esc(s.name)}</h2>
+        <div class="p-mp"><span class="party"><span class="sw" style="background:${pc(s.g)}"></span>${esc(s.party)}</span>${mpLine}</div>
+      </div>
+      <div class="verdict">
+        <div class="big">${big}</div>
+        <p>${verdict}</p>
+        <div>
+          <div class="gauge" style="background:${rampCSS()}"><i style="left:${((t + 1) / 2 * 100).toFixed(1)}%"></i></div>
+          <div class="gauge-lab"><span>Deficit</span><span>Break-even</span><span>Surplus</span></div>
+        </div>
+        <p class="muted" style="font-size:0.92rem">${rankLine}</p>
+        ${flag}
+      </div>
+      <div class="sec">
+        <h3>The ledger</h3>
+        <dl class="ledger">
+          <div><dt>Employee tax paid</dt><dd>${money(s.tax)}</dd><span class="ctx">${gbp(s.tpw)} per worker · England ${gbp(E.tpw)}</span></div>
+          <div><dt>Welfare received</dt><dd>${money(s.wel)}</dd><span class="ctx">${gbp(s.wpa)} per adult · England ${gbp(E.wpa)}</span></div>
+          <div><dt>Welfare per £1 of tax</dt><dd>${ratio(s.ratio)}</dd><span class="ctx">England ${ratio(E.ratio)}</span></div>
+          <div><dt>Employee jobs per adult</dt><dd>${jpa.toFixed(2)}</dd><span class="ctx">${f0(s.jobs)} jobs, ${f0(s.adults)} adults · England ${JOBS_PER_ADULT.toFixed(2)}</span></div>
+        </dl>
+      </div>
+      <div class="sec">
+        <h3>Where it sits</h3>
+        <p class="sub">Employee tax per worker against welfare per adult. Grey dots are the other 542 seats.</p>
+        <div class="chart" id="p-scatter"></div>
+      </div>
+      <div class="sec">
+        <h3>Where the welfare goes</h3>
+        <p class="sub">Spending per adult on each benefit.</p>
+        <div class="key"><span><span class="sw" style="background:var(--accent)"></span>${esc(s.name)}</span><span><span class="tick"></span>England average</span></div>
+        <div class="bars" id="p-ben"></div>
+      </div>
+      <div class="sec">
+        <h3>Against England</h3>
+        <p class="sub">Each track spans all 543 seats; faint ticks mark every seat.</p>
+        <div class="key"><span><span class="dot" style="background:var(--accent)"></span>${esc(s.name)}</span><span><span class="tick"></span>England</span></div>
+        <div class="strips" id="p-strips"></div>
+      </div>
+      <div class="sec">
+        <h3>The pay ladder</h3>
+        <p class="sub">Annual pay at each percentile of employee jobs, the base of the tax estimate.</p>
+        <div class="key"><span><span class="ln" style="background:var(--accent)"></span>${esc(s.name)}</span><span><span class="ln" style="background:var(--ink-3)"></span>${esc(s.region)}</span></div>
+        <div class="chart" id="p-pay"></div>
+      </div>`;
+    document.getElementById("back").addEventListener("click", () => { selectSeat(null); zoomReset(); });
+    drawPanelCharts(s);
+  }
+
+  function drawPanelCharts(s) {
+    miniScatter(document.getElementById("p-scatter"), s);
+    benefitBars(document.getElementById("p-ben"), s);
+    strips(document.getElementById("p-strips"), s);
+    payLadder(document.getElementById("p-pay"), s);
+  }
+
+  function renderEngland() {
+    const top = seats.slice().sort((a, b) => b.npa - a.npa).slice(0, 5);
+    const bottom = seats.slice().sort((a, b) => a.npa - b.npa).slice(0, 5);
+    const li = s => `<li><button type="button" data-code="${s.code}"><span class="sw" style="background:${pc(s.g)}"></span><span>${esc(s.name)}<span class="r">${esc(s.party)} · ${esc(s.region)}</span></span><span class="v">${sgbp(s.npa)}</span></button></li>`;
+    const reg = W.regions.slice().sort((a, b) => b.npa - a.npa);
+    panel.innerHTML = `
+      <div class="p-head">
+        <p class="eyebrow">England</p>
+        <h2>Select a constituency</h2>
+        <p style="color:var(--ink-2)">Click any seat on the map, or search above. The panel shows the seat&rsquo;s tax and welfare ledger, its sitting MP and how it compares with the rest of England.</p>
+      </div>
+      <div class="verdict">
+        <div class="big">${sgbp(E.npa)}<small>net per adult, England</small></div>
+        <p>Welfare spending exceeds employee tax by <strong>${bn(-E.net)}</strong> a year. ${surplusSeats} seats pay in more than they receive; ${seats.length - surplusSeats} receive more than they pay in.</p>
+      </div>
+      <div class="sec">
+        <h3>Largest net contributors</h3>
+        <p class="sub">Employee tax minus welfare, per adult.</p>
+        <ul class="list">${top.map(li).join("")}</ul>
+      </div>
+      <div class="sec">
+        <h3>Largest net recipients</h3>
+        <ul class="list">${bottom.map(li).join("")}</ul>
+      </div>
+      <div class="sec">
+        <h3>By region</h3>
+        <dl class="ledger">${reg.map(r => `<div><dt>${esc(r.name)}</dt><dd>${sgbp(r.npa)}</dd><span class="ctx">${r.surplus} of ${r.seats} seats in surplus · ${ratio(r.ratio)} welfare per £1 of tax</span></div>`).join("")}</dl>
+      </div>`;
+    panel.querySelectorAll("[data-code]").forEach(b => b.addEventListener("click", () => selectSeat(b.dataset.code, { zoom: true })));
+  }
+
+  // ---------- shared scatter pieces ----------
+  const X_MAX = 36000, Y_MAX = 9000;
+  function scatterFrame(g, x, y, w, h, opts = {}) {
+    const xt = opts.xticks || [0, 10000, 20000, 30000];
+    const yt = opts.yticks || [0, 3000, 6000, 9000];
+    const grid = g.append("g").attr("class", "grid");
+    grid.selectAll("line.x").data(xt.slice(1)).join("line").attr("x1", d => x(d)).attr("x2", d => x(d)).attr("y1", 0).attr("y2", h);
+    grid.selectAll("line.y").data(yt.slice(1)).join("line").attr("x1", 0).attr("x2", w).attr("y1", d => y(d)).attr("y2", d => y(d));
+    g.append("line").attr("class", "base").attr("x1", 0).attr("x2", w).attr("y1", h).attr("y2", h);
+    g.append("line").attr("class", "axis-line").attr("x1", 0).attr("x2", 0).attr("y1", 0).attr("y2", h);
+    if (!opts.noX) g.append("g").selectAll("text").data(xt).join("text").attr("x", d => x(d)).attr("y", h + 18).attr("text-anchor", (d, i) => i === 0 ? "start" : "middle").text(kfmt);
+    if (!opts.noY) g.append("g").selectAll("text").data(yt).join("text").attr("x", -8).attr("y", d => y(d) + 4).attr("text-anchor", "end").text(kfmt);
+    const bx = Math.min(X_MAX, Y_MAX / JOBS_PER_ADULT);
+    g.append("line").attr("class", opts.amber ? "be-amber" : "be").attr("x1", x(0)).attr("y1", y(0)).attr("x2", x(bx)).attr("y2", y(bx * JOBS_PER_ADULT));
+    return bx;
+  }
+  function voronoiHover(g, pts, w, h, onMove, onLeave, onClick, radius = 26) {
+    const del = d3.Delaunay.from(pts, p => p.px, p => p.py);
+    g.append("rect").attr("class", "hit").attr("width", w).attr("height", h).attr("fill", "transparent")
+      .on("pointermove", function (ev) {
+        const [mx, my] = d3.pointer(ev, this);
+        const i = del.find(mx, my);
+        const p = pts[i];
+        if (p && Math.hypot(p.px - mx, p.py - my) <= radius) onMove(p, ev); else onLeave();
+      })
+      .on("pointerleave", onLeave)
+      .on("click", function (ev) {
+        const [mx, my] = d3.pointer(ev, this);
+        const p = pts[del.find(mx, my)];
+        if (p && Math.hypot(p.px - mx, p.py - my) <= radius) onClick(p);
+      });
+  }
+  function chartTip(container) {
+    let el = container.querySelector(".tip");
+    if (!el) { el = document.createElement("div"); el.className = "tip"; el.hidden = true; container.appendChild(el); }
+    return el;
+  }
+  function scatterTipHTML(s) {
+    return `<b>${esc(s.name)}</b><div class="t-row"><span class="sw" style="background:${pc(s.g)}"></span>${esc(s.party)}</div>
+      <div class="t-val">${sgbp(s.npa)} <span class="t-sub">net per adult</span></div>
+      <div class="t-sub">${gbp(s.tpw)} tax per worker · ${gbp(s.wpa)} welfare per adult</div>`;
+  }
+
+  // ---------- panel: mini scatter ----------
+  function miniScatter(el, s) {
+    el.innerHTML = "";
+    const W0 = el.clientWidth || 360, m = { t: 10, r: 14, b: 26, l: 40 };
+    const w = W0 - m.l - m.r, h = Math.round(Math.min(300, w * 0.7));
+    const x = d3.scaleLinear([0, X_MAX], [0, w]), y = d3.scaleLinear([0, Y_MAX], [h, 0]);
+    const root = d3.select(el).append("svg").attr("width", W0).attr("height", h + m.t + m.b);
+    const g = root.append("g").attr("transform", `translate(${m.l},${m.t})`);
+    const bx = scatterFrame(g, x, y, w, h);
+    g.append("text").attr("class", "lab-2").attr("x", x(bx) - 6).attr("y", 12).attr("text-anchor", "end").text("Break-even");
+    const others = seats.filter(o => o !== s);
+    g.append("g").selectAll("circle").data(others).join("circle")
+      .attr("cx", o => x(o.tpw)).attr("cy", o => y(o.wpa)).attr("r", 2.4).style("fill", "var(--dot)");
+    // England average
+    g.append("circle").attr("cx", x(E.tpw)).attr("cy", y(E.wpa)).attr("r", 5).attr("fill", "none").style("stroke", "var(--ink)").attr("stroke-width", 1.5);
+    g.append("text").attr("class", "lab-2").attr("x", x(E.tpw) + 8).attr("y", y(E.wpa) - 7).text("England");
+    const sx = x(s.tpw), sy = y(s.wpa);
+    g.append("circle").attr("cx", sx).attr("cy", sy).attr("r", 7).style("fill", pc(s.g)).style("stroke", "var(--ground)").attr("stroke-width", 2);
+    const right = sx < w * 0.62;
+    g.append("text").attr("class", "lab").attr("x", sx + (right ? 11 : -11)).attr("y", sy + 4).attr("text-anchor", right ? "start" : "end").text(s.name);
+    const tipEl = chartTip(el);
+    const pts = seats.map(o => ({ s: o, px: x(o.tpw), py: y(o.wpa) }));
+    voronoiHover(g, pts, w, h, (p, ev) => {
+      tipEl.innerHTML = scatterTipHTML(p.s);
+      const [cx, cy] = d3.pointer(ev, el);
+      placeTip(tipEl, el, cx, cy);
+    }, () => { tipEl.hidden = true; }, p => { tipEl.hidden = true; if (p.s !== s) selectSeat(p.s.code, { zoom: true }); }, 18);
+  }
+
+  // ---------- panel: benefits ----------
+  function benefitBars(el, s) {
+    const rows = BEN_SHORT.map((name, i) => ({ name, seat: s.ben[i] / s.adults, eng: E.ben[i] / E.adults }))
+      .sort((a, b) => b.eng - a.eng);
+    const max = d3.max(rows, r => Math.max(r.seat, r.eng)) * 1.04;
+    el.innerHTML = rows.map(r => `<div class="bar-row"><span>${esc(r.name)}</span>
+      <span class="val num">${gbp(r.seat)} <span class="muted">/ ${gbp(r.eng)}</span></span>
+      <span class="trk" style="background:var(--track)"><span class="fill" style="width:${(r.seat / max * 100).toFixed(2)}%"></span><span class="ref" style="left:${(r.eng / max * 100).toFixed(2)}%"></span></span></div>`).join("");
+  }
+
+  // ---------- panel: indicator strips ----------
+  const INDICATORS = [
+    { grp: "Money", items: [
+      { label: "Employee tax per worker", get: s => s.tpw, eng: E.tpw, fmt: gbp },
+      { label: "Welfare spending per adult", get: s => s.wpa, eng: E.wpa, fmt: gbp },
+      { label: "Median annual pay", get: s => s.medPay, eng: E.medPay, fmt: gbp, engLabel: "seat average" },
+    ] },
+    { grp: "Work", items: [
+      { label: "Employment rate", get: s => s.h && s.h.emp, eng: E.h.emp, fmt: v => pct(v, 1) },
+      { label: "Economically inactive", get: s => s.h && s.h.inact, eng: E.h.inact, fmt: v => pct(v, 1) },
+    ] },
+    { grp: "Health", items: [
+      { label: "Life expectancy", get: s => s.h && s.h.le, eng: E.h.le, fmt: v => v.toFixed(1) + " yrs" },
+      { label: "Obesity", get: s => s.h && s.h.obesity, eng: E.h.obesity, fmt: v => v.toFixed(1) + "%" },
+      { label: "Diabetes", get: s => s.h && s.h.diabetes, eng: E.h.diabetes, fmt: v => v.toFixed(1) + "%" },
+      { label: "Depression", get: s => s.h && s.h.depress, eng: E.h.depress, fmt: v => v.toFixed(1) + "%" },
+      { label: "Hypertension", get: s => s.h && s.h.hyper, eng: E.h.hyper, fmt: v => v.toFixed(1) + "%" },
+    ] },
+  ];
+  INDICATORS.forEach(G => G.items.forEach(it => {
+    it.vals = seats.map(it.get).filter(v => v != null);
+    it.ext = d3.extent(it.vals);
+  }));
+  function strips(el, s) {
+    el.innerHTML = INDICATORS.map((G, gi) => `<div class="strip-g"><span class="ctl-label">${G.grp}</span>${G.items.map((it, ii) => {
+      const v = it.get(s);
+      return `<div class="srow"><span>${it.label}</span><span class="val num">${v == null ? "n/a" : it.fmt(v)} <span class="muted">/ ${it.fmt(it.eng)}</span></span><svg data-i="${gi}-${ii}" aria-hidden="true"></svg></div>`;
+    }).join("")}</div>`).join("");
+    el.querySelectorAll("svg[data-i]").forEach(node => {
+      const [gi, ii] = node.dataset.i.split("-").map(Number);
+      const it = INDICATORS[gi].items[ii];
+      const w = node.clientWidth || 360, pad = 7;
+      const x = d3.scaleLinear(it.ext, [pad, w - pad]);
+      const g = d3.select(node);
+      g.append("rect").attr("x", pad).attr("y", 9).attr("width", w - 2 * pad).attr("height", 8).style("fill", "var(--track)");
+      g.append("path").attr("d", it.vals.map(v => `M${x(v).toFixed(1)} 9v8`).join("")).style("stroke", "var(--ink-3)").attr("stroke-opacity", 0.28).attr("stroke-width", 1);
+      g.append("rect").attr("x", x(it.eng) - 1.5).attr("y", 3).attr("width", 3).attr("height", 20).style("fill", "var(--ink)");
+      const v = it.get(s);
+      if (v != null) g.append("circle").attr("cx", x(v)).attr("cy", 13).attr("r", 6.5).style("fill", "var(--accent)").style("stroke", "var(--ground)").attr("stroke-width", 2);
+    });
+  }
+
+  // ---------- panel: pay ladder ----------
+  function payLadder(el, s) {
+    el.innerHTML = "";
+    const reg = W.regions.find(r => r.name === s.region);
+    const P = W.pcts;
+    const W0 = el.clientWidth || 360, m = { t: 12, r: 16, b: 28, l: 44 };
+    const w = W0 - m.l - m.r, h = Math.round(Math.min(220, w * 0.5));
+    const all = s.pay.concat(reg && reg.pay ? reg.pay : []).filter(v => v != null);
+    const ymax = Math.ceil(d3.max(all) / 10000) * 10000;
+    const x = d3.scaleLinear([10, 75], [0, w]), y = d3.scaleLinear([0, ymax], [h, 0]);
+    const root = d3.select(el).append("svg").attr("width", W0).attr("height", h + m.t + m.b);
+    const g = root.append("g").attr("transform", `translate(${m.l},${m.t})`);
+    const yt = d3.range(0, ymax + 1, ymax > 60000 ? 20000 : 10000);
+    g.append("g").attr("class", "grid").selectAll("line").data(yt.slice(1)).join("line").attr("x1", 0).attr("x2", w).attr("y1", d => y(d)).attr("y2", d => y(d));
+    g.append("line").attr("class", "base").attr("x1", 0).attr("x2", w).attr("y1", h).attr("y2", h);
+    g.append("g").selectAll("text").data(yt).join("text").attr("x", -8).attr("y", d => y(d) + 4).attr("text-anchor", "end").text(kfmt);
+    g.append("g").selectAll("text").data(P).join("text").attr("x", d => x(d)).attr("y", h + 18).attr("text-anchor", "middle").text(d => "P" + d);
+    const line = d3.line().defined(d => d[1] != null).x(d => x(d[0])).y(d => y(d[1]));
+    if (reg && reg.pay) g.append("path").attr("d", line(P.map((p, i) => [p, reg.pay[i]]))).attr("fill", "none").style("stroke", "var(--ink-3)").attr("stroke-width", 2).attr("stroke-linejoin", "round");
+    const sp = P.map((p, i) => [p, s.pay[i]]);
+    g.append("path").attr("d", line(sp)).attr("fill", "none").style("stroke", "var(--accent)").attr("stroke-width", 2).attr("stroke-linejoin", "round");
+    g.append("g").selectAll("circle").data(sp.filter(d => d[1] != null)).join("circle").attr("cx", d => x(d[0])).attr("cy", d => y(d[1])).attr("r", 4).style("fill", "var(--accent)").style("stroke", "var(--ground)").attr("stroke-width", 2);
+    const last = sp[sp.length - 1];
+    if (last[1] != null) g.append("text").attr("class", "lab").attr("x", x(last[0]) - 8).attr("y", y(last[1]) - 10).attr("text-anchor", "end").text(gbp(last[1]));
+  }
+
+  // ---------- national charts ----------
+  function drawNational() {
+    regionsChart();
+    bigScatter();
+    multiples();
+    partyTable();
+    dumbbell();
+    benefitsNational();
+    seatsTable();
+    methodology();
+  }
+  function redrawNationalCharts() {
+    if (!natDrawn || state.tab !== "nat") return;
+    regionsChart(); bigScatter(); multiples(); dumbbell();
+  }
+
+  function regionsChart() {
+    const el = document.getElementById("c-regions");
+    el.innerHTML = "";
+    const data = W.regions.slice().sort((a, b) => b.ratio - a.ratio);
+    const W0 = el.clientWidth, narrow = W0 < 560;
+    const m = { t: 28, r: 56, b: 28, l: narrow ? 8 : 210 };
+    const band = narrow ? 50 : 38;
+    const w = W0 - m.l - m.r, h = data.length * band;
+    const x = d3.scaleLinear([0, Math.max(2.4, d3.max(data, d => d.ratio) * 1.08)], [0, w]);
+    const root = d3.select(el).append("svg").attr("width", W0).attr("height", h + m.t + m.b);
+    const g = root.append("g").attr("transform", `translate(${m.l},${m.t})`);
+    const xt = [0, 0.5, 1, 1.5, 2];
+    g.append("g").attr("class", "grid").selectAll("line").data(xt.slice(1)).join("line").attr("x1", d => x(d)).attr("x2", d => x(d)).attr("y1", 0).attr("y2", h);
+    g.append("line").attr("class", "axis-line").attr("x1", 0).attr("x2", w).attr("y1", h).attr("y2", h);
+    g.append("g").selectAll("text").data(xt).join("text").attr("x", d => x(d)).attr("y", h + 18).attr("text-anchor", (d, i) => i === 0 ? "start" : "middle").text(d => "£" + d.toFixed(2));
+    const barH = 22;
+    const row = g.append("g").selectAll("g").data(data).join("g").attr("transform", (d, i) => `translate(0,${i * band})`);
+    const by = narrow ? band - barH - 4 : (band - barH) / 2;
+    row.append("text").attr("class", "lab-2").attr("x", narrow ? 0 : -12).attr("y", narrow ? by - 6 : by + barH / 2 + 5).attr("text-anchor", narrow ? "start" : "end").style("font-size", "14px").style("fill", "var(--ink)").text(d => d.name);
+    row.append("rect").attr("x", 0).attr("y", by).attr("height", barH).attr("width", d => x(d.ratio)).style("fill", d => d.ratio > 1 ? "var(--amber)" : "var(--accent)");
+    row.append("text").attr("class", "lab").attr("x", d => x(d.ratio) + 8).attr("y", by + barH / 2 + 5).style("font-size", "14px").text(d => ratio(d.ratio));
+    // reference lines
+    g.append("line").attr("class", "be").attr("x1", x(1)).attr("x2", x(1)).attr("y1", -6).attr("y2", h);
+    g.append("text").attr("class", "lab").attr("x", x(1) - 6).attr("y", -12).attr("text-anchor", "end").text("Break-even £1.00");
+    g.append("line").style("stroke", "var(--ink-3)").attr("stroke-width", 2).attr("x1", x(E.ratio)).attr("x2", x(E.ratio)).attr("y1", -6).attr("y2", h);
+    g.append("text").attr("class", "lab-2").attr("x", x(E.ratio) + 6).attr("y", -12).text("England " + ratio(E.ratio));
+    // hover
+    const tipEl = chartTip(el);
+    row.append("rect").attr("class", "hit").attr("x", narrow ? 0 : -m.l).attr("y", 0).attr("width", w + m.l).attr("height", band).attr("fill", "transparent")
+      .on("pointermove", function (ev, d) {
+        tipEl.innerHTML = `<b>${esc(d.name)}</b><div class="t-val">${ratio(d.ratio)} <span class="t-sub">welfare per £1 of tax</span></div>
+          <div class="t-sub">Tax ${bn(d.tax)} · welfare ${bn(d.wel)} · net ${bn(d.net)}</div><div class="t-sub">${d.surplus} of ${d.seats} seats in surplus</div>`;
+        const [cx, cy] = d3.pointer(ev, el); placeTip(tipEl, el, cx, cy);
+      }).on("pointerleave", () => { tipEl.hidden = true; });
+    const close = W.regions.filter(r => Math.abs(r.net / r.tax) < 0.05);
+    document.getElementById("regions-foot").textContent = close.length
+      ? `${close.map(r => r.name).join(" and ")}: net balance within 5% of the tax take (${close.map(r => bn(r.net)).join(", ")}), too close to call on this model.`
+      : "";
+  }
+
+  // scatter legend (shared by the big scatter)
+  let scatterIso = null;
+  function scatterLegend() {
+    const el = document.getElementById("scatter-legend");
+    el.className = "legend" + (scatterIso ? " isolating" : "");
+    el.innerHTML = GROUPS.filter(x => x.n).map(x => {
+      const sym = d3.symbol(x.shape, 80)();
+      return `<button type="button" data-g="${x.g}" aria-pressed="${scatterIso === x.g}"><svg width="14" height="14" viewBox="-7 -7 14 14" aria-hidden="true"><path d="${sym}" style="fill:${pc(x.g)}"/></svg>${esc(x.g === "lab" ? x.long : x.name)} <span class="n">${x.n}</span></button>`;
+    }).join("");
+    el.querySelectorAll("button").forEach(b => b.addEventListener("click", () => {
+      scatterIso = scatterIso === b.dataset.g ? null : b.dataset.g;
+      scatterLegend(); bigScatter();
+    }));
+  }
+  const SCATTER_LABELS = ["Clacton", "Birmingham Perry Barr", "Bristol Central", "Richmond Park", "Chelsea and Fulham"];
+  function bigScatter() {
+    if (!document.getElementById("scatter-legend").childElementCount) scatterLegend();
+    const el = document.getElementById("c-scatter");
+    el.innerHTML = "";
+    const W0 = el.clientWidth, m = { t: 16, r: 20, b: 46, l: 58 };
+    const w = W0 - m.l - m.r, h = Math.round(Math.max(300, Math.min(560, w * 0.56)));
+    const x = d3.scaleLinear([0, X_MAX], [0, w]), y = d3.scaleLinear([0, Y_MAX], [h, 0]);
+    const root = d3.select(el).append("svg").attr("width", W0).attr("height", h + m.t + m.b);
+    const g = root.append("g").attr("transform", `translate(${m.l},${m.t})`);
+    const xt = w > 520 ? [0, 5000, 10000, 15000, 20000, 25000, 30000, 35000] : [0, 10000, 20000, 30000];
+    const yt = [0, 2000, 4000, 6000, 8000];
+    const bx = scatterFrame(g, x, y, w, h, { xticks: xt, yticks: yt, amber: true });
+    g.append("text").attr("x", x(bx) + 8).attr("y", y(bx * JOBS_PER_ADULT) + 14).style("fill", "var(--amber-ink)").style("font-size", "13px").style("font-weight", 600).text("Break-even");
+    g.append("text").attr("x", w / 2).attr("y", h + 40).attr("text-anchor", "middle").style("font-size", "13px").style("fill", "var(--ink-2)").text("Employee tax per worker");
+    g.append("text").attr("transform", `translate(${-46},${h / 2}) rotate(-90)`).attr("text-anchor", "middle").style("font-size", "13px").style("fill", "var(--ink-2)").text("Welfare spending per adult");
+    const order = GROUPS.map(x => x.g).reverse();
+    const data = seats.slice().sort((a, b) => order.indexOf(a.g) - order.indexOf(b.g));
+    const sym = d3.symbol().size(62);
+    g.append("g").selectAll("path").data(data).join("path")
+      .attr("transform", s => `translate(${x(s.tpw)},${y(s.wpa)})`)
+      .attr("d", s => sym.type(GROUP[s.g].shape)())
+      .style("fill", s => scatterIso && s.g !== scatterIso ? "var(--dot)" : pc(s.g))
+      .style("stroke", "var(--ground)").attr("stroke-width", 1.2)
+      .attr("opacity", s => scatterIso && s.g !== scatterIso ? 0.55 : 1);
+    if (scatterIso) {
+      g.append("g").selectAll("path").data(data.filter(s => s.g === scatterIso)).join("path")
+        .attr("transform", s => `translate(${x(s.tpw)},${y(s.wpa)})`).attr("d", s => sym.type(GROUP[s.g].shape)())
+        .style("fill", s => pc(s.g)).style("stroke", "var(--ground)").attr("stroke-width", 1.2);
+    }
+    // labels
+    const lab = g.append("g");
+    SCATTER_LABELS.map(n => seats.find(s => s.name === n)).filter(Boolean).forEach(s => {
+      const px = x(s.tpw), py = y(s.wpa), right = px < w * 0.7;
+      const dy = s.name === "Chelsea and Fulham" ? 18 : s.name === "Richmond Park" ? -12 : 4;
+      lab.append("text").attr("class", "lab").attr("x", px + (right ? 10 : -10)).attr("y", py + dy).attr("text-anchor", right ? "start" : "end").text(s.name);
+    });
+    const tipEl = chartTip(el);
+    const pts = data.map(s => ({ s, px: x(s.tpw), py: y(s.wpa) }));
+    voronoiHover(g, pts, w, h, (p, ev) => {
+      tipEl.innerHTML = scatterTipHTML(p.s);
+      const [cx, cy] = d3.pointer(ev, el); placeTip(tipEl, el, cx, cy);
+    }, () => { tipEl.hidden = true; }, p => openSeat(p.s.code));
+  }
+
+  function multiples() {
+    const el = document.getElementById("c-mult");
+    el.innerHTML = "";
+    const groups = ["lab", "con", "ld", "ref", "ind", "grn"].map(g => GROUP[g]).filter(x => x.n);
+    groups.forEach(G => {
+      const div = document.createElement("div");
+      div.className = "mult chart";
+      div.innerHTML = `<h3><span class="sw" style="background:${pc(G.g)}"></span>${esc(G.g === "lab" ? G.long : G.name)}</h3><p>${G.n} seats · ${G.surplus} in surplus</p>`;
+      el.appendChild(div);
+      const W0 = div.clientWidth, m = { t: 8, r: 10, b: 24, l: 40 };
+      const w = W0 - m.l - m.r, h = Math.round(w * 0.72);
+      const x = d3.scaleLinear([0, X_MAX], [0, w]), y = d3.scaleLinear([0, Y_MAX], [h, 0]);
+      const root = d3.select(div).append("svg").attr("width", W0).attr("height", h + m.t + m.b);
+      const g = root.append("g").attr("transform", `translate(${m.l},${m.t})`);
+      scatterFrame(g, x, y, w, h);
+      g.append("g").selectAll("circle").data(seats.filter(s => s.g !== G.g)).join("circle")
+        .attr("cx", s => x(s.tpw)).attr("cy", s => y(s.wpa)).attr("r", 2.2).style("fill", "var(--dot)");
+      const mine = seats.filter(s => s.g === G.g);
+      g.append("g").selectAll("circle").data(mine).join("circle")
+        .attr("cx", s => x(s.tpw)).attr("cy", s => y(s.wpa)).attr("r", 4.2).style("fill", pc(G.g)).style("stroke", "var(--ground)").attr("stroke-width", 1.3);
+      const tipEl = chartTip(div);
+      voronoiHover(g, mine.map(s => ({ s, px: x(s.tpw), py: y(s.wpa) })), w, h, (p, ev) => {
+        tipEl.innerHTML = scatterTipHTML(p.s);
+        const [cx, cy] = d3.pointer(ev, div); placeTip(tipEl, div, cx, cy);
+      }, () => { tipEl.hidden = true; }, p => openSeat(p.s.code), 16);
+    });
+    const ld = W.parties.find(p => p.name === "Liberal Democrat");
+    if (ld && ld.net <= 0) document.getElementById("party-h").textContent = "Seats by party of sitting MP.";
+  }
+
+  function partyTable() {
+    const t = document.getElementById("t-party");
+    const cols = ["Party", "Seats", "In surplus", "Employee tax", "Welfare", "Net", "Welfare per £1 of tax", "Net per adult"];
+    const row = p => `<tr><td class="l nm"><span class="pc"><span class="sw" style="background:${pc(PARTY_G[p.name] || "ind")}"></span>${esc(p.name)}</span></td>
+      <td>${p.seats}</td><td>${p.surplus} <span class="muted">(${pct(p.surplus / p.seats)})</span></td><td>${bn(p.tax)}</td><td>${bn(p.wel)}</td>
+      <td class="${p.net < 0 ? "neg" : ""}">${bn(p.net)}</td><td>${ratio(p.ratio)}</td><td class="${p.npa < 0 ? "neg" : ""}">${sgbp(p.npa)}</td></tr>`;
+    t.innerHTML = `<caption class="sr-only">Fiscal summary by party of sitting MP</caption><thead><tr>${cols.map((c, i) => `<th class="${i === 0 ? "l" : ""}"><span>${c}</span></th>`).join("")}</tr></thead>
+      <tbody>${W.parties.map(row).join("")}</tbody>
+      <tfoot><tr><td class="l">England</td><td>${E.seats}</td><td>${E.surplus} <span class="muted">(${pct(E.surplus / E.seats)})</span></td><td>${bn(E.tax)}</td><td>${bn(E.wel)}</td><td>${bn(E.net)}</td><td>${ratio(E.ratio)}</td><td>${sgbp(E.npa)}</td></tr></tfoot>`;
+  }
+
+  function dumbbell() {
+    const el = document.getElementById("c-dumb");
+    el.innerHTML = "";
+    const D = W.dumbbell;
+    document.getElementById("dumb-key").innerHTML = `<span><span class="dot" style="background:var(--hi)"></span>10 highest-welfare seats</span><span><span class="dot" style="background:var(--lo)"></span>10 lowest-welfare seats</span><span><span class="tick"></span>England average</span>`;
+    document.getElementById("dumb-foot").textContent = `Highest welfare per adult: ${D.hiSeats.join(", ")}. Lowest: ${D.loSeats.join(", ")}. Demographic figures from the Census 2021, ONS APS and NHS QOF 2024/25; England averages as given in the workbook.`;
+    const fmt = (v, f) => f === "age" ? v.toFixed(1) : f === "yrs" ? v.toFixed(1) : f === "gbp" ? "£" + Math.round(v) : f === "pct1" ? v.toFixed(1) + "%" : Math.round(v * 100) + "%";
+    const rows = [];
+    D.groups.forEach(G => { rows.push({ head: G.name }); G.rows.forEach(r => rows.push({ ...r, rh: r.hi / r.eng - 1, rl: r.lo / r.eng - 1 })); });
+    const maxRel = d3.max(rows.filter(r => !r.head), r => Math.max(Math.abs(r.rh), Math.abs(r.rl)));
+    const lim = Math.ceil((maxRel + 0.12) * 4) / 4;
+    const W0 = el.clientWidth, stacked = W0 < 620;
+    const m = { t: 34, r: 16, b: 10, l: stacked ? 8 : Math.min(300, W0 * 0.32) };
+    const w = W0 - m.l - m.r;
+    const RH = stacked ? 54 : 38, HH = 50;
+    let yy = 0;
+    rows.forEach(r => { r.y = yy; yy += r.head ? HH : RH; });
+    const h = yy;
+    const x = d3.scaleLinear([-lim, lim], [0, w]);
+    const root = d3.select(el).append("svg").attr("width", W0).attr("height", h + m.t + m.b);
+    const g = root.append("g").attr("transform", `translate(${m.l},${m.t})`);
+    const ticks = d3.range(-lim, lim + 0.001, lim >= 0.75 ? 0.25 : 0.25).filter(t => Math.abs(t) <= lim + 1e-9);
+    g.append("g").selectAll("text").data(ticks).join("text").attr("x", d => x(d)).attr("y", -16).attr("text-anchor", "middle")
+      .text(d => Math.abs(d) < 1e-9 ? "England" : (d > 0 ? "+" : MINUS) + Math.round(Math.abs(d) * 100) + "%");
+    g.append("g").attr("class", "grid").selectAll("line").data(ticks.filter(t => Math.abs(t) > 1e-9)).join("line").attr("x1", d => x(d)).attr("x2", d => x(d)).attr("y1", -6).attr("y2", h);
+    g.append("line").style("stroke", "var(--ink)").attr("stroke-width", 2).attr("x1", x(0)).attr("x2", x(0)).attr("y1", -6).attr("y2", h);
+    const rg = g.append("g").selectAll("g").data(rows).join("g").attr("transform", r => `translate(0,${r.y})`);
+    rg.filter(r => r.head).each(function (r) {
+      const s = d3.select(this);
+      s.append("text").attr("x", -m.l + (stacked ? 8 : 0)).attr("y", HH - 16).style("font-size", "12.5px").style("font-weight", 600).style("letter-spacing", "0.42em").style("fill", "var(--accent)").text(r.head.toUpperCase());
+      s.append("line").style("stroke", "var(--rule-2)").attr("x1", -m.l + (stacked ? 8 : 0)).attr("x2", w).attr("y1", HH - 6).attr("y2", HH - 6);
+    });
+    rg.filter(r => !r.head).each(function (r) {
+      const s = d3.select(this);
+      const cy = stacked ? RH - 14 : RH / 2;
+      s.append("text").attr("x", stacked ? 0 : -14).attr("y", stacked ? 16 : cy + 5).attr("text-anchor", stacked ? "start" : "end").style("font-size", "14.5px").style("fill", "var(--ink)").text(r.label);
+      s.append("text").attr("x", stacked ? w : -14).attr("y", stacked ? 16 : cy + 20).attr("text-anchor", "end").style("font-size", "11.5px").text(stacked ? "England " + fmt(r.eng, r.fmt) : "England " + fmt(r.eng, r.fmt));
+      s.append("line").style("stroke", "var(--rule)").attr("x1", 0).attr("x2", w).attr("y1", cy).attr("y2", cy);
+      const a = Math.min(r.rh, r.rl), b = Math.max(r.rh, r.rl);
+      s.append("line").style("stroke", "var(--rule-2)").attr("stroke-width", 4).attr("x1", x(a)).attr("x2", x(b)).attr("y1", cy).attr("y2", cy);
+      [["hi", r.rh, r.hi], ["lo", r.rl, r.lo]].forEach(([k, rel, v]) => {
+        const leftSide = rel === a && a !== b;
+        s.append("circle").attr("cx", x(rel)).attr("cy", cy).attr("r", 6.5).style("fill", `var(--${k})`).style("stroke", "var(--ground)").attr("stroke-width", 2);
+        s.append("text").attr("class", "lab").attr("x", x(rel) + (leftSide ? -11 : 11)).attr("y", cy + 4.5).attr("text-anchor", leftSide ? "end" : "start").text(fmt(v, r.fmt));
+      });
+    });
+  }
+
+  function benefitsNational() {
+    const el = document.getElementById("c-ben");
+    const rows = BEN_SHORT.map((name, i) => ({ name: W.benefits[i], v: E.ben[i] })).sort((a, b) => b.v - a.v);
+    const max = rows[0].v * 1.02;
+    el.innerHTML = rows.map(r => `<div class="bar-row"><span>${esc(r.name)}</span>
+      <span class="val num">${bn(r.v)} <span class="muted">${pct(r.v / E.wel, 1)}</span></span>
+      <span class="trk" style="background:var(--track)"><span class="fill" style="width:${(r.v / max * 100).toFixed(2)}%"></span></span></div>`).join("");
+    const top2 = rows[0].v + rows[1].v;
+    document.getElementById("ben-h").textContent = `${rows[0].name} and ${rows[1].name} make up ${pct(top2 / E.wel)} of the bill.`;
+  }
+
+  // ---------- all-seats table ----------
+  const TCOLS = [
+    { k: "rank", label: "Rank", get: s => s.rank, fmt: s => s.rank },
+    { k: "name", label: "Constituency", get: s => s.name, fmt: s => esc(s.name), l: true, cls: "nm" },
+    { k: "region", label: "Region", get: s => s.region, fmt: s => esc(s.region), l: true },
+    { k: "party", label: "Party", get: s => s.party, fmt: s => `<span class="pc"><span class="sw" style="background:${pc(s.g)}"></span>${esc(s.party)}</span>`, l: true },
+    { k: "mp", label: "MP", get: s => s.mp || "", fmt: s => s.mp ? esc(s.mp) : '<span class="muted">Vacant</span>', l: true },
+    { k: "tpw", label: "Tax per worker", get: s => s.tpw, fmt: s => gbp(s.tpw) },
+    { k: "wpa", label: "Welfare per adult", get: s => s.wpa, fmt: s => gbp(s.wpa) },
+    { k: "ratio", label: "Welfare per £1 tax", get: s => s.ratio, fmt: s => ratio(s.ratio) },
+    { k: "npa", label: "Net per adult", get: s => s.npa, fmt: s => `<span class="${s.npa < 0 ? "neg" : ""}">${sgbp(s.npa)}</span>` },
+  ];
+  const tsort = { k: "rank", dir: 1 };
+  function seatsTable() {
+    const t = document.getElementById("t-seats");
+    const tq = document.getElementById("tq");
+    const draw = () => {
+      const term = tq.value.trim().toLowerCase();
+      const col = TCOLS.find(c => c.k === tsort.k);
+      const list = seats.filter(s => !term || [s.name, s.mp || "", s.party, s.region].some(v => v.toLowerCase().includes(term)))
+        .sort((a, b) => { const A = col.get(a), B = col.get(b); return (typeof A === "string" ? A.localeCompare(B) : A - B) * tsort.dir; });
+      t.innerHTML = `<caption class="sr-only">All 543 English constituencies</caption><thead><tr>${TCOLS.map(c => `<th class="${c.l ? "l" : ""}" aria-sort="${c.k === tsort.k ? (tsort.dir > 0 ? "ascending" : "descending") : "none"}"><button type="button" data-k="${c.k}">${c.label}</button></th>`).join("")}</tr></thead>
+        <tbody>${list.map(s => `<tr class="click" data-code="${s.code}">${TCOLS.map(c => `<td class="${c.l ? "l" : ""} ${c.cls || ""}">${c.fmt(s)}</td>`).join("")}</tr>`).join("")}</tbody>`;
+      document.getElementById("t-count").textContent = term ? `${list.length} of ${seats.length} seats match.` : `${seats.length} seats.`;
+      t.querySelectorAll("th button").forEach(b => b.addEventListener("click", () => {
+        if (tsort.k === b.dataset.k) tsort.dir *= -1; else { tsort.k = b.dataset.k; tsort.dir = ["name", "region", "party", "mp", "rank"].includes(b.dataset.k) ? 1 : -1; }
+        draw();
+      }));
+    };
+    t.addEventListener("click", e => { const tr = e.target.closest("tr[data-code]"); if (tr) openSeat(tr.dataset.code); });
+    tq.addEventListener("input", draw);
+    draw();
+  }
+
+  function methodology() {
+    const el = document.getElementById("method");
+    let html = "", open = false;
+    W.method.forEach(([a, b]) => {
+      if (a && !b) {
+        if (open) html += "</dl></div>";
+        html += `<div><h3>${esc(a.replace(/^\d+\.\s*/, ""))}</h3><dl>`; open = true;
+      } else if (open) {
+        html += `<div><dt>${esc(a || "")}</dt><dd>${esc(b)}</dd></div>`;
+      }
+    });
+    if (open) html += "</dl></div>";
+    el.innerHTML = html;
+  }
+
+  function openSeat(code) {
+    showTab("map");
+    selectSeat(code, { zoom: true });
+    document.getElementById("view-map").scrollIntoView({ behavior: REDUCED ? "auto" : "smooth", block: "start" });
+  }
+
+  // ---------- sources ----------
+  document.getElementById("sources").textContent =
+    `Data: ASI, A Tale of Two Cities (Welfare Analysis) 2026, built from DWP Stat-Xplore, ONS ASHE 2025, ONS mid-2024 population estimates, Census 2021, ONS APS and NHS QOF 2024/25. Party of sitting MP as at ${W.partyAsOf}; MP names from the UK Parliament Members API, ${monthYear(W.mpAsOf)}. Boundaries: ONS Westminster Parliamentary Constituencies (July 2024), Open Government Licence v3.0; contains OS data © Crown copyright and database right 2024.`;
+
+  // ---------- resize & theme ----------
+  let rT;
+  const ro = new ResizeObserver(() => {
+    clearTimeout(rT);
+    rT = setTimeout(() => {
+      if (state.tab === "nat") redrawNationalCharts();
+      else if (state.sel) drawPanelCharts(byCode.get(state.sel));
+    }, 150);
+  });
+  ro.observe(document.querySelector("main"));
+  function onTheme() { buildFiscal(); paint(); }
+  window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", onTheme);
+  new MutationObserver(onTheme).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+
+  // ---------- boot ----------
+  buildFiscal();
+  paint();
+  drawLegend();
+  const h = location.hash;
+  const m = h.match(/^#seat=(E\d+)/);
+  if (h === "#national") showTab("nat");
+  else if (m && byCode.has(m[1])) { selectSeat(m[1], { zoom: true }); }
+  else renderPanel();
+})();
+</script>
