@@ -1,3 +1,4 @@
+<meta charset="utf-8">
 <title>England Welfare Tracker</title>
 <meta name="description" content="Adam Smith Institute England Welfare Tracker 2026: income tax, National Insurance and DWP welfare spending for all 543 English constituencies, by party of sitting MP.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -411,7 +412,7 @@
             <div class="seg" role="group" aria-labelledby="mode-l">
               <button type="button" data-mode="party" aria-pressed="true">Party of sitting MP</button>
               <button type="button" data-mode="fiscal" aria-pressed="false">Fiscal balance</button>
-              <button type="button" data-mode="share" aria-pressed="false">Share of England&rsquo;s total</button>
+              <button type="button" data-mode="share" aria-pressed="false">Tax and welfare</button>
             </div>
           </div>
           <div class="ctl" id="metric-ctl" hidden>
@@ -426,6 +427,13 @@
             <div class="seg" role="group" aria-labelledby="share-l">
               <button type="button" data-share="tax" aria-pressed="true">Income tax and NI</button>
               <button type="button" data-share="wel" aria-pressed="false">Welfare spending</button>
+            </div>
+          </div>
+          <div class="ctl" id="basis-ctl" hidden>
+            <span class="ctl-label" id="basis-l">Show as</span>
+            <div class="seg" role="group" aria-labelledby="basis-l">
+              <button type="button" data-basis="share" aria-pressed="true">Share of England&rsquo;s total</button>
+              <button type="button" data-basis="adult" aria-pressed="false">Per adult</button>
             </div>
           </div>
         </div>
@@ -620,21 +628,27 @@
   const NPA_MAX = 5000, RATIO_MAX = 3;
   const clampT = t => Math.max(-1, Math.min(1, t));
   const fiscalT = (o, metric) => clampT(metric === "ratio" ? -Math.log(o.ratio) / Math.log(RATIO_MAX) : o.npa / NPA_MAX);
+  // tax and welfare maps: each seat as a share of England's total, or divided by its adult population
   const SHARE = {
-    tax: { of: o => o.tax / E.tax, noun: "income tax and NI" },
-    wel: { of: o => o.wel / E.wel, noun: "welfare spending" },
+    tax: { of: o => o.tax / E.tax, per: o => o.tax / o.adults, noun: "income tax and NI" },
+    wel: { of: o => o.wel / E.wel, per: o => o.wel / o.adults, noun: "welfare spending" },
   };
   for (const k of Object.keys(SHARE)) {
-    const vals = seats.map(SHARE[k].of);
-    SHARE[k].log = d3.scaleLog(d3.extent(vals), [0, 1]).clamp(true);
+    SHARE[k].scale = {
+      share: d3.scaleLog(d3.extent(seats, SHARE[k].of), [0, 1]).clamp(true),
+      adult: d3.scaleLog(d3.extent(seats, SHARE[k].per), [0, 1]).clamp(true),
+    };
   }
-  const shareT = (o, k) => SHARE[k].log(SHARE[k].of(o));
+  const amount = o => state.basis === "adult" ? SHARE[state.share].per(o) : SHARE[state.share].of(o);
+  const amountT = o => SHARE[state.share].scale[state.basis](amount(o));
+  const amountFmt = v => state.basis === "adult" ? gbp(v) : share(v);
+  const amountNoun = () => state.basis === "adult" ? `${SHARE[state.share].noun} per adult` : `of England’s ${SHARE[state.share].noun}`;
   const gradCSS = (prefix, n) => "linear-gradient(90deg," + d3.range(n).map(i => `var(--${prefix}-${i}) ${(i / (n - 1) * 100).toFixed(1)}%`).join(",") + ")";
   const fiscalCSS = () => gradCSS("fs", 7), shareCSS = () => gradCSS("sq", 5);
 
   // ---------- state ----------
   // scope: a selected seat beats an isolated party, which beats a region, which beats England
-  const state = { mode: "party", metric: "npa", share: "tax", sel: null, iso: null, region: null, tab: "map" };
+  const state = { mode: "party", metric: "npa", share: "tax", basis: "share", sel: null, iso: null, region: null, tab: "map" };
 
   // ---------- masthead ----------
   const surplusSeats = seats.filter(s => s.net > 0).length;
@@ -723,7 +737,7 @@
 
   function fillFor(s) {
     if (state.mode === "party") return state.iso && s.g !== state.iso ? "var(--fade)" : pc(s.g);
-    if (state.mode === "share") return shareScale(shareT(s, state.share));
+    if (state.mode === "share") return shareScale(amountT(s));
     return fiscalScale(fiscalT(s, state.metric));
   }
   function paint() {
@@ -745,7 +759,7 @@
   }
   function seatTipHTML(s) {
     let primary;
-    if (state.mode === "share") primary = `<div class="t-val">${share(SHARE[state.share].of(s))} <span class="t-sub">of England&rsquo;s ${SHARE[state.share].noun}</span></div>`;
+    if (state.mode === "share") primary = `<div class="t-val">${amountFmt(amount(s))} <span class="t-sub">${amountNoun()}</span></div>`;
     else if (state.mode === "fiscal" && state.metric === "ratio") primary = `<div class="t-val">${ratio(s.ratio)} <span class="t-sub">welfare per £1 of tax</span></div>`;
     else primary = `<div class="t-val">${sgbp(s.npa)} <span class="t-sub">net per adult</span></div>`;
     return `<b>${esc(s.name)}</b>
@@ -781,14 +795,23 @@
     el.className = "ramp";
     let ticks, ends, marker = "";
     if (state.mode === "share") {
-      const k = state.share, sc = SHARE[k].log, [lo, hi] = sc.domain();
-      const cands = [0.0005, 0.001, 0.0015, 0.002, 0.003, 0.004, 0.005, 0.0075, 0.01].filter(v => v >= lo && v <= hi);
+      const k = state.share, perAdult = state.basis === "adult";
+      const sc = SHARE[k].scale[state.basis], [lo, hi] = sc.domain();
+      const cands = perAdult
+        ? [1000, 2000, 3000, 4000, 5000, 6000, 8000, 10000, 15000, 20000, 30000]
+        : [0.0005, 0.001, 0.0015, 0.002, 0.003, 0.004, 0.005, 0.0075, 0.01];
       ticks = [];
-      cands.forEach(v => { const t = sc(v); if (!ticks.length || t - ticks[ticks.length - 1][0] >= 0.16) ticks.push([t, share(v)]); });
-      const avg = 1 / seats.length;
-      marker = `<i style="left:${(sc(avg) * 100).toFixed(1)}%" title="Average seat"></i>`;
-      ends = ["Smaller share", "Larger share"];
-      cap.textContent = `Each seat’s share of England’s ${SHARE[k].noun}, on a log scale. The black mark is an average seat’s share (${share(avg)}). Click a seat to zoom in.`;
+      cands.filter(v => v >= lo && v <= hi).forEach(v => {
+        const t = sc(v);
+        if (!ticks.length || t - ticks[ticks.length - 1][0] >= 0.16) ticks.push([t, perAdult ? kfmt(v) : share(v)]);
+      });
+      const ref = perAdult ? SHARE[k].per(E) : 1 / seats.length;
+      marker = `<i style="left:${(sc(ref) * 100).toFixed(1)}%" title="${perAdult ? "England average" : "Average seat"}"></i>`;
+      ends = perAdult ? ["Less per adult", "More per adult"] : ["Smaller share", "Larger share"];
+      const noun = SHARE[k].noun;
+      cap.textContent = perAdult
+        ? `${noun[0].toUpperCase() + noun.slice(1)} divided by each seat’s adult population, on a log scale. The black mark is England’s average (${gbp(ref)}). Click a seat to zoom in.`
+        : `Each seat’s share of England’s ${noun}, on a log scale. The black mark is an average seat’s share (${share(ref)}). Click a seat to zoom in.`;
     } else if (state.metric === "npa") {
       ticks = [[0, MINUS + "£5k"], [0.25, MINUS + "£2.5k"], [0.5, "£0"], [0.75, "+£2.5k"], [1, "+£5k"]];
       ends = ["Deficit", "Surplus"];
@@ -814,6 +837,7 @@
     setSeg("mode", state.mode);
     document.getElementById("metric-ctl").hidden = state.mode !== "fiscal";
     document.getElementById("share-ctl").hidden = state.mode !== "share";
+    document.getElementById("basis-ctl").hidden = state.mode !== "share";
     if (state.mode !== "party" && state.iso) { state.iso = null; if (!state.sel) zoomScope(); }
     paint(); drawLegend(); renderPanel();
   }));
@@ -823,6 +847,10 @@
   }));
   document.querySelectorAll("[data-share]").forEach(b => b.addEventListener("click", () => {
     state.share = b.dataset.share; setSeg("share", state.share);
+    paint(); drawLegend(); renderPanel();
+  }));
+  document.querySelectorAll("[data-basis]").forEach(b => b.addEventListener("click", () => {
+    state.basis = b.dataset.basis; setSeg("basis", state.basis);
     paint(); drawLegend(); renderPanel();
   }));
 
@@ -887,9 +915,9 @@
   // headline figure and gauge follow whatever the map is showing
   function figure(o, isSeat) {
     if (state.mode === "share") {
-      const k = state.share;
-      return { big: share(SHARE[k].of(o)), small: `of England’s ${SHARE[k].noun}`,
-        gauge: isSeat ? { css: shareCSS(), t: shareT(o, k), labels: ["Smaller share", "Larger share"] } : null };
+      const labels = state.basis === "adult" ? ["Less per adult", "More per adult"] : ["Smaller share", "Larger share"];
+      return { big: amountFmt(amount(o)), small: amountNoun(),
+        gauge: isSeat ? { css: shareCSS(), t: amountT(o), labels } : null };
     }
     const t = (fiscalT(o, state.metric) + 1) / 2;
     const gauge = { css: fiscalCSS(), t, labels: ["Deficit", "Break-even", "Surplus"] };
@@ -1039,7 +1067,8 @@
     const byNpa = seats.slice().sort((a, b) => b.npa - a.npa);
     const reg = W.regions.slice().sort((a, b) => b.npa - a.npa);
     const fig = figure(E, false);
-    const big = state.mode === "share" ? `${sgbp(E.npa)}<small>net per adult, England</small>` : `${fig.big}<small>${fig.small}, England</small>`;
+    // England's own share of England is always 100%, so the share view falls back to net per adult
+    const big = state.mode === "share" && state.basis === "share" ? `${sgbp(E.npa)}<small>net per adult, England</small>` : `${fig.big}<small>${fig.small}, England</small>`;
     panel.innerHTML = `
       <div class="p-head">
         <p class="p-kind">England</p>
