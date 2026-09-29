@@ -31,6 +31,9 @@
     --tip-ink-2: #c9cde0;
     --lo: #224191;
     --hi: #c67a2e;
+    --lav: #8b8dbe;
+    --st-neutral: #cfd3ea;
+    --field-err: #ffc4bb;
 
     /* party of sitting MP: conventional party hues, validated for normal vision all-pairs */
     --p-lab: #d7263d;
@@ -81,6 +84,8 @@
       --tip-ink-2: #46536f;
       --lo: #7f9cf0;
       --hi: #e0954a;
+      --lav: #a3a6dc;
+      --st-neutral: #2a3452;
       --p-lab: #e23a4f; --p-con: #3d74e0; --p-ld: #f29a1b; --p-ref: #16b3c9; --p-grn: #3aa85a;
       --p-yp: #b35ccc; --p-rb: #b7b0e8; --p-ind: #8d94a3; --p-spk: #d0d4dc;
       --fs-0: #ff6b57; --fs-1: #d4513f; --fs-2: #8a4440; --fs-3: #3a4254;
@@ -106,6 +111,8 @@
     --tip-ink-2: #46536f;
     --lo: #7f9cf0;
     --hi: #e0954a;
+    --lav: #a3a6dc;
+    --st-neutral: #2a3452;
     --p-lab: #e23a4f; --p-con: #3d74e0; --p-ld: #f29a1b; --p-ref: #16b3c9; --p-grn: #3aa85a;
     --p-yp: #b35ccc; --p-rb: #b7b0e8; --p-ind: #8d94a3; --p-spk: #d0d4dc;
     --fs-0: #ff6b57; --fs-1: #d4513f; --fs-2: #8a4440; --fs-3: #3a4254;
@@ -146,7 +153,14 @@
   h1 { font-size: clamp(2rem, 4.4vw, 3.6rem); line-height: 1.2; letter-spacing: -0.005em; }
   h1 .hl { color: var(--field-hl); }
   .lead { font-weight: 300; font-size: clamp(1.1rem, 1.5vw, 1.3rem); line-height: 1.4; max-width: 62ch; }
-  .tabs { display: flex; gap: 4px 32px; margin-top: clamp(26px, 3.5vw, 44px); flex-wrap: wrap; }
+  .mast-nav { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 4px 32px; margin-top: clamp(26px, 3.5vw, 44px); }
+  .tabs { display: flex; gap: 4px 32px; flex-wrap: wrap; }
+  .tour-btn {
+    background: none; border: 0; padding: 10px 0 12px; cursor: pointer; color: var(--field-ink); font-size: 1.02rem;
+    display: inline-flex; align-items: center; gap: 12px; min-height: 44px; border-bottom: 4px solid transparent;
+  }
+  .tour-btn svg { width: 28px; height: 11px; flex: none; transition: transform 0.25s; }
+  .tour-btn:hover svg { transform: translateX(4px); }
   .tabs button {
     background: none; border: 0; padding: 10px 0 12px; cursor: pointer; color: var(--field-ink-2);
     font-size: 1.12rem; font-weight: 400; border-bottom: 4px solid transparent; min-height: 44px;
@@ -362,6 +376,198 @@
   .method dt { font-weight: 600; }
   .method dd { margin: 0; color: var(--ink-2); max-width: 90ch; font-size: 0.96rem; }
 
+  /* ---------- Watermark: the ASI mark tucked into a corner of every chart ---------- */
+  .wm { position: absolute; right: 0; bottom: 0; width: 22px; height: 22px; color: var(--ink); opacity: 0.22; pointer-events: none; }
+  .stamped { position: relative; padding-bottom: 28px; }
+  .map-box > .wm { right: 10px; bottom: 10px; width: 30px; height: 30px; }
+
+  /* ---------- Guided tour ---------- */
+  html.touring { overflow: hidden; }
+  .story { position: fixed; inset: 0; z-index: 100; display: grid; grid-template-columns: minmax(340px, 40%) minmax(0, 1fr); background: var(--ground); }
+  .st-text {
+    background: var(--field); color: var(--field-ink); display: flex; flex-direction: column; min-height: 0;
+    padding: calc(env(safe-area-inset-top, 0px) + 20px) clamp(20px, 3vw, 48px) calc(env(safe-area-inset-bottom, 0px) + 18px);
+  }
+  .st-text :focus-visible { outline-color: var(--field-ink); }
+  .st-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; }
+  .st-skip {
+    background: none; border: 0; padding: 6px 0; cursor: pointer; color: var(--field-ink-2); font-size: 0.95rem; min-height: 36px;
+    text-decoration: underline; text-decoration-color: var(--field-rule); text-underline-offset: 4px;
+  }
+  .st-skip:hover { color: var(--field-ink); text-decoration-color: var(--field-ink); }
+  .st-mark { width: 52px; height: auto; display: block; flex: none; }
+  .st-body { flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 18px; padding-block: 24px; }
+  .st-body > :first-child { margin-top: auto; }
+  .st-body > :last-child { margin-bottom: auto; }
+  .st-body.in > * { animation: st-in 0.5s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+  .st-body.in > :nth-child(2) { animation-delay: 0.07s; }
+  .st-body.in > :nth-child(3) { animation-delay: 0.14s; }
+  .st-body.in > :nth-child(n+4) { animation-delay: 0.2s; }
+  .st-pop { animation: st-in 0.5s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+  @keyframes st-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+  .st-h { font-size: clamp(1.75rem, 2.8vw, 2.75rem); line-height: 1.2; font-weight: 600; outline: none; }
+  .st-h .hl { color: var(--field-hl); }
+  .st-p { font-weight: 300; font-size: clamp(1.05rem, 1.35vw, 1.22rem); line-height: 1.45; max-width: 34em; }
+  .st-p strong { font-weight: 600; }
+  .st-fb { font-size: 1rem; color: var(--field-hl); }
+  .st-note { font-size: 0.85rem; color: var(--field-ink-2); }
+  .st-err { font-size: 0.95rem; color: var(--field-err); min-height: 1.3em; }
+  .st-nav { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding-top: 10px; }
+  .st-back { background: none; border: 0; padding: 10px 0; cursor: pointer; color: var(--field-ink-2); font-size: 1rem; min-height: 44px; }
+  .st-back:hover { color: var(--field-ink); }
+  .st-next {
+    margin-left: auto; display: inline-flex; align-items: center; gap: 14px; background: var(--field-ink); color: var(--field);
+    border: 0; cursor: pointer; font-weight: 600; font-size: 1.05rem; padding: 12px 20px 11px; min-height: 48px;
+  }
+  .st-next svg { width: 30px; height: 12px; flex: none; transition: transform 0.25s; }
+  .st-next:hover svg { transform: translateX(5px); }
+  .st-foot { padding-top: 16px; }
+  .st-rule { width: 120px; height: 4px; background: var(--field-ink); margin-bottom: 10px; }
+  .st-foot-row { display: flex; justify-content: space-between; align-items: baseline; font-size: 0.95rem; }
+  .st-page { color: var(--field-hl); font-weight: 600; font-variant-numeric: tabular-nums; }
+
+  /* guesses: a slider that turns into the answer */
+  .st-guess { display: grid; gap: 6px; max-width: 30em; }
+  .st-gv { font-weight: 600; font-size: 2.6rem; line-height: 1.1; }
+  .st-gv small { font-size: 0.38em; font-weight: 400; color: var(--field-ink-2); margin-left: 10px; }
+  .st-range { -webkit-appearance: none; appearance: none; width: 100%; height: 32px; margin: 0; background: transparent; cursor: pointer; }
+  .st-range::-webkit-slider-runnable-track { height: 4px; background: linear-gradient(90deg, var(--field-ink) var(--pct, 50%), var(--field-rule) var(--pct, 50%)); }
+  .st-range::-webkit-slider-thumb { -webkit-appearance: none; width: 24px; height: 24px; margin-top: -10px; background: var(--field-ink); border: 0; border-radius: 0; }
+  .st-range::-moz-range-track { height: 4px; background: var(--field-rule); }
+  .st-range::-moz-range-progress { height: 4px; background: var(--field-ink); }
+  .st-range::-moz-range-thumb { width: 24px; height: 24px; background: var(--field-ink); border: 0; border-radius: 0; }
+  .st-range:focus-visible { outline: 2px solid var(--field-ink); outline-offset: 6px; }
+  .st-gscale { display: flex; justify-content: space-between; font-size: 0.88rem; color: var(--field-ink-2); }
+  .st-rtrack { position: relative; height: 4px; background: var(--field-rule); margin-block: 34px; }
+  .st-rband { position: absolute; top: 0; height: 4px; background: var(--field-hl); transition: left 0.9s cubic-bezier(0.2, 0.7, 0.2, 1), width 0.9s cubic-bezier(0.2, 0.7, 0.2, 1); }
+  .st-rm { position: absolute; top: -10px; width: 4px; height: 24px; margin-left: -2px; transition: left 0.9s cubic-bezier(0.2, 0.7, 0.2, 1); }
+  .st-rm-g { background: var(--field-ink-2); }
+  .st-rm-a { background: var(--field-ink); width: 6px; margin-left: -3px; }
+  .st-rm em { position: absolute; left: 50%; transform: translateX(-50%); white-space: nowrap; font-style: normal; font-size: 0.92rem; }
+  .st-rm.l em { left: 0; transform: none; }
+  .st-rm.r em { left: auto; right: 0; transform: none; }
+  .st-rm-g em { top: 30px; color: var(--field-ink-2); }
+  .st-rm-a em { bottom: 30px; font-weight: 600; }
+
+  /* choices */
+  .st-choices { display: flex; flex-wrap: wrap; gap: 8px; }
+  .st-choice { background: none; border: 1.5px solid var(--field-ink-2); color: var(--field-ink); padding: 9px 14px 8px; cursor: pointer; font-size: 1rem; min-height: 44px; }
+  .st-choices.small .st-choice { padding: 6px 10px 5px; font-size: 0.92rem; min-height: 38px; }
+  .st-choice:hover:not(:disabled) { border-color: var(--field-ink); background: var(--field-rule); }
+  .st-choice[aria-pressed="true"] { border-color: var(--field-ink); border-width: 2px; font-weight: 600; }
+  .st-choice.is-answer { background: var(--field-ink); color: var(--field); border-color: var(--field-ink); font-weight: 600; }
+  .st-choice:disabled { cursor: default; }
+  .st-rank { display: grid; max-width: 30em; }
+  .st-ri { display: grid; grid-template-columns: auto 1fr auto; gap: 10px; align-items: center; padding: 6px 0 5px; border-bottom: 1px solid var(--field-rule); font-size: 0.98rem; }
+  .st-ri b { font-weight: 600; font-variant-numeric: tabular-nums; }
+  .st-ri em { font-style: normal; color: var(--field-hl); font-size: 0.88rem; margin-left: 6px; }
+  .st-ri.pick span:nth-child(2) { font-weight: 600; }
+
+  /* finding your seat */
+  .st-find { display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end; max-width: 30em; }
+  .st-find input {
+    flex: 1 1 220px; min-width: 0; font: inherit; font-size: 1.1rem; color: var(--field-ink); background: transparent;
+    border: 0; border-bottom: 2px solid var(--field-ink); border-radius: 0; padding: 8px 2px 7px;
+  }
+  .st-find input::placeholder { color: var(--field-ink-2); opacity: 1; }
+  .st-go { background: none; border: 1.5px solid var(--field-ink); color: var(--field-ink); padding: 9px 16px 8px; cursor: pointer; font-weight: 600; min-height: 44px; }
+  .st-go:hover:not(:disabled) { background: var(--field-ink); color: var(--field); }
+  .st-go:disabled { cursor: progress; }
+
+  /* the visual side */
+  .st-vis { position: relative; min-width: 0; min-height: 0; overflow: hidden; background: var(--ground); color: var(--ink); }
+  .st-expand {
+    position: absolute; z-index: 3; left: clamp(16px, 2.5vw, 32px); top: calc(env(safe-area-inset-top, 0px) + 18px);
+    display: inline-flex; align-items: center; gap: 10px; background: var(--ground); border: 1px solid var(--rule-2); color: var(--ink);
+    padding: 8px 12px 7px; cursor: pointer; font-size: 0.95rem; min-height: 40px;
+  }
+  .st-expand:hover { border-color: var(--ink); }
+  .st-expand svg { width: 24px; height: 10px; flex: none; }
+  #st-map { position: absolute; left: 16px; top: 66px; width: calc(100% - 32px); height: calc(100% - 184px); transition: opacity 0.5s; }
+  #st-map.off { opacity: 0; pointer-events: none; }
+  #st-map .st-seat { fill: var(--st-neutral); stroke: var(--map-edge); stroke-width: 0.5; stroke-linejoin: round; vector-effect: non-scaling-stroke; transition: fill 0.8s; }
+  #st-map .st-seat.rise { animation: st-rise 0.6s ease-out both; }
+  @keyframes st-rise { from { opacity: 0; } to { opacity: 1; } }
+  #st-map.pick .st-seat { cursor: pointer; }
+  #st-map .st-edge { fill: none; stroke: var(--ink); stroke-width: 1.1; stroke-linecap: round; vector-effect: non-scaling-stroke; pointer-events: none; }
+  #st-map .st-hi { fill: none; stroke: var(--ink); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; vector-effect: non-scaling-stroke; pointer-events: none; }
+  .st-scene {
+    position: absolute; left: clamp(20px, 3.5vw, 56px); right: clamp(20px, 3.5vw, 56px); top: 76px; bottom: 60px; width: auto;
+    display: flex; flex-direction: column; justify-content: center; gap: 14px; transition: opacity 0.45s;
+  }
+  .st-scene.off { opacity: 0; pointer-events: none; }
+  .st-over { position: absolute; z-index: 2; right: clamp(16px, 2.5vw, 32px); top: calc(env(safe-area-inset-top, 0px) + 18px); width: min(330px, calc(100% - 32px)); }
+  .st-legend { position: absolute; left: clamp(16px, 2.5vw, 32px); right: 72px; bottom: calc(env(safe-area-inset-bottom, 0px) + 18px); display: grid; gap: 6px; background: var(--ground); }
+  .st-legend:not(:empty) { padding-top: 8px; }
+  .st-legend .ramp { max-width: 340px; }
+  .st-cap { font-size: 0.88rem; color: var(--ink-2); max-width: 60ch; }
+  .st-vis > .wm { right: clamp(16px, 2.5vw, 32px); bottom: calc(env(safe-area-inset-bottom, 0px) + 18px); width: 30px; height: 30px; }
+  .st-sh { font-size: 0.95rem; color: var(--ink-2); }
+  .st-bars { display: grid; gap: 22px; width: 100%; max-width: 640px; margin-inline: auto; }
+  .st-bar { display: grid; gap: 8px; }
+  .st-bl { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; font-size: 1.05rem; }
+  .st-bl span { display: inline-flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .st-bl b { font-weight: 600; font-size: 1.5rem; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .st-bt { position: relative; height: 24px; background: var(--track); }
+  .st-bt i { position: absolute; left: 0; top: 0; bottom: 0; transition: width 1s cubic-bezier(0.2, 0.7, 0.2, 1); }
+  .st-gapline { font-size: 1.05rem; }
+  .st-pk { font-style: normal; font-size: 0.82rem; color: var(--ink-2); border: 1px solid var(--rule-2); padding: 1px 6px; }
+  .st-two { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: clamp(16px, 3vw, 40px); align-items: end; }
+  .st-city { margin: 0; display: grid; gap: 12px; }
+  .st-city svg { width: 100%; height: min(38vh, 340px); display: block; }
+  .st-cseat { stroke: var(--map-edge); stroke-width: 0.8; vector-effect: non-scaling-stroke; }
+  .st-cedge { fill: none; stroke: var(--ink); stroke-width: 1.6; vector-effect: non-scaling-stroke; }
+  .st-city h3 { font-size: 1.3rem; }
+  .st-city p { color: var(--ink-2); font-size: 0.95rem; }
+  .st-city p.st-cbig, .st-card p.st-cbig { font-weight: 600; font-size: clamp(1.8rem, 3vw, 2.6rem); line-height: 1.1; color: var(--ink); }
+  .st-cbig small { font-size: 0.4em; font-weight: 400; color: var(--ink-2); }
+  .st-key { font-size: 0.9rem; }
+  .st-range-mark path { fill: none; stroke: var(--ink); stroke-width: 1.5; }
+  .st-waffle-wrap { display: flex; flex-wrap: wrap; gap: clamp(20px, 3vw, 44px); align-items: center; justify-content: center; }
+  .st-waffle { display: grid; grid-template-columns: repeat(10, 1fr); gap: 3px; width: min(100%, 360px, 52vh); aspect-ratio: 1; }
+  .st-waffle i { display: block; animation: st-in 0.35s ease-out both; }
+  .st-wlegend { display: grid; gap: 10px; min-width: 220px; max-width: 360px; }
+  .st-wl { display: grid; grid-template-columns: auto 1fr auto auto; gap: 10px; align-items: baseline; font-size: 1rem; border-bottom: 1px solid var(--rule); padding-bottom: 7px; }
+  .st-wl .sw { align-self: center; }
+  .st-wl b { font-weight: 600; font-variant-numeric: tabular-nums; }
+  .st-wl em { font-style: normal; color: var(--ink-3); font-size: 0.9rem; min-width: 2.6em; text-align: right; }
+  .st-card { background: var(--ground); border: 1px solid var(--rule-2); padding: 16px 18px 14px; display: grid; gap: 8px; }
+  .st-card h3 { font-size: 1.3rem; line-height: 1.25; }
+  .st-ck { font-size: 0.9rem; color: var(--ink-2); }
+  .st-cmp { display: flex; align-items: center; gap: 8px; font-size: 0.95rem; flex-wrap: wrap; }
+  .st-card .bars { margin-top: 4px; }
+  .st-return {
+    position: fixed; z-index: 90; right: 16px; bottom: calc(env(safe-area-inset-bottom, 0px) + 16px);
+    display: inline-flex; align-items: center; gap: 12px; background: var(--field); color: var(--field-ink);
+    border: 0; padding: 12px 18px 11px; font-weight: 600; cursor: pointer; min-height: 48px;
+  }
+  .st-return svg { width: 26px; height: 11px; flex: none; }
+  @media (max-width: 900px) {
+    .story { grid-template-columns: 1fr; grid-template-rows: minmax(240px, 42%) minmax(0, 1fr); }
+    .st-vis { grid-row: 1; }
+    .st-text { grid-row: 2; padding-top: 14px; }
+    .st-h { font-size: 1.55rem; }
+    .st-mark { width: 40px; }
+    #st-map { top: 58px; height: calc(100% - 110px); }
+    .st-scene { top: 62px; bottom: 12px; left: 16px; right: 16px; justify-content: flex-start; overflow-y: auto; }
+    .st-legend { bottom: 10px; }
+    .st-legend .st-cap { display: none; }
+    .st-vis > .wm { bottom: 10px; width: 24px; height: 24px; }
+    .st-over { display: none; }
+    .st-waffle-wrap { flex-wrap: nowrap; gap: 14px; align-items: flex-start; justify-content: flex-start; }
+    .st-waffle { width: min(40vw, 22vh); flex: none; }
+    .st-wlegend { min-width: 0; gap: 6px; }
+    .st-wlegend .st-sh { font-size: 0.8rem; }
+    .st-wl { font-size: 0.82rem; gap: 6px; padding-bottom: 4px; grid-template-columns: auto 1fr auto; }
+    .st-wl em { display: none; }
+    .st-city svg { height: 15vh; }
+    .st-bl b { font-size: 1.2rem; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .st-body.in > *, .st-pop, .st-waffle i, #st-map .st-seat.rise { animation: none; }
+    .st-rband, .st-rm, .st-bt i, #st-map .st-seat, #st-map, .st-scene { transition: none; }
+  }
+
   /* ---------- Footer ---------- */
   .foot { padding-block: 32px 48px; border-top: 1px solid var(--rule); }
   .foot .rule { width: 160px; height: 4px; background: var(--ink); margin-bottom: 12px; }
@@ -388,6 +594,7 @@
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
   <defs>
+    <symbol id="asi-mark" viewBox="0 0 1788 1788"><g transform="translate(0,1788) scale(0.1,-0.1)" fill="currentColor"><path d="M8415 17315 c-186 -12 -340 -27 -480 -46 -38 -6 -115 -17 -170 -24 -132 -19 -319 -50 -375 -63 -25 -6 -70 -15 -100 -21 -127 -24 -407 -89 -425 -99 -11 -5 -42 -13 -70 -17 -27 -4 -59 -14 -70 -21 -11 -8 -29 -14 -41 -14 -12 0 -41 -7 -65 -16 -24 -8 -75 -24 -114 -34 -38 -11 -97 -29 -130 -40 -33 -12 -80 -27 -105 -35 -42 -13 -148 -51 -345 -126 -102 -38 -201 -81 -410 -174 -141 -62 -144 -64 -218 -104 -29 -15 -63 -31 -76 -36 -13 -4 -50 -22 -82 -41 -31 -19 -64 -34 -72 -34 -8 0 -26 -9 -40 -20 -14 -11 -70 -43 -124 -71 -54 -28 -105 -56 -113 -63 -8 -6 -35 -22 -59 -35 -24 -13 -70 -41 -102 -63 -32 -21 -60 -38 -63 -38 -5 0 -89 -55 -161 -104 -16 -11 -75 -51 -130 -88 -90 -61 -152 -104 -311 -218 -46 -32 -194 -148 -343 -270 -36 -28 -87 -73 -115 -100 -28 -26 -69 -62 -91 -81 -73 -61 -299 -272 -390 -364 -130 -132 -338 -354 -349 -374 -5 -9 -31 -38 -57 -66 -26 -27 -105 -122 -177 -210 -71 -88 -136 -166 -146 -174 -9 -7 -16 -18 -16 -23 0 -6 -27 -46 -60 -89 -34 -44 -64 -87 -67 -97 -3 -9 -14 -26 -24 -37 -40 -46 -267 -389 -333 -502 -26 -46 -52 -85 -57 -88 -5 -3 -25 -38 -44 -78 -20 -40 -65 -124 -100 -187 -73 -129 -182 -351 -260 -525 -51 -113 -68 -150 -86 -187 -11 -20 -19 -43 -19 -49 0 -12 -28 -78 -55 -129 -7 -14 -16 -41 -20 -60 -4 -19 -12 -44 -19 -55 -22 -37 -75 -184 -101 -280 -19 -71 -43 -136 -60 -167 -8 -14 -15 -34 -15 -43 0 -9 -13 -60 -29 -113 -16 -54 -37 -131 -46 -172 -10 -41 -23 -88 -31 -105 -7 -16 -16 -50 -19 -75 -4 -25 -12 -65 -19 -90 -27 -92 -102 -482 -111 -575 -4 -38 -13 -89 -21 -113 -8 -23 -14 -71 -14 -107 0 -35 -5 -76 -11 -92 -11 -26 -21 -135 -49 -528 -26 -353 -2 -1194 41 -1455 6 -36 15 -105 19 -155 5 -49 15 -121 24 -160 8 -38 20 -106 26 -150 18 -124 86 -458 98 -481 6 -11 14 -45 18 -75 4 -30 12 -65 19 -79 7 -14 16 -43 19 -65 4 -22 21 -87 37 -145 17 -58 36 -129 43 -157 7 -29 18 -58 24 -65 5 -7 13 -33 17 -58 4 -25 13 -55 21 -67 8 -12 14 -29 14 -38 0 -9 7 -30 16 -48 9 -17 23 -54 30 -82 19 -73 51 -160 90 -242 19 -40 34 -77 34 -83 0 -5 9 -27 20 -47 11 -21 20 -43 20 -49 0 -10 76 -188 99 -231 5 -10 30 -61 54 -113 100 -211 139 -290 193 -390 31 -58 62 -112 69 -120 8 -8 19 -26 25 -40 6 -14 22 -43 35 -65 14 -22 29 -51 35 -65 6 -14 17 -32 25 -40 7 -8 26 -40 42 -70 30 -57 212 -332 283 -430 23 -30 53 -73 68 -95 54 -82 322 -422 445 -565 160 -187 248 -281 467 -497 233 -231 228 -226 345 -327 44 -38 90 -78 101 -90 12 -12 46 -40 75 -64 30 -23 86 -68 126 -100 190 -151 444 -338 524 -387 10 -5 41 -27 71 -47 31 -21 60 -38 66 -38 6 0 12 -5 14 -11 4 -13 134 -94 325 -204 73 -42 135 -80 138 -84 2 -5 16 -12 30 -15 13 -3 41 -17 61 -31 20 -14 74 -43 120 -66 46 -22 86 -44 89 -48 2 -5 16 -12 30 -15 13 -3 46 -19 72 -34 27 -16 82 -43 123 -61 41 -18 91 -42 111 -52 20 -11 43 -19 52 -19 8 0 20 -6 26 -14 7 -8 27 -18 44 -22 18 -3 37 -10 42 -15 12 -9 178 -79 260 -109 28 -10 75 -28 105 -40 100 -39 164 -61 215 -75 28 -7 64 -20 80 -29 17 -9 38 -16 48 -16 10 0 30 -6 45 -14 15 -7 45 -17 67 -21 22 -4 45 -10 50 -15 6 -4 64 -22 130 -40 287 -77 372 -99 410 -105 22 -3 60 -13 85 -20 57 -18 157 -37 395 -75 105 -17 226 -37 270 -45 44 -8 118 -17 165 -20 47 -4 119 -13 160 -20 41 -7 129 -16 195 -19 66 -3 226 -11 355 -17 306 -15 875 3 1150 36 69 8 161 19 205 25 89 10 183 24 325 47 183 29 245 41 272 51 14 6 55 14 90 18 34 4 80 13 102 20 21 8 50 14 65 14 14 0 55 8 91 19 76 23 163 47 240 66 30 7 101 27 157 44 56 17 119 35 140 40 21 5 70 21 108 36 39 14 115 41 170 60 162 55 333 121 430 164 22 10 67 29 100 42 33 13 67 28 75 35 8 6 26 15 40 19 30 9 336 155 400 191 25 14 81 43 125 65 108 54 196 102 258 142 29 19 77 49 107 66 30 18 71 42 90 53 58 35 385 252 390 259 3 3 15 11 28 18 49 26 556 420 587 456 6 7 39 36 75 65 276 227 814 782 1014 1044 21 28 51 65 66 81 27 29 139 175 173 225 9 14 35 50 57 80 60 82 124 173 135 192 5 9 36 55 68 102 31 47 57 87 57 91 0 3 16 28 35 55 19 27 35 54 35 58 0 5 9 17 20 27 11 10 20 23 20 28 0 5 16 35 37 65 20 30 50 80 66 111 16 31 35 63 41 71 27 34 296 571 296 591 0 9 9 27 19 41 11 13 23 38 27 54 4 16 12 36 20 44 7 8 16 27 19 43 4 15 16 44 26 64 10 21 19 43 19 49 0 7 16 43 34 82 19 38 38 82 42 98 4 16 13 40 20 54 17 31 42 102 55 154 5 21 15 48 21 60 6 11 17 44 24 71 7 28 25 82 39 120 15 39 31 88 37 110 5 22 16 54 24 72 8 17 14 36 14 41 0 6 18 75 39 154 22 79 42 163 46 188 4 25 12 54 18 65 6 11 17 52 23 90 7 39 17 88 23 110 33 133 100 553 101 627 0 26 4 58 10 73 5 14 14 87 20 163 6 75 18 196 26 267 16 151 20 1008 4 1135 -5 41 -14 138 -20 215 -6 77 -17 185 -25 240 -8 55 -22 152 -30 215 -9 63 -24 167 -35 230 -11 63 -26 151 -34 196 -7 44 -18 89 -23 100 -6 10 -14 41 -18 69 -4 27 -20 101 -37 165 -17 63 -36 140 -43 170 -20 86 -53 201 -69 245 -8 22 -15 51 -16 65 0 14 -6 34 -13 45 -7 11 -23 54 -36 95 -47 153 -75 236 -87 255 -7 11 -15 35 -19 54 -4 19 -21 64 -37 100 -16 36 -42 100 -57 141 -16 41 -38 93 -50 115 -11 22 -21 44 -21 50 0 5 -18 46 -40 90 -22 44 -40 83 -40 87 0 7 -84 182 -99 208 -5 8 -24 44 -42 80 -45 90 -107 208 -133 251 -11 20 -39 70 -62 110 -122 222 -387 631 -519 799 -27 35 -57 74 -65 86 -266 386 -929 1078 -1370 1427 -47 38 -101 82 -120 100 -20 18 -56 45 -80 62 -25 16 -67 48 -95 71 -27 22 -68 53 -90 67 -43 29 -92 63 -170 120 -27 20 -76 53 -108 74 -32 21 -86 57 -119 81 -33 24 -71 47 -84 52 -14 6 -55 29 -92 53 -37 24 -98 61 -135 83 -38 21 -85 49 -105 60 -75 44 -250 138 -327 176 -33 17 -98 48 -145 70 -47 22 -92 44 -100 49 -17 10 -44 23 -107 51 -24 10 -64 27 -90 39 -27 11 -64 28 -83 36 -19 9 -53 24 -75 34 -22 10 -60 24 -85 32 -25 8 -81 29 -125 47 -44 18 -96 38 -115 45 -39 14 -157 56 -210 75 -43 15 -151 48 -205 62 -22 6 -61 19 -87 29 -26 11 -59 19 -75 19 -15 0 -36 7 -47 15 -10 8 -39 17 -65 20 -25 4 -73 15 -106 25 -147 44 -422 103 -627 135 -47 7 -97 16 -109 20 -57 18 -610 79 -859 95 -217 13 -855 11 -1095 -5z m1030 -1295 c33 -5 110 -12 170 -16 140 -7 519 -55 675 -84 156 -29 384 -79 485 -106 103 -27 242 -67 298 -85 31 -10 69 -19 84 -19 14 0 34 -6 42 -13 9 -8 86 -37 171 -65 85 -28 180 -60 210 -72 30 -13 79 -31 109 -42 30 -11 64 -26 75 -34 11 -8 33 -14 48 -14 15 0 30 -5 34 -11 3 -6 25 -19 48 -29 102 -44 403 -189 456 -220 8 -5 29 -16 45 -24 17 -8 41 -21 55 -28 14 -7 60 -34 103 -61 44 -27 86 -51 95 -55 26 -11 172 -99 217 -131 22 -15 87 -59 145 -97 58 -38 110 -74 115 -79 6 -6 30 -24 55 -41 269 -176 806 -642 1013 -878 29 -33 75 -83 103 -110 43 -43 92 -98 204 -227 8 -10 29 -35 45 -55 17 -21 44 -54 60 -73 58 -68 102 -126 115 -151 7 -14 32 -47 55 -75 23 -27 70 -90 104 -140 34 -49 81 -117 105 -151 24 -33 47 -71 51 -83 4 -13 23 -44 42 -69 19 -25 44 -63 55 -86 11 -23 38 -67 59 -98 20 -31 40 -67 44 -80 4 -13 13 -30 21 -38 18 -21 233 -446 273 -540 18 -41 40 -93 50 -115 17 -37 64 -155 127 -320 14 -38 30 -74 34 -80 8 -11 18 -42 51 -165 27 -98 59 -192 70 -206 5 -6 12 -33 15 -60 4 -27 13 -58 20 -69 8 -11 14 -29 14 -41 0 -12 16 -85 35 -161 41 -166 72 -316 90 -438 7 -49 17 -101 23 -115 5 -14 12 -59 16 -100 4 -41 13 -122 21 -180 60 -454 60 -1220 0 -1635 -8 -55 -17 -131 -21 -170 -3 -38 -12 -90 -19 -115 -8 -25 -17 -79 -21 -120 -3 -41 -13 -90 -20 -109 -8 -18 -14 -45 -14 -60 0 -30 -43 -227 -71 -321 -11 -36 -19 -73 -19 -83 0 -10 -7 -31 -15 -46 -8 -16 -17 -48 -21 -72 -3 -24 -12 -57 -19 -74 -13 -30 -63 -189 -92 -295 -8 -30 -21 -62 -28 -70 -7 -8 -16 -31 -20 -50 -4 -19 -16 -51 -26 -70 -11 -19 -19 -40 -19 -47 0 -6 -16 -46 -35 -89 -19 -42 -35 -83 -35 -92 0 -8 -8 -29 -19 -46 -10 -17 -22 -42 -26 -56 -6 -23 -29 -73 -104 -230 -14 -30 -41 -81 -58 -113 -18 -33 -33 -64 -33 -69 0 -6 -18 -37 -40 -70 -22 -33 -40 -69 -40 -79 0 -11 -9 -28 -19 -38 -10 -10 -22 -29 -26 -42 -4 -13 -22 -44 -40 -70 -18 -25 -43 -66 -55 -90 -12 -24 -41 -73 -64 -109 -23 -36 -46 -72 -51 -81 -13 -21 -75 -112 -113 -164 -16 -22 -51 -72 -78 -110 -96 -138 -216 -294 -283 -371 -56 -63 -84 -96 -169 -197 -86 -103 -407 -428 -597 -604 -107 -99 -147 -134 -220 -187 -11 -8 -66 -52 -122 -98 -56 -46 -117 -93 -135 -106 -18 -13 -70 -50 -116 -83 -45 -33 -102 -72 -126 -87 -24 -15 -83 -54 -131 -87 -88 -61 -148 -99 -175 -112 -8 -4 -35 -21 -60 -38 -25 -17 -61 -39 -80 -49 -71 -38 -127 -67 -195 -106 -38 -21 -149 -78 -245 -125 -96 -48 -192 -95 -212 -106 -20 -10 -43 -19 -50 -19 -7 0 -34 -11 -60 -25 -26 -14 -52 -25 -57 -25 -6 0 -43 -16 -83 -35 -40 -19 -114 -48 -163 -65 -129 -43 -187 -64 -210 -76 -11 -6 -54 -21 -95 -33 -41 -13 -95 -29 -120 -38 -25 -8 -67 -19 -95 -25 -27 -5 -59 -15 -70 -21 -19 -10 -101 -32 -230 -62 -33 -7 -71 -18 -85 -23 -14 -5 -51 -13 -84 -17 -32 -3 -76 -13 -97 -20 -21 -8 -71 -17 -111 -20 -40 -4 -86 -13 -102 -21 -16 -8 -50 -14 -75 -14 -25 0 -75 -7 -111 -15 -36 -8 -119 -20 -185 -25 -66 -6 -169 -18 -230 -26 -257 -36 -1150 -27 -1440 16 -33 4 -88 9 -122 9 -34 1 -74 6 -90 12 -15 6 -73 17 -128 24 -199 25 -763 149 -827 181 -14 8 -32 14 -40 14 -23 0 -320 89 -348 104 -14 8 -40 17 -59 21 -18 4 -54 16 -80 27 -25 11 -59 25 -76 32 -16 7 -57 23 -90 35 -127 48 -273 112 -490 216 -49 24 -101 48 -115 54 -48 21 -235 123 -251 137 -8 8 -19 14 -23 14 -8 0 -124 65 -186 104 -145 92 -414 271 -475 317 -22 16 -56 41 -75 54 -107 74 -209 152 -255 194 -11 10 -53 44 -92 76 -40 31 -73 60 -73 64 0 4 -20 22 -44 39 -83 60 -476 445 -587 576 -28 32 -65 73 -83 90 -18 17 -48 51 -67 76 -19 25 -44 56 -56 70 -64 75 -202 249 -218 275 -10 17 -29 41 -41 55 -54 62 -318 461 -379 574 -20 38 -51 91 -70 120 -18 28 -49 83 -69 121 -20 39 -41 77 -46 85 -22 37 -140 287 -140 297 0 6 -7 13 -15 17 -8 3 -15 14 -15 24 0 10 -15 49 -34 88 -19 38 -48 107 -66 154 -17 47 -38 99 -45 115 -8 17 -21 48 -29 70 -8 22 -26 72 -41 110 -15 39 -32 90 -40 115 -14 51 -70 229 -86 275 -28 82 -109 403 -109 433 0 13 -6 35 -14 51 -8 15 -18 56 -22 92 -3 35 -10 69 -14 74 -4 6 -13 51 -19 100 -7 50 -16 106 -21 125 -20 76 -61 477 -72 700 -28 556 18 1309 103 1690 6 25 14 73 19 107 5 34 16 76 25 92 8 17 15 42 15 56 0 35 58 282 76 322 8 17 14 41 14 53 0 11 6 33 14 48 7 15 17 47 21 72 4 25 13 56 20 70 7 14 33 88 60 165 71 212 92 267 109 300 9 17 16 35 16 41 0 11 23 69 55 139 8 17 24 53 36 80 12 28 48 104 80 170 32 66 63 131 69 145 6 14 23 48 38 75 15 28 49 90 75 139 26 49 61 109 78 133 16 25 41 68 56 97 14 28 52 89 83 136 31 47 71 108 88 135 54 87 135 203 200 288 34 45 81 107 104 137 41 54 132 164 272 329 205 242 628 653 822 796 14 11 52 43 84 70 149 129 268 217 520 382 198 131 244 160 280 179 19 10 60 34 89 53 97 61 536 287 619 317 26 10 54 23 63 31 8 7 19 13 24 13 4 0 49 17 99 39 140 59 421 166 519 197 48 15 90 30 92 34 3 4 26 11 52 15 26 4 60 13 75 21 15 8 39 14 53 14 15 0 39 6 53 14 15 8 77 26 137 39 61 14 142 33 180 42 176 43 422 88 690 125 39 5 102 14 140 19 39 6 99 11 135 11 36 0 92 5 125 11 138 25 843 31 990 9z M8769 14925 c-118 -6 -220 -15 -227 -19 -6 -4 -60 -13 -119 -21 -59 -7 -146 -22 -193 -33 -47 -11 -107 -26 -135 -32 -27 -6 -65 -16 -84 -22 -19 -6 -60 -17 -90 -24 -72 -16 -198 -60 -233 -79 -14 -8 -31 -15 -38 -15 -32 0 -345 -145 -473 -219 -49 -28 -93 -51 -98 -51 -5 0 -18 -9 -30 -21 -11 -11 -28 -23 -37 -27 -38 -15 -275 -184 -357 -254 -11 -9 -38 -31 -60 -48 -65 -50 -301 -279 -373 -361 -130 -147 -211 -245 -246 -294 -79 -111 -178 -259 -184 -274 -3 -9 -30 -53 -59 -99 -29 -45 -53 -85 -53 -87 0 -2 -36 -77 -79 -167 -44 -90 -84 -182 -90 -205 -7 -23 -15 -45 -20 -47 -5 -3 -12 -23 -16 -43 -4 -21 -10 -42 -14 -48 -5 -5 -24 -62 -44 -125 -129 -405 -179 -709 -203 -1235 -7 -147 18 -610 42 -787 8 -62 19 -147 24 -188 5 -41 15 -106 24 -145 9 -38 16 -86 16 -106 0 -20 7 -53 15 -72 8 -20 15 -51 15 -69 0 -18 7 -58 16 -88 9 -30 18 -68 21 -85 7 -45 51 -235 85 -365 17 -63 36 -140 43 -170 8 -30 18 -68 23 -85 6 -16 20 -64 32 -105 39 -131 58 -194 75 -245 9 -27 21 -68 26 -90 5 -22 26 -85 45 -140 19 -55 42 -120 50 -145 9 -25 20 -62 25 -82 5 -20 15 -52 23 -70 8 -18 26 -76 41 -128 15 -52 33 -112 41 -133 26 -69 5 -196 -36 -222 -6 -4 -16 -21 -24 -38 -15 -36 -190 -215 -279 -285 -72 -56 -116 -117 -151 -207 -15 -39 -31 -79 -36 -90 -5 -11 -12 -31 -15 -44 -11 -36 -44 -80 -119 -154 -135 -135 -294 -338 -350 -446 -77 -149 -100 -291 -116 -726 -16 -415 -13 -595 9 -646 21 -45 109 -138 171 -179 19 -13 40 -28 45 -35 15 -16 262 -185 272 -185 4 0 34 -18 66 -40 31 -22 61 -40 65 -40 4 0 33 -18 65 -40 31 -22 61 -40 65 -40 4 0 36 -15 72 -34 151 -78 260 -132 296 -148 22 -9 59 -25 84 -36 143 -63 178 -78 255 -107 163 -62 294 -108 330 -116 22 -5 54 -16 70 -23 36 -17 146 -52 195 -61 19 -4 47 -13 61 -21 15 -7 51 -18 80 -23 30 -5 116 -25 192 -45 76 -20 148 -36 160 -36 12 0 51 -9 85 -20 35 -11 81 -20 102 -20 20 0 55 -6 76 -14 22 -7 64 -16 94 -20 30 -4 93 -13 140 -21 152 -26 474 -65 528 -65 29 0 96 -8 150 -17 147 -26 1358 -26 1477 0 44 9 103 17 130 17 91 0 664 88 703 108 9 5 44 13 77 17 33 4 71 13 85 20 14 7 46 15 71 18 26 4 75 15 110 26 35 11 91 27 124 36 33 9 83 25 110 35 28 10 66 22 85 25 19 4 42 13 50 20 8 7 29 15 45 19 17 4 44 13 60 20 52 24 165 66 176 66 6 0 22 9 36 20 14 11 36 20 48 20 12 0 28 7 35 15 7 8 18 15 24 15 6 0 58 25 116 55 58 30 119 61 135 70 17 8 50 28 75 45 25 16 52 33 60 37 23 11 187 122 250 169 130 97 270 260 270 314 0 11 7 32 16 45 21 32 14 133 -13 200 -49 119 -94 221 -102 236 -5 8 -21 47 -36 85 -15 38 -42 101 -60 139 -18 39 -45 102 -60 140 -15 39 -38 93 -51 121 -13 28 -24 57 -24 63 0 7 -7 25 -15 39 -26 49 -84 190 -100 246 -9 31 -20 58 -25 61 -4 2 -11 20 -14 38 -3 18 -15 51 -26 72 -11 22 -20 47 -20 57 0 9 -6 32 -14 50 -17 38 -66 343 -66 405 0 23 -6 75 -14 115 -8 41 -17 128 -21 194 -4 65 -13 165 -21 220 -8 56 -14 120 -14 142 0 52 -36 96 -129 157 -107 70 -121 86 -121 143 0 47 3 52 58 104 31 30 75 66 97 80 22 14 47 33 54 42 12 14 165 122 230 161 9 6 42 30 75 55 32 25 73 55 91 67 79 53 113 113 141 248 27 130 28 864 2 995 -9 47 -22 121 -27 165 -6 44 -18 118 -26 165 -20 108 -16 267 7 302 15 22 131 88 156 88 5 0 15 6 21 14 7 8 27 18 44 21 18 4 39 13 47 20 8 7 25 16 36 19 39 12 129 65 169 99 37 32 39 37 43 100 5 74 -33 219 -70 266 -10 13 -18 31 -18 40 0 10 -15 39 -32 66 -40 59 -62 95 -107 172 -19 32 -39 63 -45 68 -6 6 -24 30 -40 54 -45 70 -196 257 -316 392 -37 42 -50 57 -102 122 -27 33 -103 120 -170 194 -68 74 -149 166 -181 205 l-57 70 2 321 c2 339 -1 361 -51 454 -5 10 -24 50 -42 88 -44 93 -152 279 -225 385 -36 52 -79 117 -97 144 -6 10 -21 31 -32 45 -21 27 -37 49 -79 111 -48 71 -199 231 -243 257 -44 26 -47 26 -107 14 -33 -8 -128 -17 -211 -22 -82 -4 -175 -12 -205 -18 -30 -6 -120 -13 -200 -16 -80 -3 -183 -10 -230 -14 -47 -5 -148 -12 -225 -15 -507 -22 -732 -53 -805 -111 -8 -7 -22 -14 -31 -18 -90 -31 -221 -154 -273 -257 -67 -131 -90 -344 -53 -491 9 -35 26 -104 38 -154 12 -49 33 -110 46 -135 13 -25 23 -49 23 -55 0 -6 13 -35 29 -65 16 -30 44 -83 63 -118 18 -35 39 -68 45 -74 7 -6 13 -15 13 -21 0 -11 9 -25 90 -147 60 -90 109 -184 119 -231 12 -48 -2 -261 -20 -334 -16 -64 -38 -352 -29 -391 6 -26 29 -55 84 -108 42 -40 77 -74 78 -77 1 -2 5 -80 8 -174 10 -247 20 -271 186 -410 149 -126 149 -127 179 -185 26 -51 26 -57 27 -240 0 -209 -4 -223 -83 -296 -33 -29 -43 -37 -119 -88 -38 -25 -189 -90 -260 -111 -25 -8 -65 -21 -90 -29 -56 -19 -207 -52 -280 -61 -46 -6 -158 -49 -220 -85 -21 -12 -272 -137 -301 -150 -13 -6 -42 -21 -64 -35 -22 -13 -51 -29 -65 -35 -39 -18 -342 -171 -480 -244 -123 -64 -210 -109 -340 -175 -36 -18 -78 -40 -95 -49 -55 -30 -210 -112 -250 -133 -119 -61 -153 -89 -185 -153 -11 -23 -24 -48 -30 -56 -5 -8 -28 -55 -50 -105 -23 -49 -58 -126 -80 -170 -21 -44 -66 -145 -100 -225 -34 -80 -73 -170 -86 -201 -13 -31 -24 -66 -24 -78 0 -12 -5 -31 -10 -41 -6 -11 -15 -41 -20 -67 -5 -27 -23 -113 -41 -193 -17 -80 -37 -181 -44 -225 -7 -44 -17 -93 -23 -110 -6 -16 -16 -65 -22 -108 -5 -43 -14 -87 -20 -97 -5 -10 -10 -29 -10 -41 0 -49 -84 -415 -105 -459 -71 -147 -127 -255 -161 -310 -51 -81 -144 -255 -144 -269 0 -6 -16 -43 -35 -84 -19 -41 -35 -78 -35 -82 0 -5 -8 -27 -18 -49 -10 -23 -32 -70 -48 -106 -74 -168 -240 -303 -298 -244 -21 20 -21 129 -1 204 8 30 15 71 15 91 0 19 7 44 15 55 8 10 15 30 15 44 0 14 14 50 30 80 17 30 36 66 43 80 13 27 163 232 193 265 11 11 37 42 58 70 22 27 61 74 88 104 27 29 58 70 69 90 10 20 23 43 28 51 62 100 92 205 101 353 9 134 35 302 57 357 6 14 14 50 18 80 4 30 12 66 17 80 9 23 20 61 62 227 8 28 17 57 21 63 4 6 13 35 20 63 7 29 20 70 29 92 8 22 15 54 16 70 0 17 9 41 20 55 11 14 20 31 20 39 0 13 20 51 133 249 21 37 47 85 58 107 11 22 27 54 35 70 8 17 19 37 25 45 55 88 102 245 97 325 -5 83 -22 104 -168 210 -43 31 -85 86 -117 152 -15 32 -18 64 -18 198 0 162 9 209 51 280 6 11 14 31 17 45 4 14 22 49 42 78 62 94 42 142 -103 250 -98 74 -132 151 -132 303 0 147 32 274 83 327 23 23 47 42 54 42 7 0 21 8 31 18 26 25 96 72 108 72 6 0 19 9 29 20 10 11 22 20 26 20 4 0 55 27 113 60 58 33 108 60 111 60 2 0 28 15 57 33 29 18 100 57 158 86 58 29 130 65 160 81 76 39 310 149 455 214 33 15 76 35 95 46 19 10 60 27 90 38 30 11 89 35 130 52 214 90 323 111 610 117 319 7 324 10 384 203 30 96 10 311 -39 425 -7 17 -27 73 -45 125 -58 171 -63 185 -82 209 -10 13 -18 29 -18 35 0 26 -49 110 -130 224 -16 23 -30 46 -30 51 0 5 -7 15 -17 22 -22 18 -81 147 -105 229 -36 123 -40 162 -35 355 5 218 24 299 93 413 22 35 49 80 61 100 12 21 59 72 105 116 72 68 111 97 203 153 23 15 99 52 170 85 l50 23 630 3 c522 2 638 5 674 17 25 8 58 15 74 15 55 0 152 54 187 104 56 83 51 122 -31 231 -71 94 -85 106 -238 207 -98 65 -265 140 -391 177 -216 63 -328 88 -454 101 -54 6 -103 13 -109 17 -14 8 -479 32 -612 31 -60 0 -207 -6 -326 -13z m-624 -6500 c209 -15 316 -28 415 -50 36 -7 81 -16 100 -20 49 -8 270 -96 365 -145 21 -11 46 -20 55 -20 9 0 24 -6 35 -13 11 -7 45 -22 75 -33 30 -12 105 -40 165 -63 240 -92 251 -95 510 -142 94 -17 200 -37 236 -45 37 -8 100 -18 142 -23 41 -5 80 -12 86 -16 7 -3 60 -13 119 -20 59 -8 132 -19 162 -25 30 -5 98 -17 150 -26 52 -9 104 -22 115 -29 11 -7 36 -15 56 -19 84 -15 149 -151 166 -346 7 -80 -23 -473 -42 -555 -8 -33 -16 -91 -20 -130 -3 -38 -12 -90 -20 -115 -8 -25 -26 -99 -41 -165 -29 -136 -65 -256 -88 -300 -9 -16 -16 -35 -16 -41 0 -26 -84 -179 -139 -255 -33 -45 -61 -84 -63 -88 -7 -15 -131 -91 -149 -91 -11 0 -36 -7 -56 -15 -19 -8 -119 -29 -222 -46 -236 -39 -606 -47 -721 -15 -99 27 -220 77 -270 111 -25 16 -62 39 -83 49 -20 11 -54 33 -75 51 -52 44 -132 96 -162 106 -14 4 -63 22 -110 39 -111 40 -172 58 -245 74 -33 7 -69 17 -80 23 -11 6 -42 14 -70 18 -27 4 -72 13 -100 20 -63 18 -254 51 -363 65 -46 5 -100 14 -120 19 -20 5 -84 12 -142 16 -58 3 -136 13 -175 21 -39 8 -161 18 -275 22 l-205 7 -9 64 c-8 61 -7 66 14 83 13 10 30 16 39 14 9 -3 113 -10 231 -16 118 -6 247 -18 287 -26 40 -8 92 -14 117 -14 25 0 116 -9 203 -19 87 -11 208 -25 268 -31 300 -33 446 -66 612 -136 17 -8 35 -14 40 -14 4 -1 26 -9 48 -20 22 -11 44 -19 48 -20 37 -1 251 -118 329 -179 14 -12 30 -21 36 -21 5 0 20 -9 34 -19 13 -11 38 -23 54 -27 16 -4 38 -13 49 -20 124 -79 932 -12 1096 91 70 45 154 208 184 355 7 36 27 124 44 195 18 72 36 150 41 175 5 25 16 72 24 105 9 33 16 76 16 96 0 20 7 56 16 80 13 36 17 92 18 314 1 293 5 267 -52 352 -11 17 -198 73 -243 73 -20 0 -54 6 -75 14 -22 7 -66 16 -99 20 -33 4 -96 13 -140 21 -76 14 -263 42 -440 66 -44 6 -107 17 -140 25 -33 7 -77 14 -98 14 -21 0 -51 7 -66 15 -16 8 -48 17 -72 21 -24 4 -60 15 -79 26 -19 10 -47 18 -61 18 -15 0 -32 7 -39 15 -7 8 -21 15 -32 15 -19 0 -77 22 -186 71 -23 10 -51 19 -60 19 -10 0 -23 5 -29 11 -39 39 -417 148 -642 184 -51 9 -97 18 -102 21 -12 7 -235 34 -357 43 -132 9 -143 22 -99 111 31 64 66 68 372 45z M8915 11080 c-38 -4 -82 -12 -96 -18 -14 -5 -52 -13 -85 -17 -32 -4 -69 -13 -81 -21 -12 -8 -34 -14 -48 -14 -14 0 -42 -7 -63 -16 -20 -9 -66 -24 -102 -33 -114 -32 -274 -82 -305 -96 -16 -7 -48 -18 -70 -23 -94 -25 -381 -127 -388 -139 -4 -7 -17 -13 -28 -13 -18 0 -63 -18 -164 -65 -142 -66 -275 -132 -350 -173 -49 -27 -126 -68 -170 -91 -44 -23 -87 -49 -96 -57 -8 -8 -20 -14 -25 -14 -14 0 -100 -81 -113 -107 -70 -138 -59 -311 26 -418 56 -70 297 -117 359 -70 10 8 25 15 33 15 22 0 606 284 721 350 20 11 118 60 155 77 17 8 41 20 55 27 32 17 357 179 390 194 14 7 32 16 40 21 58 37 338 114 500 137 25 4 57 13 72 20 15 8 35 14 44 14 61 0 184 88 227 164 40 69 -2 237 -75 302 -62 54 -212 81 -363 64z M9180 10366 c-69 -6 -134 -16 -145 -22 -11 -6 -42 -15 -68 -18 -57 -9 -300 -90 -330 -111 -12 -8 -28 -15 -35 -15 -8 0 -65 -25 -127 -55 -63 -30 -117 -55 -121 -55 -4 0 -27 -9 -51 -20 -131 -61 -306 -135 -355 -150 -21 -6 -40 -15 -43 -20 -3 -4 -22 -11 -42 -15 -21 -4 -49 -13 -63 -20 -23 -12 -61 -30 -150 -69 -19 -8 -66 -33 -105 -56 -38 -22 -81 -45 -95 -52 -14 -7 -46 -27 -72 -45 -26 -18 -51 -33 -54 -33 -4 0 -32 -17 -63 -37 -31 -21 -64 -42 -73 -48 -61 -35 -258 -176 -288 -205 -90 -91 -129 -293 -76 -395 9 -17 16 -36 16 -43 0 -32 66 -94 139 -130 116 -57 192 -54 320 14 52 27 106 55 120 62 14 7 33 17 41 22 8 6 31 18 50 28 82 44 137 75 276 157 53 32 455 257 494 277 19 10 42 22 50 28 8 5 53 27 100 49 47 23 101 50 120 60 32 18 86 43 150 70 14 6 32 15 40 21 26 17 221 96 330 133 88 30 128 38 245 47 217 16 266 31 334 99 65 65 93 298 45 389 -7 15 -14 32 -14 38 0 7 -16 26 -35 43 -96 84 -199 101 -465 77z"/></g></symbol>
     <symbol id="i-arrow" viewBox="0 0 40 16"><path d="M1 8h36M30 1.5l7 6.5-7 6.5" fill="none" stroke="currentColor" stroke-width="2.4"/></symbol>
   </defs>
 </svg>
@@ -402,10 +609,13 @@
       </div>
       <img class="mark" src="asi_logo_white.svg" alt="Adam Smith Institute" width="88" height="88">
     </div>
+    <div class="mast-nav">
     <div class="tabs" role="tablist" aria-label="Tracker views">
       <button type="button" role="tab" id="tab-map" aria-controls="view-map" aria-selected="true">Constituency map</button>
       <button type="button" role="tab" id="tab-cities" aria-controls="view-map" aria-selected="false" tabindex="-1">Explore England&rsquo;s cities</button>
       <button type="button" role="tab" id="tab-nat" aria-controls="view-nat" aria-selected="false" tabindex="-1">National picture</button>
+    </div>
+    <button type="button" class="tour-btn" id="tour-open">Take the tour <svg aria-hidden="true"><use href="#i-arrow"/></svg></button>
     </div>
   </div>
 </header>
@@ -465,6 +675,7 @@
             </div>
             <div class="wheel-hint" id="wheel-hint">Hold Ctrl or &#8984; and scroll to zoom</div>
             <div class="tip" id="map-tip" hidden></div>
+            <svg class="wm" aria-hidden="true" focusable="false"><use href="#asi-mark"/></svg>
           </div>
           <div id="legend"></div>
           <p class="caption" id="map-caption"></p>
@@ -476,7 +687,7 @@
 
   <section id="view-nat" role="tabpanel" aria-labelledby="tab-nat" hidden>
     <div class="wrap nat">
-      <div class="block">
+      <div class="block" id="b-regions">
         <div class="block-head">
           <h2>London is the only region where income tax and NI clearly cover welfare.</h2>
           <p>Welfare spending for every &pound;1 of income tax and National Insurance paid on wages, by region.</p>
@@ -484,7 +695,7 @@
         <div class="chart" id="c-regions"></div>
       </div>
 
-      <div class="block">
+      <div class="block" id="b-scatter">
         <div class="block-head">
           <h2>Seats below the line pay in more than they take out.</h2>
           <p>Income tax and NI per worker against welfare spending per adult, all 543 English constituencies. Click a party to pick out its seats; click a seat to open it on the map.</p>
@@ -494,7 +705,7 @@
         <p class="block-foot">The break-even line assumes England&rsquo;s average of 0.51 jobs per adult. A seat with more jobs per adult breaks even above the line; one with fewer, below it.</p>
       </div>
 
-      <div class="block">
+      <div class="block" id="b-parties">
         <div class="block-head">
           <h2 id="party-h">Of the larger parties, only Liberal Democrat seats pay in more than they receive.</h2>
           <p>Each panel picks out one party&rsquo;s seats against all 543. Axes as above.</p>
@@ -503,7 +714,7 @@
         <div class="table-scroll short"><table id="t-party"></table></div>
       </div>
 
-      <div class="block">
+      <div class="block" id="b-dumb">
         <div class="block-head">
           <h2>High-welfare seats have fewer people in work and more in poor health.</h2>
           <p>The ten English seats with the highest welfare spending per adult against the ten with the lowest, measured as the difference from the England average. Labels give each group&rsquo;s actual value.</p>
@@ -513,7 +724,7 @@
         <p class="block-foot" id="dumb-foot"></p>
       </div>
 
-      <div class="block">
+      <div class="block" id="b-ben">
         <div class="block-head">
           <h2 id="ben-h">State Pension and Universal Credit make up most of the bill.</h2>
           <p>Annual spending across England on the ten DWP benefits in the model.</p>
@@ -521,7 +732,7 @@
         <div class="bars" id="c-ben" style="max-width: 820px"></div>
       </div>
 
-      <div class="block">
+      <div class="block" id="b-table">
         <div class="block-head">
           <h2>Every constituency, ranked by net contribution per adult.</h2>
           <p>Sort by any column. Click a row to open the seat on the map.</p>
@@ -536,7 +747,7 @@
         <div class="table-scroll"><table id="t-seats"></table></div>
       </div>
 
-      <div class="block">
+      <div class="block" id="b-method">
         <div class="block-head">
           <h2>What the model counts, and what it leaves out.</h2>
         </div>
@@ -555,6 +766,33 @@
     </div>
   </div>
 </footer>
+
+<div class="story" id="story" role="dialog" aria-modal="true" aria-labelledby="st-h" hidden>
+  <div class="st-text">
+    <div class="st-top">
+      <button type="button" class="st-skip" id="st-skip">Skip to the tracker</button>
+      <img class="st-mark" src="asi_logo_white.svg" alt="Adam Smith Institute" width="52" height="52">
+    </div>
+    <div class="st-body" id="st-body" aria-live="polite"></div>
+    <div class="st-nav">
+      <button type="button" class="st-back" id="st-back">Back</button>
+      <button type="button" class="st-next" id="st-next">Start the tour</button>
+    </div>
+    <div class="st-foot">
+      <div class="st-rule"></div>
+      <div class="st-foot-row"><span>adamsmith.org</span><span class="st-page" id="st-page"></span></div>
+    </div>
+  </div>
+  <div class="st-vis" id="st-vis">
+    <button type="button" class="st-expand" id="st-expand">Explore this in full</button>
+    <svg id="st-map" role="img" aria-label="Map of England's 543 parliamentary constituencies"></svg>
+    <div class="st-scene chart off" id="st-scene"></div>
+    <div class="st-over" id="st-over"></div>
+    <div class="st-legend" id="st-legend"></div>
+    <svg class="wm" aria-hidden="true" focusable="false"><use href="#asi-mark"/></svg>
+  </div>
+</div>
+<button type="button" class="st-return" id="st-return" hidden>Back to the tour <svg aria-hidden="true"><use href="#i-arrow"/></svg></button>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
 <script src="data.js"></script>
@@ -648,6 +886,9 @@
   const share = v => (v * 100).toFixed(v < 0.01 ? 2 : 1) + "%";
   const ord = n => { const s = ["th", "st", "nd", "rd"], v = n % 100; return n + (s[(v - 20) % 10] || s[v] || s[0]); };
   const kfmt = v => "£" + (v / 1000) + "k";
+  // the ASI mark, tucked into the bottom-right corner of a chart
+  const WM = '<svg class="wm" aria-hidden="true" focusable="false"><use href="#asi-mark"/></svg>';
+  const stamp = el => { el.classList.add("stamped"); el.insertAdjacentHTML("beforeend", WM); };
   const monthYear = iso => { if (!iso) return ""; const d = new Date(iso + "T00:00:00"); return d.toLocaleDateString("en-GB", { month: "long", year: "numeric" }); };
   const cssVar = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
 
@@ -1407,6 +1648,7 @@
       const [cx, cy] = d3.pointer(ev, el);
       placeTip(tipEl, el, cx, cy);
     }, () => { tipEl.hidden = true; ring.hide(); }, p => { tipEl.hidden = true; if (p.s !== s) selectSeat(p.s.code, { zoom: true }); }, 18);
+    stamp(el);
   }
 
   function benefitBars(el, o) {
@@ -1415,6 +1657,7 @@
     el.innerHTML = rows.map(r => `<div class="bar-row"><span>${esc(r.name)}</span>
       <span class="val num">${gbp(r.v)} <span class="muted">/ ${gbp(r.eng)}</span></span>
       <span class="trk"><span class="fill" style="width:${(r.v / max * 100).toFixed(2)}%"></span><span class="ref" style="left:${(r.eng / max * 100).toFixed(2)}%"></span></span></div>`).join("");
+    stamp(el);
   }
 
   const INDICATORS = [
@@ -1456,6 +1699,7 @@
       const v = it.get(s);
       if (v != null) g.append("circle").attr("cx", x(v)).attr("cy", 13).attr("r", 6.5).style("fill", "var(--accent)").style("stroke", "var(--ground)").attr("stroke-width", 2);
     });
+    stamp(el);
   }
 
   function payLadder(el, s) {
@@ -1480,6 +1724,7 @@
     g.append("g").selectAll("circle").data(sp.filter(d => d[1] != null)).join("circle").attr("cx", d => x(d[0])).attr("cy", d => y(d[1])).attr("r", 4).style("fill", "var(--accent)").style("stroke", "var(--ground)").attr("stroke-width", 2);
     const last = sp[sp.length - 1];
     if (last[1] != null) g.append("text").attr("class", "lab halo").attr("x", x(last[0]) - 8).attr("y", y(last[1]) - 10).attr("text-anchor", "end").text(gbp(last[1]));
+    stamp(el);
   }
 
   // ---------- national ----------
@@ -1522,6 +1767,7 @@
           <div class="t-sub">Income tax and NI ${bn(d.tax)} · welfare ${bn(d.wel)}</div><div class="t-sub">${d.surplus} of ${d.seats} seats in surplus</div>`;
         const [cx, cy] = d3.pointer(ev, el); placeTip(tipEl, el, cx, cy);
       }).on("pointerleave", () => { tipEl.hidden = true; });
+    stamp(el);
   }
 
   let scatterIso = null;
@@ -1572,6 +1818,7 @@
       tipEl.innerHTML = scatterTipHTML(p.s);
       const [cx, cy] = d3.pointer(ev, el); placeTip(tipEl, el, cx, cy);
     }, () => { tipEl.hidden = true; ring.hide(); }, p => openSeat(p.s.code));
+    stamp(el);
   }
 
   function multiples() {
@@ -1600,6 +1847,7 @@
       }, () => { tipEl.hidden = true; ring.hide(); }, p => openSeat(p.s.code), 16);
     });
     const ld = W.parties.find(p => p.name === "Liberal Democrat");
+    stamp(el);
     if (ld && ld.net <= 0) document.getElementById("party-h").textContent = "Seats by party of sitting MP.";
   }
 
@@ -1659,6 +1907,7 @@
         s.append("text").attr("class", "lab halo").attr("x", x(rel) + (leftSide ? -11 : 11)).attr("y", cy + 4.5).attr("text-anchor", leftSide ? "end" : "start").text(fmt(v, r.fmt));
       });
     });
+    stamp(el);
   }
 
   function benefitsNational() {
@@ -1668,6 +1917,7 @@
     el.innerHTML = rows.map(r => `<div class="bar-row"><span>${esc(r.name)}</span>
       <span class="val num">${bn(r.v)} <span class="muted">${pct(r.v / E.wel, 1)}</span></span>
       <span class="trk"><span class="fill" style="width:${(r.v / max * 100).toFixed(2)}%"></span></span></div>`).join("");
+    stamp(el);
     document.getElementById("ben-h").textContent = `${rows[0].name} and ${rows[1].name} make up ${pct((rows[0].v + rows[1].v) / E.wel)} of the bill.`;
   }
 
@@ -1740,9 +1990,595 @@
       else if (state.sel) drawSeatCharts(byCode.get(state.sel));
     }, 150);
   }).observe(document.querySelector("main"));
-  function onTheme() { buildScales(); paint(); }
+  function onTheme() {
+    buildScales(); paint();
+    if (tour.open) { tour.scene = null; STEPS[tour.i].show(isDone(STEPS[tour.i])); }
+  }
   window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", onTheme);
   new MutationObserver(onTheme).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+
+  // ---------- guided tour ----------
+  // A short presentation that opens on arrival: guesses, reveals and the reader's own seat.
+  // Every step can hand over to the matching view in the full tracker and be resumed.
+  const ST = {
+    el: document.getElementById("story"), body: document.getElementById("st-body"),
+    next: document.getElementById("st-next"), back: document.getElementById("st-back"),
+    page: document.getElementById("st-page"), scene: document.getElementById("st-scene"),
+    over: document.getElementById("st-over"), legend: document.getElementById("st-legend"),
+    expand: document.getElementById("st-expand"), ret: document.getElementById("st-return"),
+  };
+  const tour = { i: 0, ans: {}, draft: {}, open: false, scene: null };
+  const ARROW_SVG = '<svg aria-hidden="true"><use href="#i-arrow"/></svg>';
+  const cap = t => t.charAt(0).toUpperCase() + t.slice(1);
+  const pence = r => r < 1 ? Math.round(r * 100) + "p" : ratio(r);
+  const theRegion = n => (/^(North|South|East|West)/.test(n) ? "the " : "") + n;
+  const PARTY_PHRASE = { lab: "Labour", con: "the Conservatives", ld: "the Liberal Democrats", ref: "Reform UK" };
+  const dumbFmt = (v, f) => f === "age" || f === "yrs" ? v.toFixed(1) : f === "gbp" ? "£" + Math.round(v) : f === "pct1" ? v.toFixed(1) + "%" : Math.round(v * 100) + "%";
+
+  // figures the story quotes, all read from the model
+  const REG = W.regions.slice().sort((a, b) => b.npa - a.npa);
+  const REG_BY = Object.fromEntries(W.regions.map(r => [r.name, r]));
+  const TOP_REG = REG[0], LOW_REG = REG[REG.length - 1];
+  const EVEN = REG.filter(r => r !== TOP_REG && Math.abs(r.net / r.tax) < 0.05);
+  const LON = CITY_AGG.London, BHAM = CITY_AGG.Birmingham;
+  const [TPW0, TPW1] = d3.extent(seats, s => s.tpw), [WPA0, WPA1] = d3.extent(seats, s => s.wpa);
+  const SURPLUS_HIGH_PAY = seats.filter(s => s.net > 0 && s.tpw > E.tpw).length;
+  const benOf = n => E.ben[W.benefits.indexOf(n)];
+  const SP = benOf("State Pension"), UC = benOf("Universal Credit");
+  const DIS = ["Personal Independence Payment", "Disability Living Allowance", "Attendance Allowance", "Employment and Support Allowance", "Carer's Allowance"]
+    .reduce((a, n) => a + benOf(n), 0);
+  const DB = Object.fromEntries(W.dumbbell.groups.flatMap(g => g.rows).map(r => [r.label, r]));
+  const TOUR_PARTIES = ["lab", "con", "ld", "ref"].map(g => GROUP[g]).filter(p => p.n);
+  const BEST_PARTY = TOUR_PARTIES.slice().sort((a, b) => b.surplus / b.n - a.surplus / a.n)[0];
+  const BEST_AGG = agg(seats.filter(s => s.g === BEST_PARTY.g));
+  const fiscalOf = o => fiscalScale(fiscalT(o, "npa"));
+
+  // ----- the tour's own map -----
+  const stSvg = d3.select("#st-map").attr("viewBox", `0 0 ${VW} ${VH}`).attr("preserveAspectRatio", "xMidYMid meet");
+  const stG = stSvg.append("g").attr("transform", "translate(0,0) scale(1)");
+  const stSeats = stG.append("g").selectAll("path").data(feats, d => d.id).join("path").attr("class", "st-seat").attr("d", path);
+  const stEdges = stG.append("g");
+  const stHi = stG.append("path").attr("class", "st-hi");
+  const stNorth = new Map(feats.map(f => [f.id, path.centroid(f)[1] / VH]));
+  let regionEdges = null;
+  const regionEdge = r => (regionEdges = regionEdges || Object.fromEntries(REGIONS.map(n => [n, outlineD(seats.filter(s => s.region === n))])))[r];
+
+  function stZoom(b, fx = 0.5, fy = 0.5, fill = 0.62) {
+    let t = "translate(0,0) scale(1)";
+    if (b) {
+      const [[x0, y0], [x1, y1]] = b;
+      const k = Math.max(1, Math.min(30, fill / Math.max((x1 - x0) / VW, (y1 - y0) / VH)));
+      t = `translate(${VW * fx - k * (x0 + x1) / 2},${VH * fy - k * (y0 + y1) / 2}) scale(${k})`;
+    }
+    stG.transition().duration(dur(900)).attr("transform", t);
+  }
+  const stMapOn = on => stSvg.classed("off", !on);
+  const stPaint = fn => stSeats.style("fill", d => fn(byCode.get(d.id)));
+  function stReset() {
+    stEdges.selectAll("*").remove();
+    stHi.attr("d", null);
+    stSvg.classed("pick", false);
+    ST.over.innerHTML = "";
+    ST.legend.innerHTML = "";
+  }
+  // seats fade in from north to south the first time the map appears
+  function stRise() {
+    if (REDUCED) return;
+    stSeats.classed("rise", false).style("animation-delay", d => Math.round(stNorth.get(d.id) * 900) + "ms");
+    void stSvg.node().getBoundingClientRect();
+    stSeats.classed("rise", true);
+  }
+  function fiscalKey(note) {
+    ST.legend.innerHTML = `<div class="ramp"><div class="ramp-ends"><span>Deficit</span><span>Surplus</span></div>
+      <div class="ramp-bar" style="background:${fiscalCSS()}"></div>
+      <div class="ramp-ticks"><span style="left:0">${MINUS}£5k</span><span style="left:50%;transform:translateX(-50%)">£0</span><span style="left:100%;transform:translateX(-100%)">+£5k</span></div></div>
+      <p class="st-cap">${note || "Income tax and NI minus welfare spending, per adult."}</p>`;
+  }
+  function partyKey() {
+    ST.legend.innerHTML = `<div class="legend">${GROUPS.filter(x => x.n).map(x => `<span class="item"><span class="sw" style="background:${pc(x.g)}"></span>${esc(groupName(x.g))} <span class="n">${x.n}</span></span>`).join("")}</div>
+      <p class="st-cap">Party of sitting MP, ${W.partyAsOf}.</p>`;
+  }
+  stSeats
+    .on("pointermove", (ev, d) => { if (canPickRegion()) stHi.attr("d", regionEdge(byCode.get(d.id).region)); })
+    .on("pointerleave", () => { if (canPickRegion()) stHi.attr("d", null); })
+    .on("click", (ev, d) => { if (canPickRegion()) answer(STEPS[tour.i], byCode.get(d.id).region); });
+  const canPickRegion = () => tour.open && STEPS[tour.i].pick === "region" && !isDone(STEPS[tour.i]);
+
+  // ----- scenes: the charts that take the map's place -----
+  const SCENES = {
+    bars: {
+      build(el) {
+        el.innerHTML = `<div class="st-bars">
+          <p class="st-sh">One year of income tax and National Insurance against one year of welfare spending</p>
+          <div class="st-bar"><div class="st-bl"><span>Income tax and NI paid by workers</span><b>${bn(E.tax)}</b></div><div class="st-bt"><i class="st-tb" style="width:0;background:var(--accent)"></i></div></div>
+          <div class="st-bar"><div class="st-bl"><span>Welfare spending on ten DWP benefits</span><b class="st-wv">?</b></div><div class="st-bt"><i class="st-wb" style="width:0;background:var(--hi)"></i></div></div>
+          <p class="st-gapline" hidden>The gap is <b>${bn(E.wel - E.tax)}</b> a year.</p></div>`;
+      },
+      update(el, done) {
+        el.querySelector(".st-tb").style.width = (E.tax / E.wel * 100).toFixed(1) + "%";
+        el.querySelector(".st-wb").style.width = done ? "100%" : "0";
+        el.querySelector(".st-wv").textContent = done ? bn(E.wel) : "?";
+        el.querySelector(".st-gapline").hidden = !done;
+      },
+    },
+    cities: {
+      build(el) {
+        el.innerHTML = `<div class="st-two">${["London", "Birmingham"].map(c => {
+          const A = CITY_AGG[c];
+          return `<figure class="st-city"><svg data-c="${c}" role="img" aria-label="Map of ${c}'s constituencies"></svg>
+            <figcaption><h3>${c}</h3><p class="st-cbig">${sgbp(A.npa)}<small> net per adult</small></p>
+            <p>${A.surplus} of ${A.seats} seats pay in more than they receive</p><p>${ratio(A.ratio)} of welfare per £1 of tax</p></figcaption></figure>`;
+        }).join("")}</div>`;
+        el.querySelectorAll("svg[data-c]").forEach(node => {
+          const c = node.dataset.c, [[x0, y0], [x1, y1]] = CITY_BOX[c], pad = Math.max(x1 - x0, y1 - y0) * 0.06;
+          const g = d3.select(node).attr("viewBox", `${x0 - pad} ${y0 - pad} ${x1 - x0 + 2 * pad} ${y1 - y0 + 2 * pad}`).attr("preserveAspectRatio", "xMidYMid meet");
+          g.selectAll("path.st-cseat").data(CITY_SEATS[c]).join("path").attr("class", "st-cseat")
+            .attr("d", s => path(featBy.get(s.code))).style("fill", s => fiscalOf(s))
+            .append("title").text(s => `${s.name}: ${sgbp(s.npa)} per adult`);
+          g.append("path").attr("class", "st-cedge").attr("d", CITY_EDGE[c]);
+        });
+        fiscalKey("Each seat coloured by income tax and NI minus welfare, per adult. The two cities are drawn at different scales.");
+      },
+    },
+    scatter: {
+      build(el) {
+        el.innerHTML = `<div class="key st-key"><span><span class="dot" style="background:var(--accent)"></span>London seats</span><span><span class="dot" style="background:var(--hi)"></span>Birmingham seats</span><span><span class="dot" style="background:var(--dot)"></span>Other seats</span></div>`;
+        const W0 = el.clientWidth, H0 = el.clientHeight, m = { t: 14, r: 18, b: 62, l: 84 };
+        const w = Math.max(200, W0 - m.l - m.r), h = Math.max(160, Math.min(H0 - 44 - m.t - m.b, w * 0.72));
+        const x = d3.scaleLinear([0, X_MAX], [0, w]), y = d3.scaleLinear([0, Y_MAX], [h, 0]);
+        const g = d3.select(el).append("svg").attr("width", W0).attr("height", h + m.t + m.b).append("g").attr("transform", `translate(${m.l},${m.t})`);
+        scatterFrame(g, x, y, w, h);
+        const dots = (list, r, fill) => g.append("g").selectAll("circle").data(list).join("circle")
+          .attr("cx", s => x(s.tpw)).attr("cy", s => y(s.wpa)).attr("r", r).style("fill", fill)
+          .style("stroke", "var(--ground)").attr("stroke-width", r > 3 ? 1.2 : 0);
+        dots(seats.filter(s => s.city !== "London" && s.city !== "Birmingham"), 2.6, "var(--dot)");
+        dots(CITY_SEATS.London, 3.8, "var(--accent)");
+        dots(CITY_SEATS.Birmingham, 4.6, "var(--hi)");
+        const br = g.append("g").attr("class", "st-range-mark");
+        br.append("path").attr("d", `M${x(TPW0)},${h + 32}v-8M${x(TPW0)},${h + 28}H${x(TPW1)}M${x(TPW1)},${h + 32}v-8`);
+        br.append("text").attr("class", "lab").attr("x", (x(TPW0) + x(TPW1)) / 2).attr("y", h + 50).attr("text-anchor", "middle")
+          .text(`Income tax and NI per worker varies ${(TPW1 / TPW0).toFixed(1)} times`);
+        br.append("path").attr("d", `M-52,${y(WPA0)}h8M-48,${y(WPA0)}V${y(WPA1)}M-52,${y(WPA1)}h8`);
+        br.append("text").attr("class", "lab").attr("transform", `translate(-60,${(y(WPA0) + y(WPA1)) / 2}) rotate(-90)`).attr("text-anchor", "middle")
+          .text(`Welfare per adult varies ${(WPA1 / WPA0).toFixed(1)} times`);
+      },
+    },
+    dumb: {
+      build(el) {
+        const rows = ["Employment rate", "Median weekly pay", "No qualifications", "Degree-level qualifications", "Obesity", "Diabetes", "Disabled"]
+          .map(l => DB[l]).filter(Boolean).map(r => ({ ...r, rh: r.hi / r.eng - 1, rl: r.lo / r.eng - 1 }));
+        el.innerHTML = `<div class="key st-key"><span><span class="dot" style="background:var(--hi)"></span>10 highest-welfare seats</span><span><span class="dot" style="background:var(--lo)"></span>10 lowest-welfare seats</span><span><span class="tick"></span>England average</span></div>`;
+        const W0 = el.clientWidth, narrow = W0 < 520;
+        const m = { t: 30, r: 24, b: 8, l: narrow ? 8 : Math.min(230, W0 * 0.34) };
+        const RH = narrow ? 52 : 46, w = W0 - m.l - m.r, h = rows.length * RH;
+        const lim = Math.ceil((d3.max(rows, r => Math.max(Math.abs(r.rh), Math.abs(r.rl))) + 0.12) * 4) / 4;
+        const x = d3.scaleLinear([-lim, lim], [0, w]);
+        const g = d3.select(el).append("svg").attr("width", W0).attr("height", h + m.t + m.b).append("g").attr("transform", `translate(${m.l},${m.t})`);
+        const ticks = d3.range(-lim, lim + 0.001, 0.25);
+        g.append("g").selectAll("text").data(ticks).join("text").attr("x", d => x(d)).attr("y", -12).attr("text-anchor", "middle")
+          .text(d => Math.abs(d) < 1e-9 ? "England" : (d > 0 ? "+" : MINUS) + Math.round(Math.abs(d) * 100) + "%");
+        g.append("g").attr("class", "grid").selectAll("line").data(ticks.filter(t => Math.abs(t) > 1e-9)).join("line")
+          .attr("x1", d => x(d)).attr("x2", d => x(d)).attr("y1", -4).attr("y2", h);
+        g.append("line").style("stroke", "var(--ink)").attr("stroke-width", 2).attr("x1", x(0)).attr("x2", x(0)).attr("y1", -4).attr("y2", h);
+        rows.forEach((r, i) => {
+          const s = g.append("g").attr("transform", `translate(0,${i * RH})`), cy = narrow ? RH - 14 : RH / 2;
+          s.append("text").attr("x", narrow ? 0 : -14).attr("y", narrow ? 15 : cy + 5).attr("text-anchor", narrow ? "start" : "end")
+            .style("font-size", "14.5px").style("fill", "var(--ink)").text(r.label);
+          const a = Math.min(r.rh, r.rl), b = Math.max(r.rh, r.rl);
+          s.append("line").style("stroke", "var(--rule-2)").attr("stroke-width", 4).attr("x1", x(a)).attr("x2", x(b)).attr("y1", cy).attr("y2", cy);
+          [["hi", r.rh, r.hi], ["lo", r.rl, r.lo]].forEach(([k, rel, v]) => {
+            const left = rel === a && a !== b;
+            s.append("circle").attr("cx", x(rel)).attr("cy", cy).attr("r", 7).style("fill", `var(--${k})`).style("stroke", "var(--ground)").attr("stroke-width", 2);
+            s.append("text").attr("class", "lab halo").attr("x", x(rel) + (left ? -12 : 12)).attr("y", cy + 4.5).attr("text-anchor", left ? "end" : "start").text(dumbFmt(v, r.fmt));
+          });
+        });
+      },
+    },
+    waffle: {
+      build(el) {
+        const parts = [
+          { name: "State Pension", v: SP, c: "var(--accent)" },
+          { name: "Universal Credit", v: UC, c: "var(--hi)" },
+          { name: "Disability and carer benefits", v: DIS, c: "var(--lav)" },
+          { name: "Housing Benefit, Pension Credit and JSA", v: E.wel - SP - UC - DIS, c: "var(--dot)" },
+        ];
+        // largest remainder, so the squares add up to exactly 100
+        const raw = parts.map(p => p.v / E.wel * 100), n = raw.map(Math.floor);
+        let left = 100 - d3.sum(n);
+        raw.map((r, i) => [r - n[i], i]).sort((a, b) => b[0] - a[0]).forEach(([, i]) => { if (left-- > 0) n[i]++; });
+        const cells = parts.flatMap((p, i) => d3.range(n[i]).map(() => p.c));
+        el.innerHTML = `<div class="st-waffle-wrap">
+          <div class="st-waffle" role="img" aria-label="Welfare spending in 100 squares">${cells.map((c, i) => `<i style="background:${c};animation-delay:${REDUCED ? 0 : i * 12}ms"></i>`).join("")}</div>
+          <div class="st-wlegend"><p class="st-sh">Each square is 1% of the ${bn(E.wel)} bill, about ${bn(E.wel / 100)}.</p>
+          ${parts.map((p, i) => `<div class="st-wl"><span class="sw" style="background:${p.c}"></span><span>${p.name}</span><b>${bn(p.v)}</b><em>${n[i]}%</em></div>`).join("")}</div></div>`;
+      },
+    },
+    party: {
+      build(el) {
+        el.innerHTML = `<div class="st-bars"><p class="st-sh">Share of each party’s seats that pay in more than they receive</p>${TOUR_PARTIES.map(p => `
+          <div class="st-bar" data-g="${p.g}"><div class="st-bl"><span><span class="sw" style="background:${pc(p.g)}"></span>${esc(groupName(p.g))} <span class="muted">${p.n} seats</span> <em class="st-pk" hidden>Your pick</em></span><b class="st-pv"></b></div>
+          <div class="st-bt"><i style="width:0;background:${pc(p.g)}"></i></div></div>`).join("")}</div>`;
+      },
+      update(el, done) {
+        TOUR_PARTIES.forEach(p => {
+          const row = el.querySelector(`[data-g="${p.g}"]`);
+          row.querySelector("i").style.width = done ? (p.surplus / p.n * 100).toFixed(1) + "%" : "0";
+          row.querySelector(".st-pv").textContent = done ? `${p.surplus} of ${p.n}` : "";
+          row.querySelector(".st-pk").hidden = !(done && tour.ans.party === p.g);
+        });
+      },
+    },
+  };
+  function setScene(key, done) {
+    const el = ST.scene;
+    if (!key) { el.classList.add("off"); tour.scene = null; return; }
+    if (tour.scene !== key) {
+      tour.scene = key;
+      el.style.transition = "none";
+      el.classList.add("off");
+      el.innerHTML = "";
+      SCENES[key].build(el);
+      void el.offsetWidth;
+      el.style.transition = "";
+      el.classList.remove("off");
+    }
+    // skip the update if the reader has already moved on to another step
+    if (SCENES[key].update) requestAnimationFrame(() => { if (tour.scene === key) SCENES[key].update(el, done); });
+  }
+
+  function seatCard(s) {
+    const cmp = (label, v, e) => {
+      const max = Math.max(v, e) * 1.15;
+      return `<div class="bar-row"><span>${label}</span><span class="val num">${gbp(v)} <span class="muted">/ ${gbp(e)}</span></span>
+        <span class="trk"><span class="fill" style="width:${(v / max * 100).toFixed(1)}%"></span><span class="ref" style="left:${(e / max * 100).toFixed(1)}%"></span></span></div>`;
+    };
+    return `<div class="st-card"><p class="st-ck">${esc(s.region)}</p><h3>${esc(s.name)}</h3>
+      <p class="st-cmp"><span class="sw" style="background:${pc(s.g)}"></span>${esc(s.party)} · ${s.mp ? esc(s.mp) : "Seat vacant"}</p>
+      <p class="st-cbig">${sgbp(s.npa)}<small> net per adult</small></p>
+      <div class="bars">${cmp("Income tax and NI per worker", s.tpw, E.tpw)}${cmp("Welfare spending per adult", s.wpa, E.wpa)}</div>
+      <div class="key"><span><span class="sw" style="background:var(--accent)"></span>This seat</span><span><span class="tick"></span>England</span></div></div>`;
+  }
+
+  // ----- handing over to the full tracker -----
+  function openMap(mode) {
+    showTab("map");
+    if (mode) document.querySelector(`[data-mode="${mode}"]`).click();
+    document.getElementById("view-map").scrollIntoView({ block: "start" });
+  }
+  function openNat(id) {
+    showTab("nat");
+    const t = document.getElementById(id);
+    if (t) t.scrollIntoView({ block: "start" });
+  }
+
+  // ----- the steps -----
+  const deficitSeats = seats.length - surplusSeats;
+  const otherParties = TOUR_PARTIES.filter(p => p !== BEST_PARTY).sort((a, b) => b.surplus / b.n - a.surplus / a.n);
+  const STEPS = [
+    {
+      key: "intro",
+      h: `England spends <span class="hl">more on welfare</span> than its workers pay in income tax and National Insurance.`,
+      p: `Follow the money through all ${seats.length} English constituencies. The tour takes about three minutes, and anything you see can be opened in the full tracker as you go.`,
+      show() { stReset(); setScene(null); stMapOn(true); stPaint(() => "var(--st-neutral)"); stZoom(null); stRise(); },
+      expandLabel: "Explore the map", expand() { openMap(); },
+    },
+    {
+      key: "ratio",
+      h: `For every £1 of income tax and National Insurance, how much is spent on welfare?`,
+      p: `Drag the slider to make your guess.`,
+      guess: {
+        min: 0.5, max: 2, step: 0.05, init: 1, answer: E.ratio, unit: "of welfare", fmt: v => "£" + v.toFixed(2),
+        gap: d => { const p = Math.round(Math.abs(d) * 100); return p === 0 ? "matches the real figure" : `was ${p}p too ${d < 0 ? "low" : "high"}`; },
+      },
+      reveal: () => `<strong>${ratio(E.ratio)}.</strong> Workers pay ${bn(E.tax)} a year in income tax and National Insurance on their wages. The ten benefits in this model cost ${bn(E.wel)}.`,
+      show(done) { stReset(); stMapOn(false); setScene("bars", done); },
+      expandLabel: "See the national figures", expand() { openNat("view-nat"); },
+    },
+    {
+      key: "seats",
+      h: `How many of England’s ${seats.length} constituencies pay in more than they take out?`,
+      p: `A seat pays its way when its workers pay more in income tax and National Insurance than is spent there on welfare. Drag to guess.`,
+      guess: {
+        min: 0, max: seats.length, step: 1, init: Math.round(seats.length / 2), answer: surplusSeats, unit: "seats", fmt: v => f0(v),
+        gap: d => d === 0 ? "was exactly right" : `was ${f0(Math.abs(d))} too ${d < 0 ? "low" : "high"}`,
+      },
+      reveal: () => `<strong>${surplusSeats}.</strong> The other ${deficitSeats} receive more in welfare than their workers pay in.`,
+      show(done) {
+        stReset(); setScene(null); stMapOn(true); stZoom(null);
+        stPaint(s => done ? fiscalOf(s) : "var(--st-neutral)");
+        if (done) fiscalKey();
+      },
+      expandLabel: "Explore this map", expand() { openMap("fiscal"); },
+    },
+    {
+      key: "region", pick: "region",
+      h: `Only one region clearly pays its way. Which?`,
+      p: `Click it on the map, or choose from the list.`,
+      choices: REGIONS.map(r => ({ v: r, label: r })), answer: TOP_REG.name, small: true,
+      feedback: v => {
+        if (!v) return "";
+        if (v === TOP_REG.name) return `You chose ${theRegion(v)}, which is right.`;
+        const r = REG_BY[v];
+        return r.npa < 0 ? `You chose ${theRegion(v)}, which runs a deficit of ${gbp(-r.npa)} per adult.` : `You chose ${theRegion(v)}, which pays in ${gbp(r.npa)} per adult, close to break-even.`;
+      },
+      reveal: () => `<strong>${TOP_REG.name}.</strong> Its seats pay in ${bn(TOP_REG.net)} more than they receive, or ${gbp(TOP_REG.npa)} per adult. ` +
+        (EVEN.length ? `${cap(EVEN.map(r => theRegion(r.name)).join(" and "))} roughly ${EVEN.length > 1 ? "break" : "breaks"} even. ` : "") +
+        `Every other region runs a deficit, deepest in ${theRegion(LOW_REG.name)} at ${gbp(-LOW_REG.npa)} per adult.`,
+      after: () => `<div class="st-rank st-pop">${REG.map(r => `<div class="st-ri${r.name === tour.ans.region ? " pick" : ""}"><span class="sw" style="background:${fiscalOf(r)}"></span><span>${esc(r.name)}${r.name === tour.ans.region ? "<em>your pick</em>" : ""}</span><b>${sgbp(r.npa)}</b></div>`).join("")}</div>`,
+      show(done) {
+        stReset(); setScene(null); stMapOn(true); stZoom(null);
+        stEdges.selectAll("path").data(REGIONS).join("path").attr("class", "st-edge").attr("d", r => regionEdge(r));
+        if (!done) { stSvg.classed("pick", true); stPaint(() => "var(--st-neutral)"); return; }
+        stPaint(s => fiscalOf(REG_BY[s.region]));
+        stHi.attr("d", regionEdge(TOP_REG.name));
+        fiscalKey("Each region coloured by income tax and NI minus welfare, per adult.");
+      },
+      expandLabel: "Explore the regions",
+      expand() { openMap("fiscal"); setRegion(REGIONS.includes(tour.ans.region) ? tour.ans.region : TOP_REG.name); },
+    },
+    {
+      key: "cities",
+      h: `A tale of two cities.`,
+      p: `London and Birmingham are England’s two largest cities. ${LON.surplus} of London’s ${LON.seats} seats pay in more than they receive. ` +
+        `${BHAM.surplus ? `${BHAM.surplus} of Birmingham’s ${BHAM.seats} do.` : `None of Birmingham’s ${BHAM.seats} do.`} ` +
+        `Birmingham spends ${pence(BHAM.ratio)} on welfare for every £1 its workers pay in income tax and NI. London spends ${pence(LON.ratio)}.`,
+      show() { stReset(); stMapOn(false); setScene("cities"); },
+      expandLabel: "Explore England’s cities", expand() { showTab("cities"); document.getElementById("view-map").scrollIntoView({ block: "start" }); },
+    },
+    {
+      key: "pay",
+      h: `Pay makes most of the difference.`,
+      p: `Welfare spending per adult in the highest-spending seat is ${(WPA1 / WPA0).toFixed(1)} times the lowest. For income tax and NI per worker, the gap is ${(TPW1 / TPW0).toFixed(1)} times. ` +
+        `Of the ${surplusSeats} seats that pay their way, ${SURPLUS_HIGH_PAY} have above-average tax per worker.`,
+      show() { stReset(); stMapOn(false); setScene("scatter"); },
+      expandLabel: "See every seat", expand() { openNat("b-scatter"); },
+    },
+    {
+      key: "work",
+      h: `High-welfare seats have fewer people in work and more in poor health.`,
+      p: `Take the ten seats with the highest welfare spending per adult and the ten with the lowest. In the first group, ${pct(DB["Employment rate"].hi)} of working-age adults have a job and ${pct(DB["No qualifications"].hi)} have no qualifications. ` +
+        `In the second, the figures are ${pct(DB["Employment rate"].lo)} and ${pct(DB["No qualifications"].lo)}. ` +
+        `Obesity is ${(DB.Obesity.hi / DB.Obesity.lo).toFixed(1)} times as common in the first group, and diabetes ${(DB.Diabetes.hi / DB.Diabetes.lo).toFixed(1)} times.`,
+      show() { stReset(); stMapOn(false); setScene("dumb"); },
+      expandLabel: "See the full comparison", expand() { openNat("b-dumb"); },
+    },
+    {
+      key: "pension",
+      h: `The State Pension is ${pct(SP / E.wel)} of the bill.`,
+      p: `It costs ${bn(SP)} of the ${bn(E.wel)}. Universal Credit costs ${bn(UC)}, and disability and carer benefits ${bn(DIS)}. ` +
+        `The tax side does not count pensioners’ own income tax, so seats with older populations look worse than a full balance of tax and spending would show.`,
+      show() { stReset(); stMapOn(false); setScene("waffle"); },
+      expandLabel: "See spending by benefit", expand() { openNat("b-ben"); },
+    },
+    {
+      key: "party",
+      h: `Which party’s seats are most likely to pay their way?`,
+      p: `Pick one.`,
+      choices: TOUR_PARTIES.map(p => ({ v: p.g, label: p.name })), answer: BEST_PARTY.g,
+      feedback: v => !v ? "" : v === BEST_PARTY.g ? `You chose ${PARTY_PHRASE[v]}, which is right.` : `You chose ${PARTY_PHRASE[v]}.`,
+      reveal: () => {
+        const rest = otherParties.map((p, i) => `${PARTY_PHRASE[p.g]} ${i === 0 ? "it is " : ""}${p.surplus} of ${p.n}${i === 0 ? " seats" : ""}`);
+        const list = rest.length > 1 ? rest.slice(0, -1).join(", for ") + " and for " + rest[rest.length - 1] : rest[0];
+        return `<strong>${cap(PARTY_PHRASE[BEST_PARTY.g])}.</strong> ${BEST_PARTY.surplus} of their ${BEST_PARTY.n} seats pay in more than they receive, and together their seats ` +
+          `${BEST_AGG.net >= 0 ? `run a surplus of ${bn(BEST_AGG.net)}` : `run a deficit of ${bn(-BEST_AGG.net)}`}. For ${list}.`;
+      },
+      show(done) { stReset(); stMapOn(false); setScene("party", done); },
+      expandLabel: "See seats by party", expand() { openNat("b-parties"); },
+    },
+    {
+      key: "seat", find: true,
+      h: `Now find where you live.`,
+      p: `Type your constituency, your MP’s name or your postcode.`,
+      reveal: () => {
+        const s = byCode.get(tour.ans.seat);
+        const who = !s.mp ? "currently without an MP" : s.party === "Speaker" ? `represented by ${esc(s.mp)}, the Speaker` : `represented by ${esc(s.mp)}, ${esc(s.party)} MP`;
+        const verdict = s.net < 0
+          ? `Welfare spending here exceeds income tax and NI by ${money(-s.net)} a year, or ${gbp(-s.npa)} per adult.`
+          : `Income tax and NI here exceed welfare spending by ${money(s.net)} a year, or ${gbp(s.npa)} per adult.`;
+        return `<strong>${esc(s.name)}</strong>, ${who}. ${verdict} It ranks ${ord(s.rank)} of England’s ${seats.length} seats for net contribution per adult.`;
+      },
+      show(done) {
+        stReset(); setScene(null); stMapOn(true);
+        stPaint(s => fiscalOf(s)); fiscalKey();
+        if (!done) { stZoom(null); return; }
+        const s = byCode.get(tour.ans.seat), f = featBy.get(s.code);
+        stHi.attr("d", path(f));
+        stZoom(path.bounds(f), 0.34, 0.6, 0.32);
+        ST.over.innerHTML = seatCard(s);
+      },
+      expandLabel: done => done ? "Explore this seat in full" : "Explore the map",
+      expand() { openMap(); if (tour.ans.seat) selectSeat(tour.ans.seat, { zoom: true }); },
+    },
+    {
+      key: "end",
+      h: `Explore the full data.`,
+      p: `The tracker covers every constituency, region, city and party, with each seat’s MP, its tax and welfare figures and the method behind them.`,
+      show() { stReset(); setScene(null); stMapOn(true); stZoom(null); stPaint(s => pc(s.g)); partyKey(); },
+    },
+  ];
+
+  // ----- rendering a step -----
+  const isDone = st => st.find ? !!tour.ans.seat : (st.guess || st.choices) ? (st.key in tour.ans) : true;
+  const pos = (v, g) => Math.max(0, Math.min(100, (v - g.min) / (g.max - g.min) * 100));
+  function guessHTML(st) {
+    const g = st.guess, v = tour.draft[st.key] ?? g.init;
+    return `<div class="st-guess"><div class="st-gv"><span id="st-gv">${g.fmt(v)}</span><small>${g.unit}</small></div>
+      <input type="range" class="st-range" id="st-range" min="${g.min}" max="${g.max}" step="${g.step}" value="${v}" aria-label="Your guess" style="--pct:${pos(v, g)}%">
+      <div class="st-gscale"><span>${g.fmt(g.min)}</span><span>${g.fmt(g.max)}</span></div></div>`;
+  }
+  function resultHTML(st) {
+    const g = st.guess, v = tour.ans[st.key], gp = pos(v, g), ap = pos(g.answer, g);
+    const edge = p => p < 12 ? " l" : p > 88 ? " r" : "";
+    return `<div class="st-guess st-pop"><div class="st-rtrack" data-a="${ap}" data-g="${gp}">
+        <span class="st-rband" style="left:${gp}%;width:0"></span>
+        <span class="st-rm st-rm-g${edge(gp)}" style="left:${gp}%"><em>Your guess: ${g.fmt(v)}</em></span>
+        <span class="st-rm st-rm-a${edge(ap)}" style="left:${gp}%"><em>Actual: ${g.fmt(g.answer)}</em></span>
+      </div><div class="st-gscale"><span>${g.fmt(g.min)}</span><span>${g.fmt(g.max)}</span></div></div>
+      <p class="st-fb st-pop">Your guess of ${g.fmt(v)} ${g.gap(v - g.answer)}.</p>`;
+  }
+  // the answer marker slides from the guess to the real figure
+  function playResult() {
+    const tr = ST.body.querySelector(".st-rtrack");
+    if (!tr) return;
+    const a = +tr.dataset.a, g = +tr.dataset.g;
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      tr.querySelector(".st-rm-a").style.left = a + "%";
+      const band = tr.querySelector(".st-rband");
+      band.style.left = Math.min(a, g) + "%";
+      band.style.width = Math.abs(a - g) + "%";
+    }));
+  }
+  function choicesHTML(st, done) {
+    const v = tour.ans[st.key];
+    return `<div class="st-choices${st.small ? " small" : ""}">${st.choices.map(c => `<button type="button" class="st-choice${done && c.v === st.answer ? " is-answer" : ""}" data-v="${esc(c.v)}" aria-pressed="${v === c.v}"${done ? " disabled" : ""}>${esc(c.label)}</button>`).join("")}</div>`;
+  }
+  function findHTML() {
+    return `<form class="st-find" id="st-find"><label class="sr-only" for="st-q">Constituency, MP or postcode</label>
+      <input id="st-q" list="seat-list" placeholder="e.g. Wigan, or SW1A 1AA" autocomplete="off" value="${esc(tour.draft.q || "")}">
+      <button type="submit" class="st-go" id="st-go">Show me</button></form>
+      <p class="st-err" id="st-err" aria-live="polite"></p>
+      <p class="st-note">Postcodes are looked up with postcodes.io and are not stored.</p>`;
+  }
+  function nextLabel(st, done) {
+    if (tour.i === STEPS.length - 1) return "Open the tracker";
+    if (st.guess && !done) return "Lock in my guess";
+    if (st.choices && !done) return "Show the answer";
+    return tour.i === 0 ? "Start the tour" : "Next";
+  }
+
+  function render(entering) {
+    const st = STEPS[tour.i], done = isDone(st);
+    let html = `<h2 class="st-h" id="st-h" tabindex="-1">${st.h}</h2>`;
+    html += done && st.reveal ? `<p class="st-p${entering ? "" : " st-pop"}">${st.reveal()}</p>` : `<p class="st-p">${st.p}</p>`;
+    if (st.guess) html += done ? resultHTML(st) : guessHTML(st);
+    if (st.choices) {
+      if (done && st.feedback && st.feedback(tour.ans[st.key])) html += `<p class="st-fb st-pop">${st.feedback(tour.ans[st.key])}</p>`;
+      html += done && st.after ? st.after() : choicesHTML(st, done);
+    }
+    if (st.find) html += findHTML();
+    ST.body.classList.remove("in");
+    ST.body.innerHTML = html;
+    if (entering) { ST.body.scrollTop = 0; void ST.body.offsetWidth; ST.body.classList.add("in"); }
+    wireStep(st, done);
+    ST.back.hidden = tour.i === 0;
+    ST.next.innerHTML = `${nextLabel(st, done)} ${ARROW_SVG}`;
+    ST.page.textContent = `${tour.i + 1}/${STEPS.length}`;
+    const label = typeof st.expandLabel === "function" ? st.expandLabel(done) : st.expandLabel;
+    ST.expand.hidden = !st.expand;
+    if (st.expand) ST.expand.innerHTML = `${label} ${ARROW_SVG}`;
+    st.show(done);
+    if (done && st.guess) playResult();
+  }
+
+  function wireStep(st, done) {
+    const range = document.getElementById("st-range");
+    if (range) range.addEventListener("input", () => {
+      const v = +range.value;
+      tour.draft[st.key] = v;
+      document.getElementById("st-gv").textContent = st.guess.fmt(v);
+      range.style.setProperty("--pct", pos(v, st.guess) + "%");
+    });
+    ST.body.querySelectorAll(".st-choice").forEach(b => b.addEventListener("click", () => answer(st, b.dataset.v)));
+    const form = document.getElementById("st-find");
+    if (form) form.addEventListener("submit", async e => {
+      e.preventDefault();
+      const q = document.getElementById("st-q"), err = document.getElementById("st-err"), go = document.getElementById("st-go");
+      tour.draft.q = q.value;
+      if (!q.value.trim()) { err.textContent = "Type a constituency, an MP’s name or a postcode."; return; }
+      go.disabled = true; go.textContent = "Looking up";
+      try {
+        const s = await findWhere(q.value);
+        tour.ans.seat = s.code;
+        render(false);
+      } catch (ex) {
+        err.textContent = ex.message;
+        go.disabled = false; go.textContent = "Show me";
+      }
+    });
+  }
+
+  const POSTCODE = /^[A-Z]{1,2}\d[A-Z\d]?\s*\d[A-Z]{2}$/i;
+  async function findWhere(v) {
+    const t = v.trim();
+    if (!POSTCODE.test(t)) {
+      const s = findSeat(t);
+      if (!s) throw new Error("No English constituency or MP matches that. Try a postcode instead.");
+      return s;
+    }
+    let r;
+    try { r = await fetch("https://api.postcodes.io/postcodes/" + encodeURIComponent(t.replace(/\s+/g, ""))); }
+    catch (e) { throw new Error("The postcode lookup is not available right now. Try your constituency or your MP’s name."); }
+    if (r.status === 404) throw new Error("That postcode was not found. Check it and try again.");
+    if (!r.ok) throw new Error("The postcode lookup is not available right now. Try your constituency or your MP’s name.");
+    const j = (await r.json()).result || {};
+    const code = j.codes && (j.codes.parliamentary_constituency_2024 || j.codes.parliamentary_constituency);
+    if (byCode.has(code)) return byCode.get(code);
+    if (j.country && j.country !== "England") throw new Error(`That postcode is in ${j.country}. The tracker covers England only.`);
+    throw new Error("That postcode could not be matched to a constituency.");
+  }
+
+  function answer(st, v) {
+    tour.ans[st.key] = v;
+    render(false);
+    ST.next.focus({ preventScroll: true });
+  }
+  function go(i) {
+    tour.i = Math.max(0, Math.min(STEPS.length - 1, i));
+    render(true);
+  }
+  function openTour(i, fresh) {
+    if (fresh) { tour.ans = {}; tour.draft = {}; }
+    tour.open = true;
+    tour.scene = null;
+    ST.el.hidden = false;
+    ST.ret.hidden = true;
+    document.documentElement.classList.add("touring");
+    go(i);
+    ST.next.focus({ preventScroll: true });
+  }
+  function closeTour(canReturn) {
+    tour.open = false;
+    ST.el.hidden = true;
+    ST.ret.hidden = !canReturn;
+    document.documentElement.classList.remove("touring");
+    drawCityLabels();
+  }
+
+  ST.next.addEventListener("click", () => {
+    const st = STEPS[tour.i], done = isDone(st);
+    if (tour.i === STEPS.length - 1) { closeTour(false); showTab("map"); window.scrollTo(0, 0); return; }
+    if (st.guess && !done) return answer(st, tour.draft[st.key] ?? st.guess.init);
+    if (st.choices && !done) return answer(st, null);
+    go(tour.i + 1);
+  });
+  ST.back.addEventListener("click", () => go(tour.i - 1));
+  document.getElementById("st-skip").addEventListener("click", () => { closeTour(false); window.scrollTo(0, 0); });
+  ST.expand.addEventListener("click", () => { const st = STEPS[tour.i]; closeTour(true); st.expand(); });
+  ST.ret.addEventListener("click", () => openTour(tour.i, false));
+  document.getElementById("tour-open").addEventListener("click", () => openTour(0, true));
+  document.addEventListener("keydown", e => {
+    if (!tour.open) return;
+    if (e.key === "Escape") { e.preventDefault(); closeTour(false); return; }
+    const tag = (e.target.tagName || "").toLowerCase();
+    if (tag === "input" || tag === "textarea" || tag === "select") return;
+    if (e.key === "ArrowRight") { e.preventDefault(); ST.next.click(); }
+    else if (e.key === "ArrowLeft" && tour.i > 0) { e.preventDefault(); go(tour.i - 1); }
+  });
+  // keep keyboard focus inside the tour while it is open
+  ST.el.addEventListener("keydown", e => {
+    if (e.key !== "Tab") return;
+    const f = [...ST.el.querySelectorAll("button, input")].filter(x => !x.disabled && !x.hidden && x.offsetParent !== null);
+    if (!f.length) return;
+    const first = f[0], last = f[f.length - 1];
+    if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+    else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+  });
+  let tourRT;
+  window.addEventListener("resize", () => {
+    if (!tour.open) return;
+    clearTimeout(tourRT);
+    tourRT = setTimeout(() => { tour.scene = null; STEPS[tour.i].show(isDone(STEPS[tour.i])); }, 200);
+  });
 
   // ---------- boot ----------
   buildScales();
@@ -1756,5 +2592,7 @@
   else if (mSeat && byCode.has(mSeat[1])) selectSeat(mSeat[1], { zoom: true });
   else if (mReg && REGIONS.includes(decodeURIComponent(mReg[1]))) setRegion(decodeURIComponent(mReg[1]));
   else renderPanel();
+  // a plain visit opens the tour; a shared link to a seat, city, region or tab goes straight there
+  if (!h) openTour(0, true);
 })();
 </script>
