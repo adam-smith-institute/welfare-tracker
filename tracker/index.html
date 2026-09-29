@@ -184,6 +184,12 @@
   #map path.seat.on { stroke: var(--ink); stroke-width: 1; }
   #map path.seat.out { opacity: 0.25; }
   #map path.seat.dim { opacity: 0.5; }
+  #map path.seat.inert { cursor: default; }
+  #map .city-edge { fill: none; stroke: var(--ink); stroke-width: 1.6; stroke-linecap: round; vector-effect: non-scaling-stroke; pointer-events: none; transition: opacity 0.3s; }
+  #map .city-edge.out { opacity: 0.25; }
+  #map .hov.city { stroke-width: 3.2; stroke-linecap: round; }
+  #map .city-lab text { font-family: var(--font); font-size: 14px; font-weight: 600; fill: var(--ink); paint-order: stroke; stroke: var(--ground); stroke-width: 4px; stroke-linejoin: round; }
+  #map .city-lab line { stroke: var(--ink); stroke-width: 1; }
   #map .hov { fill: none; stroke: var(--ink); stroke-width: 1.6; vector-effect: non-scaling-stroke; pointer-events: none; }
   #map .sel { fill: none; stroke: var(--ink); stroke-width: 3; stroke-linejoin: round; vector-effect: non-scaling-stroke; pointer-events: none; }
   .zoom { position: absolute; right: 0; top: 0; display: flex; gap: 6px; align-items: flex-start; }
@@ -224,6 +230,7 @@
   .legend button[aria-pressed="true"] { border-bottom-color: var(--ink); font-weight: 600; }
   .legend.isolating button[aria-pressed="false"] { color: var(--ink-3); }
   .legend .n { color: var(--ink-3); font-weight: 400; }
+  .legend .item { display: inline-flex; align-items: center; gap: 7px; padding: 4px 0; min-height: 30px; }
   .ramp { display: grid; gap: 4px; max-width: 460px; }
   .ramp-bar { height: 12px; position: relative; }
   .ramp-bar i { position: absolute; top: -5px; width: 3px; height: 22px; margin-left: -1.5px; background: var(--ink); }
@@ -397,6 +404,7 @@
     </div>
     <div class="tabs" role="tablist" aria-label="Tracker views">
       <button type="button" role="tab" id="tab-map" aria-controls="view-map" aria-selected="true">Constituency map</button>
+      <button type="button" role="tab" id="tab-cities" aria-controls="view-map" aria-selected="false" tabindex="-1">Explore England&rsquo;s cities</button>
       <button type="button" role="tab" id="tab-nat" aria-controls="view-nat" aria-selected="false" tabindex="-1">National picture</button>
     </div>
   </div>
@@ -586,6 +594,30 @@
   // rank by net contribution per adult (1 = largest net contributor)
   seats.slice().sort((a, b) => b.npa - a.npa).forEach((s, i) => { s.rank = i + 1; });
 
+  // ---------- cities ----------
+  // London's 75 seats, plus the constituencies that contain each city council's wards
+  const CITY_LIST = {
+    "Manchester": ["Blackley and Middleton South", "Gorton and Denton", "Manchester Central", "Manchester Rusholme", "Manchester Withington", "Wythenshawe and Sale East"],
+    "Liverpool": ["Liverpool Garston", "Liverpool Riverside", "Liverpool Walton", "Liverpool Wavertree", "Liverpool West Derby"],
+    "Birmingham": ["Birmingham Edgbaston", "Birmingham Erdington", "Birmingham Hall Green and Moseley", "Birmingham Hodge Hill and Solihull North", "Birmingham Ladywood", "Birmingham Northfield", "Birmingham Perry Barr", "Birmingham Selly Oak", "Birmingham Yardley", "Sutton Coldfield"],
+    "Leeds": ["Leeds Central and Headingley", "Leeds East", "Leeds North East", "Leeds North West", "Leeds South", "Leeds South West and Morley", "Leeds West and Pudsey", "Selby", "Wakefield and Rothwell", "Wetherby and Easingwold"],
+    "Sheffield": ["Penistone and Stocksbridge", "Sheffield Brightside and Hillsborough", "Sheffield Central", "Sheffield Hallam", "Sheffield Heeley", "Sheffield South East"],
+    "Bristol": ["Bristol Central", "Bristol East", "Bristol North East", "Bristol North West", "Bristol South"],
+    "Bradford": ["Bradford East", "Bradford South", "Bradford West", "Keighley and Ilkley", "Shipley"],
+    "Leicester": ["Leicester East", "Leicester South", "Leicester West"],
+    "Coventry": ["Coventry East", "Coventry North West", "Coventry South"],
+  };
+  const CITY_NOTES = {
+    Leeds: "Selby, Wakefield and Rothwell, and Wetherby and Easingwold cross the city boundary; each contains Leeds City Council wards.",
+  };
+  const byName = new Map(seats.map(s => [s.name, s]));
+  const CITIES = ["London", ...Object.keys(CITY_LIST)];
+  const CITY_SEATS = { London: seats.filter(s => s.region === "London") };
+  for (const [c, names] of Object.entries(CITY_LIST)) CITY_SEATS[c] = names.map(n => byName.get(n)).filter(Boolean);
+  CITIES.forEach(c => CITY_SEATS[c].forEach(s => { s.city = c; }));
+  const CITY_COUNT = CITIES.reduce((n, c) => n + CITY_SEATS[c].length, 0);
+  const inWords = n => ["no", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten"][n] || String(n);
+
   const BEN_SHORT = ["JSA", "Universal Credit", "State Pension", "Pension Credit", "Housing Benefit", "PIP", "DLA", "ESA", "Carer's Allowance", "Attendance Allowance"];
   const JOBS_PER_ADULT = E.jobs / E.adults;
 
@@ -595,6 +627,8 @@
     return { seats: list.length, tax, wel, net: tax - wel, adults, jobs, ratio: wel / tax, tpw: tax / jobs, wpa: wel / adults,
       npa: (tax - wel) / adults, surplus: list.filter(s => s.net > 0).length, ben: d3.range(10).map(i => d3.sum(list, s => s.ben[i])) };
   }
+  const CITY_AGG = Object.fromEntries(CITIES.map(c => [c, agg(CITY_SEATS[c])]));
+  CITIES.slice().sort((a, b) => CITY_AGG[b].npa - CITY_AGG[a].npa).forEach((c, i) => { CITY_AGG[c].rank = i + 1; });
 
   // ---------- formatting ----------
   const MINUS = "−";
@@ -647,8 +681,11 @@
   const fiscalCSS = () => gradCSS("fs", 7), shareCSS = () => gradCSS("sq", 5);
 
   // ---------- state ----------
-  // scope: a selected seat beats an isolated party, which beats a region, which beats England
-  const state = { mode: "party", metric: "npa", share: "tax", basis: "share", sel: null, iso: null, region: null, tab: "map" };
+  // scope: a selected seat beats an isolated party, which beats a region, which beats England.
+  // On the cities tab: a selected seat beats a city, which beats all cities.
+  const state = { mode: "party", metric: "npa", share: "tax", basis: "share", sel: null, iso: null, region: null, city: null, tab: "map" };
+  let mapScope = "map"; // which map tab was shown last: "map" or "cities"
+  const inCities = () => mapScope === "cities";
 
   // ---------- masthead ----------
   const surplusSeats = seats.filter(s => s.net > 0).length;
@@ -656,29 +693,37 @@
   document.getElementById("lead").textContent = `Workers in England pay ${bn(E.tax)} a year in income tax and National Insurance on their wages. The ten DWP benefits in this model cost ${bn(E.wel)}: ${ratio(E.ratio)} in welfare for every £1 of that tax.`;
 
   // ---------- tabs ----------
-  const tabs = { map: document.getElementById("tab-map"), nat: document.getElementById("tab-nat") };
-  const views = { map: document.getElementById("view-map"), nat: document.getElementById("view-nat") };
+  // the map and cities tabs share one map; the national tab has its own view
+  const TAB_ORDER = ["map", "cities", "nat"];
+  const tabs = Object.fromEntries(TAB_ORDER.map(k => [k, document.getElementById("tab-" + k)]));
   let natDrawn = false;
   function showTab(t, focus) {
     state.tab = t;
-    for (const k of Object.keys(tabs)) {
+    for (const k of TAB_ORDER) {
       const on = k === t;
       tabs[k].setAttribute("aria-selected", on);
       tabs[k].tabIndex = on ? 0 : -1;
-      views[k].hidden = !on;
     }
+    document.getElementById("view-map").hidden = t === "nat";
+    document.getElementById("view-nat").hidden = t !== "nat";
     if (focus) tabs[t].focus();
     if (t === "nat" && !natDrawn) { natDrawn = true; drawNational(); }
+    if (t !== "nat") { if (t !== mapScope) enterMapScope(t); else drawCityLabels(); }
     writeHash();
   }
-  tabs.map.addEventListener("click", () => showTab("map"));
-  tabs.nat.addEventListener("click", () => showTab("nat"));
+  TAB_ORDER.forEach(k => tabs[k].addEventListener("click", () => showTab(k)));
   document.querySelector(".tabs").addEventListener("keydown", e => {
-    if (e.key === "ArrowRight" || e.key === "ArrowLeft") { e.preventDefault(); showTab(state.tab === "map" ? "nat" : "map", true); }
+    if (e.key !== "ArrowRight" && e.key !== "ArrowLeft") return;
+    e.preventDefault();
+    const i = TAB_ORDER.indexOf(state.tab) + (e.key === "ArrowRight" ? 1 : -1);
+    showTab(TAB_ORDER[(i + TAB_ORDER.length) % TAB_ORDER.length], true);
   });
 
   function writeHash() {
-    const h = state.tab === "nat" ? "#national" : state.sel ? "#seat=" + state.sel : state.region ? "#region=" + encodeURIComponent(state.region) : "";
+    const h = state.tab === "nat" ? "#national"
+      : state.sel ? "#seat=" + state.sel
+      : state.tab === "cities" ? (state.city ? "#city=" + encodeURIComponent(state.city) : "#cities")
+      : state.region ? "#region=" + encodeURIComponent(state.region) : "";
     try { history.replaceState(null, "", h || location.pathname + location.search); } catch (e) { /* sandboxed viewer */ }
   }
 
@@ -689,11 +734,34 @@
   const path = d3.geoPath(proj);
   const gRoot = svg.append("g");
   const gSeats = gRoot.append("g");
+  const gEdges = gRoot.append("g");
   const hov = gRoot.append("path").attr("class", "hov");
   const selPath = gRoot.append("path").attr("class", "sel");
+  const gLabels = svg.append("g").attr("pointer-events", "none");
   const feats = GEO.features.filter(f => byCode.has(f.id));
   const featBy = new Map(feats.map(f => [f.id, f]));
   const seatPaths = gSeats.selectAll("path").data(feats, d => d.id).join("path").attr("class", "seat").attr("d", path);
+
+  // Outer boundary of a group of seats: the edges only one of its seats uses. The ONS boundaries
+  // share identical vertices along common edges, so this traces each city as one clean outline.
+  function outlineD(list) {
+    const count = new Map(), segs = [];
+    const add = ring => {
+      for (let i = 1; i < ring.length; i++) {
+        const a = ring[i - 1], b = ring[i], ka = a.join(","), kb = b.join(",");
+        const k = ka < kb ? ka + "|" + kb : kb + "|" + ka;
+        count.set(k, (count.get(k) || 0) + 1);
+        segs.push([k, a, b]);
+      }
+    };
+    list.forEach(s => { const g = featBy.get(s.code).geometry; (g.type === "Polygon" ? [g.coordinates] : g.coordinates).forEach(p => p.forEach(add)); });
+    return segs.filter(([k]) => count.get(k) === 1).map(([, a, b]) => {
+      const p = proj(a), q = proj(b);
+      return `M${p[0].toFixed(1)},${p[1].toFixed(1)}L${q[0].toFixed(1)},${q[1].toFixed(1)}`;
+    }).join("");
+  }
+  const CITY_EDGE = Object.fromEntries(CITIES.map(c => [c, outlineD(CITY_SEATS[c])]));
+  const cityEdges = gEdges.selectAll("path").data(CITIES).join("path").attr("class", "city-edge").attr("d", c => CITY_EDGE[c]);
 
   const mapBox = document.getElementById("map-box");
   const tip = document.getElementById("map-tip");
@@ -705,7 +773,7 @@
       if (ev.type === "touchstart") return ev.touches.length > 1 || curK > 1.01;
       return !ev.ctrlKey && !ev.button;
     })
-    .on("zoom", ev => { gRoot.attr("transform", ev.transform); curK = ev.transform.k; });
+    .on("zoom", ev => { gRoot.attr("transform", ev.transform); curK = ev.transform.k; drawCityLabels(); });
   svg.call(zoom).on("dblclick.zoom", null);
 
   let hintTimer;
@@ -724,28 +792,79 @@
   }
   // frame whatever scope is active once a seat is let go
   function zoomScope() {
-    if (state.iso) zoomToBounds(boundsOf(seats.filter(s => s.g === state.iso)), 12, 0.9);
+    if (inCities() && state.city) zoomToBounds(boundsOf(CITY_SEATS[state.city]), 16, 0.8);
+    else if (state.iso) zoomToBounds(boundsOf(seats.filter(s => s.g === state.iso)), 12, 0.9);
     else if (state.region) zoomToBounds(boundsOf(seats.filter(s => s.region === state.region)), 12, 0.92);
     else svg.transition().duration(dur(650)).call(zoom.transform, d3.zoomIdentity);
   }
   document.getElementById("z-in").addEventListener("click", () => svg.transition().duration(dur(300)).call(zoom.scaleBy, 1.8));
   document.getElementById("z-out").addEventListener("click", () => svg.transition().duration(dur(300)).call(zoom.scaleBy, 1 / 1.8));
 
+  // the menu on the map lists regions on the map tab and cities on the cities tab
   const regionSel = document.getElementById("region");
-  regionSel.innerHTML = `<option value="">England</option>` + REGIONS.map(r => `<option value="${esc(r)}">${esc(r)}</option>`).join("");
-  regionSel.addEventListener("change", () => setRegion(regionSel.value || null));
+  function fillScopeMenu() {
+    const cities = inCities();
+    document.querySelector('label[for="region"]').textContent = cities ? "Show city" : "Show region";
+    regionSel.innerHTML = cities
+      ? `<option value="">All cities</option>` + CITIES.map(c => `<option value="${esc(c)}">${esc(c)}</option>`).join("")
+      : `<option value="">England</option>` + REGIONS.map(r => `<option value="${esc(r)}">${esc(r)}</option>`).join("");
+    regionSel.value = (cities ? state.city : state.region) || "";
+  }
+  fillScopeMenu();
+  regionSel.addEventListener("change", () => inCities() ? setCity(regionSel.value || null) : setRegion(regionSel.value || null));
 
   function fillFor(s) {
+    if (inCities() && !s.city) return "var(--fade)";
     if (state.mode === "party") return state.iso && s.g !== state.iso ? "var(--fade)" : pc(s.g);
     if (state.mode === "share") return shareScale(amountT(s));
     return fiscalScale(fiscalT(s, state.metric));
   }
   function paint() {
+    const cities = inCities();
     seatPaths.style("fill", d => fillFor(byCode.get(d.id)))
       .classed("on", d => state.mode === "party" && !!state.iso && byCode.get(d.id).g === state.iso)
-      .classed("out", d => !!state.region && byCode.get(d.id).region !== state.region)
-      .classed("dim", d => !!state.sel && d.id !== state.sel);
+      .classed("out", d => {
+        const s = byCode.get(d.id);
+        return (!!state.region && s.region !== state.region) || (cities && !!state.city && s.city !== state.city);
+      })
+      .classed("dim", d => !!state.sel && d.id !== state.sel)
+      .classed("inert", d => cities && !byCode.get(d.id).city);
     if (state.iso && state.mode === "party") seatPaths.filter(".on").raise();
+    cityEdges.attr("display", cities ? null : "none").classed("out", c => !!state.city && c !== state.city);
+    drawCityLabels();
+  }
+
+  // City names sit just outside each city's seats, pushed in these directions (screen pixels,
+  // so the labels stay the same size at every zoom). Shown on the all-cities view only.
+  const LABEL_DIR = {
+    London: [1, 0], Birmingham: [-1, 0], Coventry: [0.6, 0.8], Leicester: [1, 0], Bristol: [-1, 0],
+    Liverpool: [-1, 0], Manchester: [0, 1], Sheffield: [1, 0.25], Leeds: [1, -0.35], Bradford: [-1, -0.3],
+  };
+  const CITY_BOX = Object.fromEntries(CITIES.map(c => [c, boundsOf(CITY_SEATS[c])]));
+  function drawCityLabels() {
+    const show = inCities() && !state.city && state.tab === "cities";
+    gLabels.attr("display", show ? null : "none");
+    if (!show) return;
+    const r = svg.node().getBoundingClientRect();
+    const s = Math.min(r.width / VW, r.height / VH) || 1, t = d3.zoomTransform(svg.node());
+    gLabels.selectAll("g.city-lab").data(CITIES).join(enter => {
+      const g = enter.append("g").attr("class", "city-lab");
+      g.append("line"); g.append("text");
+      return g;
+    }).each(function (c) {
+      const [[x0, y0], [x1, y1]] = CITY_BOX[c];
+      const [cx, cy] = t.apply([(x0 + x1) / 2, (y0 + y1) / 2]);
+      const hw = (x1 - x0) / 2 * t.k * s, hh = (y1 - y0) / 2 * t.k * s;
+      const [ux, uy] = LABEL_DIR[c], len = Math.hypot(ux, uy), dx = ux / len, dy = uy / len;
+      const edge = Math.min(dx ? hw / Math.abs(dx) : Infinity, dy ? hh / Math.abs(dy) : Infinity);
+      const ex = dx * edge, ey = dy * edge, lx = ex + dx * 14, ly = ey + dy * 14;
+      const anchor = dx > 0.3 ? "start" : dx < -0.3 ? "end" : "middle";
+      const g = d3.select(this).attr("transform", `translate(${cx},${cy}) scale(${1 / s})`);
+      g.select("line").attr("x1", ex).attr("y1", ey).attr("x2", lx).attr("y2", ly);
+      g.select("text").text(c).attr("text-anchor", anchor)
+        .attr("x", lx + (anchor === "start" ? 4 : anchor === "end" ? -4 : 0))
+        .attr("y", ly + (anchor !== "middle" ? 5 : dy > 0 ? 15 : -5));
+    });
   }
 
   function placeTip(el, box, x, y) {
@@ -766,30 +885,60 @@
       <div class="t-row"><span class="sw" style="background:${pc(s.g)}"></span>${esc(s.party)} · ${s.mp ? esc(s.mp) : "Seat vacant"}</div>
       ${primary}<div class="t-sub">${esc(s.region)}</div>`;
   }
+  function cityTipHTML(c, s) {
+    const A = CITY_AGG[c], fig = figure(A, false);
+    return `<b>${esc(c)}</b><div class="t-row">${A.seats} seats · ${A.surplus} in surplus</div>
+      <div class="t-val">${fig.big} <span class="t-sub">${fig.small}</span></div><div class="t-sub">Click to open the city</div>`;
+  }
   seatPaths
     .on("pointermove", function (ev, d) {
-      hov.attr("d", path(d));
-      tip.innerHTML = seatTipHTML(byCode.get(d.id));
+      const s = byCode.get(d.id);
+      if (inCities() && !s.city) { hov.attr("d", null); tip.hidden = true; return; }
+      // on the cities tab a whole city answers the pointer until that city is open
+      const wholeCity = inCities() && s.city !== state.city;
+      hov.attr("d", wholeCity ? CITY_EDGE[s.city] : path(d)).classed("city", wholeCity);
+      tip.innerHTML = wholeCity ? cityTipHTML(s.city, s) : seatTipHTML(s);
       const [x, y] = d3.pointer(ev, mapBox);
       placeTip(tip, mapBox, x, y);
     })
     .on("pointerleave", () => { hov.attr("d", null); tip.hidden = true; })
     .on("click", (ev, d) => {
+      const s = byCode.get(d.id);
+      if (inCities()) {
+        if (!s.city) return;
+        if (s.city !== state.city) { setCity(s.city); return; }
+      }
       if (d.id === state.sel) { selectSeat(null); zoomScope(); }
       else selectSeat(d.id, { zoom: true });
     });
-  svg.on("click", ev => { if (ev.target === svg.node() && state.sel) { selectSeat(null); zoomScope(); } });
+  svg.on("click", ev => {
+    if (ev.target !== svg.node()) return;
+    if (state.sel) { selectSeat(null); zoomScope(); }
+    else if (inCities() && state.city) setCity(null);
+  });
 
   // ---------- legend ----------
   function drawLegend() {
     const el = document.getElementById("legend");
     const cap = document.getElementById("map-caption");
+    const cities = inCities();
+    const next = cities
+      ? (state.city ? ` Click a seat for its detail, or another city to move there.` : ` Grey seats are outside the ${inWords(CITIES.length)} cities. Click a city to zoom in and open its summary.`)
+      : " Click a seat to zoom in and open its detail.";
     if (state.mode === "party") {
       el.className = "legend" + (state.iso ? " isolating" : "");
+      if (cities) {
+        // on the cities tab the legend counts city seats and is a key only
+        const citySeats = seats.filter(s => s.city);
+        el.innerHTML = GROUPS.map(x => ({ x, n: citySeats.filter(s => s.g === x.g).length })).filter(o => o.n)
+          .map(({ x, n }) => `<span class="item"><span class="sw" style="background:${pc(x.g)}"></span>${esc(groupName(x.g))} <span class="n">${n}</span></span>`).join("");
+        cap.textContent = `Party of sitting MP in the ${CITY_COUNT} city seats, ${W.partyAsOf}.` + next;
+        return;
+      }
       el.innerHTML = GROUPS.filter(x => x.n).map(x =>
         `<button type="button" data-g="${x.g}" aria-pressed="${state.iso === x.g}"><span class="sw" style="background:${pc(x.g)}"></span>${esc(groupName(x.g))} <span class="n">${x.n}</span></button>`).join("");
       el.querySelectorAll("button").forEach(b => b.addEventListener("click", () => setParty(state.iso === b.dataset.g ? null : b.dataset.g)));
-      cap.textContent = `Party of sitting MP, ${W.partyAsOf}. Click a party to show only its seats. Click a seat to zoom in and open its detail.`;
+      cap.textContent = `Party of sitting MP, ${W.partyAsOf}. Click a party to show only its seats.` + next;
       return;
     }
     el.className = "ramp";
@@ -809,18 +958,18 @@
       marker = `<i style="left:${(sc(ref) * 100).toFixed(1)}%" title="${perAdult ? "England average" : "Average seat"}"></i>`;
       ends = perAdult ? ["Less per adult", "More per adult"] : ["Smaller share", "Larger share"];
       const noun = SHARE[k].noun;
-      cap.textContent = perAdult
-        ? `${noun[0].toUpperCase() + noun.slice(1)} divided by each seat’s adult population, on a log scale. The black mark is England’s average (${gbp(ref)}). Click a seat to zoom in.`
-        : `Each seat’s share of England’s ${noun}, on a log scale. The black mark is an average seat’s share (${share(ref)}). Click a seat to zoom in.`;
+      cap.textContent = (perAdult
+        ? `${noun[0].toUpperCase() + noun.slice(1)} divided by each seat’s adult population, on a log scale. The black mark is England’s average (${gbp(ref)}).`
+        : `Each seat’s share of England’s ${noun}, on a log scale. The black mark is an average seat’s share (${share(ref)}).`) + next;
     } else if (state.metric === "npa") {
       ticks = [[0, MINUS + "£5k"], [0.25, MINUS + "£2.5k"], [0.5, "£0"], [0.75, "+£2.5k"], [1, "+£5k"]];
       ends = ["Deficit", "Surplus"];
-      cap.textContent = "Income tax and NI minus welfare spending, per adult. Seats beyond ±£5,000 take the end colour. Click a seat to zoom in.";
+      cap.textContent = "Income tax and NI minus welfare spending, per adult. Seats beyond ±£5,000 take the end colour." + next;
     } else {
       const at = r => (clampT(-Math.log(r) / Math.log(RATIO_MAX)) + 1) / 2;
       ticks = [3, 2, 1, 0.5, 1 / 3].map(r => [at(r), "£" + r.toFixed(2)]);
       ends = ["Deficit", "Surplus"];
-      cap.textContent = "Welfare spending for every £1 of income tax and NI, on a log scale. Above £1.00 a seat receives more than it pays in. Click a seat to zoom in.";
+      cap.textContent = "Welfare spending for every £1 of income tax and NI, on a log scale. Above £1.00 a seat receives more than it pays in." + next;
     }
     const tickSpan = ([t, l]) => {
       const tf = t < 0.06 ? "none" : t > 0.94 ? "translateX(-100%)" : "translateX(-50%)";
@@ -887,6 +1036,11 @@
   // ---------- scope changes ----------
   function selectSeat(code, opts = {}) {
     const s = code ? byCode.get(code) : null;
+    if (s && inCities() && state.tab !== "nat") {
+      // a seat outside the cities opens on the constituency map; one inside opens within its city
+      if (!s.city) showTab("map");
+      else if (s.city !== state.city) { state.city = s.city; regionSel.value = s.city; drawLegend(); }
+    }
     state.sel = code;
     if (s && state.region && s.region !== state.region) { state.region = null; regionSel.value = ""; }
     if (s && state.iso && s.g !== state.iso) { state.iso = null; drawLegend(); }
@@ -907,6 +1061,19 @@
     paint(); drawLegend(); renderPanel(); zoomScope(); writeHash();
   }
   function toEngland() { setRegion(null); }
+  function setCity(c) {
+    state.city = c; state.sel = null; regionSel.value = c || "";
+    selPath.attr("d", null);
+    paint(); drawLegend(); renderPanel(); zoomScope(); writeHash();
+  }
+  // switching between the map and cities tabs starts each at its overview
+  function enterMapScope(t) {
+    mapScope = t;
+    state.sel = null; state.region = null; state.iso = null; state.city = null;
+    selPath.attr("d", null); hov.attr("d", null); tip.hidden = true;
+    fillScopeMenu();
+    paint(); drawLegend(); renderPanel(); zoomScope();
+  }
 
   // ---------- panel ----------
   const panel = document.getElementById("panel");
@@ -930,6 +1097,7 @@
 
   function renderPanel() {
     if (state.sel) return renderSeat(byCode.get(state.sel));
+    if (inCities()) return state.city ? renderGroup("city", state.city) : renderCities();
     if (state.iso && state.mode === "party") return renderGroup("party", state.iso);
     if (state.region) return renderGroup("region", state.region);
     return renderEngland();
@@ -943,12 +1111,13 @@
     const mpLine = s.mp
       ? `<span>${esc(s.mp)}</span><span class="since">MP since ${monthYear(s.mpSince)}</span>`
       : `<span>Seat vacant (${monthYear(W.mpAsOf)})</span>`;
-    const back = state.iso ? `Back to ${esc(groupName(state.iso))}` : state.region ? `Back to ${esc(state.region)}` : "Back to England";
+    const back = inCities() && state.city ? `Back to ${esc(state.city)}` : state.iso ? `Back to ${esc(groupName(state.iso))}` : state.region ? `Back to ${esc(state.region)}` : "Back to England";
+    const kind = inCities() && s.city && s.city !== s.region ? `${s.city}, ${s.region}` : s.region;
     const jpa = s.jobs / s.adults;
     panel.innerHTML = `
       <div class="p-head">
         <button type="button" class="back" id="back">${arrow}${back}</button>
-        <p class="p-kind">${esc(s.region)}</p>
+        <p class="p-kind">${esc(kind)}</p>
         <h2>${esc(s.name)}</h2>
         <div class="p-mp"><span class="party"><span class="sw" style="background:${pc(s.g)}"></span>${esc(s.party)}</span>${mpLine}</div>
       </div>
@@ -1003,19 +1172,22 @@
   const seatLi = s => `<li><button type="button" data-code="${s.code}"><span class="sw" style="background:${pc(s.g)}"></span><span>${esc(s.name)}<span class="r">${esc(s.party)} · ${esc(s.region)}</span></span><span class="v">${sgbp(s.npa)}</span></button></li>`;
   function wireSeatButtons() { panel.querySelectorAll("[data-code]").forEach(b => b.addEventListener("click", () => selectSeat(b.dataset.code, { zoom: true }))); }
 
+  // summary for a region, a city or a party's seats
   function renderGroup(kind, key) {
-    const list = seats.filter(s => kind === "region" ? s.region === key : s.g === key);
-    const A = agg(list);
+    const list = kind === "city" ? CITY_SEATS[key] : seats.filter(s => kind === "region" ? s.region === key : s.g === key);
+    const A = kind === "city" ? CITY_AGG[key] : agg(list);
     const fig = figure(A, false);
-    const title = kind === "region" ? key : groupName(key);
-    const where = kind === "region" ? `across the region’s ${A.seats} seats` : `across the ${A.seats} seats it holds`;
+    const title = kind === "party" ? groupName(key) : key;
+    const where = kind === "region" ? `across the region’s ${A.seats} seats` : kind === "city" ? `across the city’s ${A.seats} seats` : `across the ${A.seats} seats it holds`;
     const verdict = A.net < 0
-      ? `Welfare spending exceeds income tax and NI by <strong>${bn(-A.net)}</strong> a year ${where}.`
-      : `Income tax and NI exceed welfare spending by <strong>${bn(A.net)}</strong> a year ${where}.`;
+      ? `Welfare spending exceeds income tax and NI by <strong>${money(-A.net)}</strong> a year ${where}.`
+      : `Income tax and NI exceed welfare spending by <strong>${money(A.net)}</strong> a year ${where}.`;
     const byNpa = list.slice().sort((a, b) => b.npa - a.npa);
-    const n = Math.min(5, Math.floor(list.length / 2)) || 1;
+    const n = Math.min(5, Math.floor(list.length / 2));
+    const rank = kind === "city" ? `${ord(A.rank)} of ${CITIES.length} cities for net contribution per adult. ` : "";
+    const note = kind === "city" && CITY_NOTES[key] ? `<p class="rank">${esc(CITY_NOTES[key])}</p>` : "";
     let mix;
-    if (kind === "region") {
+    if (kind !== "party") {
       const counts = GROUPS.map(G => ({ G, c: list.filter(s => s.g === G.g).length })).filter(x => x.c);
       mix = `<div class="sec"><h3>Seats by party</h3>
         <div class="stack" aria-hidden="true">${counts.map(x => `<span style="flex:${x.c};background:${pc(x.G.g)}"></span>`).join("")}</div>
@@ -1026,20 +1198,22 @@
       mix = `<div class="sec"><h3>Seats by region</h3><div class="bars">${counts.map(x => `<div class="bar-row"><span>${esc(x.r)}</span><span class="val num">${x.c}</span>
         <span class="trk"><span class="fill" style="width:${(x.c / max * 100).toFixed(1)}%;background:${pc(key)}"></span></span></div>`).join("")}</div></div>`;
     }
-    const lists = list.length > 1 ? `
+    // ten seats or fewer: rank them all; more than that: the five at each end
+    const lists = list.length > 10 ? `
       <div class="sec"><h3>Largest net contributors</h3><p class="sub">Income tax and NI minus welfare, per adult.</p><ul class="list">${byNpa.slice(0, n).map(seatLi).join("")}</ul></div>
       <div class="sec"><h3>Largest net recipients</h3><ul class="list">${byNpa.slice(-n).reverse().map(seatLi).join("")}</ul></div>`
-      : `<div class="sec"><h3>Seat</h3><ul class="list">${list.map(seatLi).join("")}</ul></div>`;
+      : `<div class="sec"><h3>${list.length > 1 ? "Seats" : "Seat"}</h3>${list.length > 1 ? `<p class="sub">Ranked by income tax and NI minus welfare, per adult.</p>` : ""}<ul class="list">${byNpa.map(seatLi).join("")}</ul></div>`;
     panel.innerHTML = `
       <div class="p-head">
-        <button type="button" class="back" id="back">${arrow}Back to England</button>
-        <p class="p-kind">${kind === "region" ? "Region" : "Party of sitting MP"}</p>
+        <button type="button" class="back" id="back">${arrow}${kind === "city" ? "Back to all cities" : "Back to England"}</button>
+        <p class="p-kind">${{ region: "Region", city: "City", party: "Party of sitting MP" }[kind]}</p>
         <h2>${esc(title)}</h2>
       </div>
       <div class="verdict">
         <div class="big">${fig.big}<small>${fig.small}</small></div>
         <p>${verdict}</p>
-        <p class="rank">${A.surplus} of ${A.seats} seats pay in more than they receive.</p>
+        <p class="rank">${rank}${A.surplus} of ${A.seats} seats pay in more than they receive.</p>
+        ${note}
       </div>
       <div class="sec">
         <h3>Tax and welfare</h3>
@@ -1058,9 +1232,47 @@
         <div class="key"><span><span class="sw" style="background:var(--accent)"></span>${esc(title)}</span><span><span class="tick"></span>England average</span></div>
         <div class="bars" id="p-ben"></div>
       </div>`;
-    document.getElementById("back").addEventListener("click", toEngland);
+    document.getElementById("back").addEventListener("click", kind === "city" ? () => setCity(null) : toEngland);
     wireSeatButtons();
     benefitBars(document.getElementById("p-ben"), A);
+  }
+
+  function renderCities() {
+    const all = seats.filter(s => s.city);
+    const A = agg(all), fig = figure(A, false);
+    const ranked = CITIES.slice().sort((a, b) => CITY_AGG[a].rank - CITY_AGG[b].rank);
+    const verdict = A.net < 0
+      ? `Across the ${inWords(CITIES.length)} cities, welfare spending exceeds income tax and NI by <strong>${bn(-A.net)}</strong> a year.`
+      : `Across the ${inWords(CITIES.length)} cities, income tax and NI exceed welfare spending by <strong>${bn(A.net)}</strong> a year.`;
+    const compare = [
+      ["London", CITY_SEATS.London],
+      [`The other ${inWords(CITIES.length - 1)} cities`, all.filter(s => s.city !== "London")],
+      ["Rest of England", seats.filter(s => !s.city)],
+    ].map(([label, list]) => {
+      const G = agg(list);
+      return `<div><dt>${esc(label)}</dt><dd>${sgbp(G.npa)}</dd><span class="ctx">${G.seats} seats · ${G.surplus} in surplus · ${ratio(G.ratio)} welfare per £1 of tax</span></div>`;
+    }).join("");
+    panel.innerHTML = `
+      <div class="p-head">
+        <p class="p-kind">England&rsquo;s cities</p>
+        <h2>Select a city</h2>
+        <p class="intro">London and ${inWords(CITIES.length - 1)} other cities hold ${all.length} of England&rsquo;s ${seats.length} seats. Click a city on the map, or pick one below or from the menu on the map. Each city is the set of constituencies containing its council&rsquo;s wards, so a few seats cross the city boundary.</p>
+      </div>
+      <div class="verdict">
+        <div class="big">${fig.big}<small>${fig.small}, all ${inWords(CITIES.length)} cities</small></div>
+        <p>${verdict}</p>
+      </div>
+      <div class="sec">
+        <h3>Cities compared</h3>
+        <p class="sub">Income tax and NI minus welfare, per adult.</p>
+        <dl class="ledger">${ranked.map(c => { const G = CITY_AGG[c]; return `<div><dt><button type="button" data-city="${esc(c)}">${esc(c)}</button></dt><dd>${sgbp(G.npa)}</dd><span class="ctx">${G.surplus} of ${G.seats} seats in surplus · ${ratio(G.ratio)} welfare per £1 of tax</span></div>`; }).join("")}</dl>
+      </div>
+      <div class="sec">
+        <h3>London and the rest</h3>
+        <p class="sub">Income tax and NI minus welfare, per adult.</p>
+        <dl class="ledger">${compare}</dl>
+      </div>`;
+    panel.querySelectorAll("[data-city]").forEach(b => b.addEventListener("click", () => setCity(b.dataset.city)));
   }
 
   function renderEngland() {
@@ -1518,6 +1730,7 @@
   // ---------- resize & theme ----------
   let rT, lastW = 0;
   new ResizeObserver(entries => {
+    drawCityLabels();
     const wNow = Math.round(entries[0].contentRect.width);
     if (wNow === lastW) return;
     lastW = wNow;
@@ -1536,8 +1749,10 @@
   paint();
   drawLegend();
   const h = location.hash;
-  const mSeat = h.match(/^#seat=(E\d+)/), mReg = h.match(/^#region=(.+)$/);
+  const mSeat = h.match(/^#seat=(E\d+)/), mReg = h.match(/^#region=(.+)$/), mCity = h.match(/^#city=(.+)$/);
   if (h === "#national") { renderPanel(); showTab("nat"); }
+  else if (h === "#cities") showTab("cities");
+  else if (mCity && CITIES.includes(decodeURIComponent(mCity[1]))) { showTab("cities"); setCity(decodeURIComponent(mCity[1])); }
   else if (mSeat && byCode.has(mSeat[1])) selectSeat(mSeat[1], { zoom: true });
   else if (mReg && REGIONS.includes(decodeURIComponent(mReg[1]))) setRegion(decodeURIComponent(mReg[1]));
   else renderPanel();
