@@ -2987,11 +2987,10 @@
     party: {
       build(el) {
         el.innerHTML = `<div class="st-key"><span><span class="sw" style="background:var(--ink-3)"></span>Working-age benefits (party colour)</span>
-          <span><span class="sw st-sw-light" style="background:var(--ink-3)"></span>Pensioner benefits (lighter shade)</span>
-          <span><span class="sw" style="background:var(--good)"></span>Seats that pay their way</span></div>`;
+          <span><span class="sw st-sw-light" style="background:var(--ink-3)"></span>Pensioner benefits (lighter shade)</span></div>`;
         const rows = PARTY_ROWS.slice().sort((a, b) => b.A.ratio - a.A.ratio);
         const W0 = el.clientWidth, narrow = W0 < 680;
-        const m = { t: 34, r: narrow ? 56 : 196, b: 30, l: narrow ? 4 : 196 };
+        const m = { t: narrow ? 34 : 58, r: narrow ? 56 : 222, b: 30, l: narrow ? 4 : 196 };
         const band = narrow ? 88 : 56, barH = 28, w = W0 - m.l - m.r, h = rows.length * band;
         const x = d3.scaleLinear([0, 2], [0, w]);
         const g = d3.select(el).append("svg").attr("width", W0).attr("height", h + m.t + m.b).append("g").attr("transform", `translate(${m.l},${m.t})`);
@@ -3021,8 +3020,8 @@
           row.append("text").attr("class", "lab halo st-rv").attr("x", x(p.A.ratio) + 10).attr("y", cy + 5).style("font-size", "16px").style("opacity", 0).text(ratio(p.A.ratio));
           if (!narrow) {
             // seats in surplus: a count and a small green/red split
-            row.append("text").attr("class", "lab st-rv").attr("x", w + 64).attr("y", cy - 4).style("opacity", 0).text(`${p.surplus} of ${p.n}`);
-            const sx = w + 64, sw = m.r - 74, gw = p.surplus / p.n * sw;
+            row.append("text").attr("class", "lab st-rv").attr("x", w + 56).attr("y", cy - 4).style("opacity", 0).text(`${p.surplus} of ${p.n}`);
+            const sx = w + 56, sw = m.r - 62, gw = p.surplus / p.n * sw;
             row.append("rect").attr("class", "st-rv").attr("x", sx).attr("y", cy + 4).attr("width", sw).attr("height", 9).style("fill", "var(--bad)").style("opacity", 0);
             row.append("rect").attr("class", "st-rv").attr("x", sx).attr("y", cy + 4).attr("width", gw).attr("height", 9).style("fill", "var(--good)").style("opacity", 0);
           }
@@ -3031,7 +3030,12 @@
         g.append("text").attr("class", "lab halo").attr("x", x(1) - 6).attr("y", -16).attr("text-anchor", "end").text("Break-even £1.00");
         g.append("line").style("stroke", "var(--ink-3)").attr("stroke-width", 2).attr("x1", x(E.ratio)).attr("x2", x(E.ratio)).attr("y1", -10).attr("y2", h);
         g.append("text").attr("class", "lab-2 halo").attr("x", x(E.ratio) + 6).attr("y", -16).text("England " + ratio(E.ratio));
-        if (!narrow) g.append("text").attr("class", "lab-2").attr("x", w + 64).attr("y", -16).text("Seats in surplus");
+        if (!narrow) {
+          // the green key sits directly over the column it explains
+          g.append("rect").attr("x", w + 56).attr("y", -47).attr("width", 12).attr("height", 12).style("fill", "var(--good)");
+          g.append("text").attr("class", "lab-2").attr("x", w + 74).attr("y", -37).style("font-size", "12.5px").text("Seats that pay their way");
+          g.append("text").attr("class", "lab-2").attr("x", w + 56).attr("y", -16).text("Seats in surplus");
+        }
         el.insertAdjacentHTML("beforeend", `<p class="st-cap">Welfare spending for every £1 of income tax and NI, in seats held by each party.</p>`);
       },
       update(el, done) {
