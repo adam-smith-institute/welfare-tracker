@@ -2,12 +2,11 @@
 
     python3 build_standalone.py
 
-index.html is the published artifact's source: it loads data.js, geo.js and the logo
+index.html is the published page: it loads data.js, geo.js and the logo
 from sibling files and d3 and Josefin Sans from CDNs. Opened on its own (an email
 attachment, or a file double-clicked inside a zip) those are missing and the page is blank.
 
-This script inlines everything - data, boundaries, d3, logo and fonts - and adds the
-document shell (doctype, UTF-8 charset, viewport) the artifact host normally supplies.
+This script inlines everything - data, boundaries, d3, logo and fonts - into one file.
 Output: ../English-Welfare-Tracker-2026.html. Works offline in any modern browser.
 """
 import base64, os
@@ -55,13 +54,16 @@ page = swap(page, '<script src="geo.js"></script>', inline_script(read("geo.js")
 logo = "data:image/svg+xml;base64," + base64.b64encode(read("asi_logo_white.svg", "rb")).decode()
 page = swap(page, 'src="asi_logo_white.svg"', 'src="' + logo + '"')
 
-# Document shell: the artifact host adds this when publishing; a local file needs its own.
-head_end = page.index('<svg width="0" height="0"')
-doc = (
-    "<!doctype html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n"
-    "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1, viewport-fit=cover\">\n"
-    + page[:head_end] + "</head>\n<body>\n" + page[head_end:] + "\n</body>\n</html>\n"
-)
+# Document shell: index.html carries its own (doctype, charset, viewport). Add one only if it is missing.
+if page.lstrip().lower().startswith("<!doctype"):
+    doc = page
+else:
+    head_end = page.index('<svg width="0" height="0"')
+    doc = (
+        "<!doctype html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n"
+        "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1, viewport-fit=cover\">\n"
+        + page[:head_end] + "</head>\n<body>\n" + page[head_end:] + "\n</body>\n</html>\n"
+    )
 
 with open(OUT, "w", encoding="utf-8") as f:
     f.write(doc)
