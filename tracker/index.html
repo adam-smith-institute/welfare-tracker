@@ -390,6 +390,7 @@
     --cat-1: #2a78d6; --cat-2: #eb6834; --cat-3: #1baf7a; --cat-rest: #b9bec9;
     --grp-hi: #e8772e; --grp-lo: #2a78d6;
     --btn: #ffffff; --btn-hover: #e3e7f5; --btn-ink: #224191;
+    --btn-grey: #6b7280; --btn-grey-hover: #5c6370;
     --field-good: #8ee0ad; --field-bad: #ffa596;
   }
   @media (prefers-color-scheme: dark) {
@@ -430,12 +431,13 @@
   .st-skip:hover, .st-skip2:hover { background: var(--field-ink); color: var(--field); }
   .st-skip2, .st-topmark, .st-navnote { display: none; }
 
-  /* content starts on the same line in both columns, every step */
-  .st-body { flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 20px; padding-block: 24px; }
-  .st-body.in > * { animation: st-in 0.5s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
-  .st-body.in > :nth-child(2) { animation-delay: 0.07s; }
-  .st-body.in > :nth-child(3) { animation-delay: 0.14s; }
-  .st-body.in > :nth-child(n+4) { animation-delay: 0.2s; }
+  /* each column's content is one block, centred vertically; auto margins never clip an overflowing block */
+  .st-body { flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; padding-block: 24px; }
+  .st-inner { margin-block: auto; display: flex; flex-direction: column; gap: 20px; }
+  .st-body.in .st-inner > * { animation: st-in 0.5s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+  .st-body.in .st-inner > :nth-child(2) { animation-delay: 0.07s; }
+  .st-body.in .st-inner > :nth-child(3) { animation-delay: 0.14s; }
+  .st-body.in .st-inner > :nth-child(n+4) { animation-delay: 0.2s; }
   .st-pop { animation: st-in 0.5s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
   @keyframes st-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
   .st-h { font-size: clamp(1.9rem, 3vw, 3rem); line-height: 1.18; font-weight: 600; outline: none; }
@@ -454,10 +456,12 @@
   .st-back svg { width: 26px; height: 11px; flex: none; transform: scaleX(-1); }
   .st-back:hover { background: var(--field-ink); color: var(--field); }
   .st-next {
-    margin-left: auto; display: inline-flex; align-items: center; gap: 14px; background: var(--btn); color: var(--btn-ink);
-    border: 2px solid var(--btn); cursor: pointer; font-weight: 600; font-size: 1.15rem; padding: 12px 24px 11px; min-height: 56px;
+    margin-left: auto; display: inline-flex; align-items: center; gap: 14px; background: var(--btn-grey); color: #ffffff;
+    border: 2px solid var(--btn-grey); cursor: pointer; font-weight: 600; font-size: 1.15rem; padding: 12px 24px 11px; min-height: 56px;
   }
-  .st-next:hover { background: var(--btn-hover); border-color: var(--btn-hover); }
+  .st-next:hover { background: var(--btn-grey-hover); border-color: var(--btn-grey-hover); }
+  /* keyboard focus darkens the button instead of drawing a box around it */
+  .story .st-next:focus-visible { outline: none; background: var(--btn-grey-hover); border-color: var(--btn-grey-hover); }
   .st-next svg { width: 32px; height: 13px; flex: none; transition: transform 0.25s; }
   .st-next:hover svg { transform: translateX(5px); }
   .st-foot { padding-top: 14px; font-size: 1rem; }
@@ -465,25 +469,29 @@
   /* the welcome screen: one calm greeting, full width */
   .story.is-welcome { grid-template-columns: 1fr; }
   .story.is-welcome .st-vis, .story.is-welcome .st-progress, .story.is-welcome .st-skip, .story.is-welcome .st-back, .story.is-welcome .st-foot { display: none; }
-  .story.is-welcome .st-top { justify-content: center; padding-top: 3vh; }
+  .story.is-welcome .st-top { justify-content: center; padding-top: 7vh; }
   .story.is-welcome .st-body { padding-bottom: 7vh; }
   .story.is-welcome .st-topmark { display: block; width: clamp(76px, 7.5vw, 104px); height: auto; animation: st-in 0.6s ease-out both; }
   .story.is-welcome .st-body { align-items: center; text-align: center; }
-  .story.is-welcome .st-body > :first-child { margin-top: auto; }
-  .story.is-welcome .st-body > :last-child { margin-bottom: auto; }
+  .story.is-welcome .st-inner { align-items: center; }
   .story.is-welcome .st-nav { justify-content: center; gap: 16px; padding-bottom: 5vh; animation: st-in 0.6s cubic-bezier(0.2, 0.7, 0.2, 1) 1s both; }
   .story.is-welcome .st-navnote { display: block; flex: 0 0 100%; text-align: center; font-size: clamp(1.15rem, 1.6vw, 1.35rem); color: var(--field-ink-2); margin-bottom: 6px; }
-  .story.is-welcome .st-next { margin-left: 0; font-size: 1.25rem; padding: 16px 30px 15px; min-height: 60px; }
-  .story.is-welcome .st-skip2 { display: inline-flex; align-items: center; font-size: 1.15rem; padding: 14px 24px 13px; min-height: 60px; }
+  .story.is-welcome .st-next, .story.is-welcome .st-skip2 {
+    display: inline-flex; align-items: center; justify-content: center; width: 17rem; min-height: 62px; margin-left: 0;
+    padding: 12px 16px 11px; border-width: 2px; text-align: center; line-height: 1.2;
+  }
+  .story.is-welcome .st-next { font-size: 1.25rem; background: var(--btn); color: var(--btn-ink); border-color: var(--btn); }
+  .story.is-welcome .st-next:hover, .story.is-welcome .st-next:focus-visible { background: var(--btn-hover); border-color: var(--btn-hover); }
+  .story.is-welcome .st-skip2 { font-size: 1.12rem; }
   .st-hello { display: grid; justify-items: center; gap: 26px; max-width: 46rem; margin-inline: auto; }
-  .st-hello-h { font-size: clamp(3.6rem, 10vw, 7.5rem); line-height: 1.02; font-weight: 600; letter-spacing: -0.015em; outline: none; }
+  .st-hello-h { font-size: clamp(3.6rem, 10vw, 7.5rem); line-height: 1.12; font-weight: 600; letter-spacing: -0.015em; outline: none; }
   .st-hello-h span span { display: inline-block; animation: st-letter 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
   @keyframes st-letter { from { opacity: 0; transform: translateY(0.35em); } to { opacity: 1; transform: none; } }
   .st-hello-p { font-weight: 300; font-size: clamp(1.2rem, 1.9vw, 1.55rem); line-height: 1.45; max-width: 36em; animation: st-in 0.6s cubic-bezier(0.2, 0.7, 0.2, 1) 0.7s both; }
 
   /* guesses: a slider that turns into the answer (your guess in lavender, the answer in white) */
   .st-guess { display: grid; gap: 8px; max-width: 32em; }
-  .st-gv { font-weight: 600; font-size: 3.2rem; line-height: 1.05; color: var(--field-hl); }
+  .st-gv { font-weight: 600; font-size: 3.2rem; line-height: 1.15; color: var(--field-hl); }
   .st-gv small { font-size: 0.34em; font-weight: 400; color: var(--field-ink); margin-left: 10px; }
   .st-range { -webkit-appearance: none; appearance: none; width: 100%; height: 44px; margin: 0; background: transparent; cursor: pointer; }
   .st-range::-webkit-slider-runnable-track { height: 8px; background: linear-gradient(90deg, var(--field-hl) var(--pct, 50%), var(--field-rule) var(--pct, 50%)); }
@@ -541,16 +549,18 @@
     display: flex; flex-direction: column;
     padding: calc(env(safe-area-inset-top, 0px) + 20px) clamp(18px, 3vw, 48px) calc(env(safe-area-inset-bottom, 0px) + 20px);
   }
-  .st-vtop { flex: none; display: flex; min-height: 48px; }
+  .st-vtop { flex: none; display: flex; min-height: 48px; width: 100%; max-width: 940px; margin-inline: auto; }
   .st-expand {
     display: inline-flex; align-items: center; gap: 10px; background: var(--ground); border: 2px solid var(--ink); color: var(--ink);
     padding: 10px 14px 9px; cursor: pointer; font-size: 1.02rem; font-weight: 600; min-height: 48px;
   }
   .st-expand:hover { background: var(--ink); color: var(--ground); }
   .st-expand svg { width: 24px; height: 10px; flex: none; }
-  .st-group { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 16px; margin-top: 24px; overflow-y: auto; }
+  .st-group { flex: 1; min-height: 0; display: flex; flex-direction: column; margin-top: 16px; padding-top: 8px; overflow-y: auto; }
+  .st-ginner { margin: auto; width: 100%; max-width: 940px; display: flex; flex-direction: column; gap: 16px; }
+  .st-group.is-map .st-ginner { flex: 1 1 auto; margin-block: 0; }
   .st-take { flex: none; display: grid; gap: 6px; }
-  .st-tbig { font-weight: 600; font-size: clamp(2.5rem, 4.6vw, 4.4rem); line-height: 1.02; letter-spacing: -0.01em; }
+  .st-tbig { font-weight: 600; font-size: clamp(2.5rem, 4.6vw, 4.4rem); line-height: 1.12; letter-spacing: -0.01em; }
   .st-tbig.good { color: var(--good-ink); }
   .st-tbig.bad { color: var(--bad-ink); }
   .st-tline { font-size: clamp(1.1rem, 1.5vw, 1.4rem); line-height: 1.35; max-width: 46ch; }
@@ -600,7 +610,7 @@
   .st-cedge { fill: none; stroke: var(--ink); stroke-width: 1.8; vector-effect: non-scaling-stroke; }
   .st-city h3 { font-size: 1.45rem; }
   .st-city p { color: var(--ink-2); font-size: 1.05rem; }
-  .st-city p.st-cbig { font-weight: 600; font-size: clamp(2rem, 3.4vw, 2.9rem); line-height: 1.05; }
+  .st-city p.st-cbig { font-weight: 600; font-size: clamp(2rem, 3.4vw, 2.9rem); line-height: 1.12; }
   .st-cbig small { font-size: 0.38em; font-weight: 400; color: var(--ink-2); }
   .st-cbig.good { color: var(--good-ink); }
   .st-cbig.bad { color: var(--bad-ink); }
@@ -625,9 +635,7 @@
   .st-flyr .trk i { position: absolute; top: 0; bottom: 0; width: 0; transition: width 1s cubic-bezier(0.2, 0.7, 0.2, 1); }
   .st-flyr .trk.l i { right: 0; }
   .st-flyr .trk.r i { left: 0; }
-  .st-flyr .trk u { position: absolute; top: -5px; bottom: -5px; width: 3px; background: var(--ink); }
-  .st-flyr .trk.l u { margin-right: -1.5px; }
-  .st-flyr .trk.r u { margin-left: -1.5px; }
+  .st-flyr .trk u { position: absolute; left: 0; top: -5px; bottom: -5px; width: 3px; background: var(--ink); }
   .st-flyr .mid { display: grid; text-align: center; line-height: 1.2; }
   .st-flyr .mid b { font-size: 1.05rem; font-weight: 600; }
   .st-flyr .mid small { font-size: 0.92rem; color: var(--ink-2); }
@@ -663,11 +671,11 @@
   .st-rname { font-size: clamp(1.8rem, 3vw, 2.6rem); line-height: 1.15; margin: 0 0 6px; }
   .st-rmp { display: flex; align-items: center; gap: 8px; font-size: 1.15rem; flex-wrap: wrap; }
   .st-rk { font-size: 1.05rem; color: var(--ink-2); margin-top: 4px; }
-  .st-loc { width: clamp(90px, 11vw, 150px); height: auto; display: block; }
+  .st-loc { width: clamp(90px, 11vw, 150px); height: auto; display: block; overflow: visible; }
   .st-loc path { fill: var(--st-neutral); }
   .st-loc .me { fill: var(--ink); }
   .st-loc circle { fill: none; stroke: var(--ink); stroke-width: 2.5; vector-effect: non-scaling-stroke; }
-  .st-rbig { font-weight: 600; font-size: clamp(2.6rem, 5vw, 4.4rem); line-height: 1; }
+  .st-rbig { font-weight: 600; font-size: clamp(2.6rem, 5vw, 4.4rem); line-height: 1.12; }
   .st-rbig small { font-size: 0.32em; font-weight: 400; color: var(--ink-2); margin-left: 10px; }
   .st-rbig.good { color: var(--good-ink); }
   .st-rbig.bad { color: var(--bad-ink); }
@@ -697,6 +705,28 @@
   .st-return:hover { background: var(--ink); }
   .st-return svg { width: 26px; height: 11px; flex: none; }
 
+  /* shorter laptop screens: tighter spacing so each step fits without scrolling */
+  @media (min-width: 901px) and (max-height: 840px) {
+    .st-text { padding-top: calc(env(safe-area-inset-top, 0px) + 14px); padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 12px); }
+    .st-body { padding-block: 12px; }
+    .st-inner { gap: 14px; }
+    .st-h { font-size: clamp(1.6rem, 2.5vw, 2.3rem); }
+    .st-p { font-size: clamp(1.05rem, 1.3vw, 1.2rem); }
+    .st-gv { font-size: 2.6rem; }
+    .st-range { height: 38px; }
+    .st-rtrack { margin-block: 52px 58px; }
+    .st-verdict, .st-fb { font-size: 1.15rem; }
+    .st-ri { padding-block: 5px 4px; font-size: 1rem; }
+    .st-nav { padding-top: 8px; }
+    .st-back, .st-next { min-height: 50px; padding-block: 9px 8px; }
+    .st-foot { padding-top: 8px; }
+    .st-vis { padding-top: calc(env(safe-area-inset-top, 0px) + 14px); padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 14px); }
+    .st-group { margin-top: 8px; }
+    .st-tbig { font-size: clamp(2.2rem, 4vw, 3.6rem); }
+    .st-tline { font-size: clamp(1.05rem, 1.35vw, 1.25rem); }
+    .story.is-welcome .st-top { padding-top: 5vh; }
+  }
+
   /* phones: one scrolling page per step, question first, chart below, controls pinned to the bottom */
   @media (max-width: 900px) {
     .story { display: block; overflow-y: auto; overscroll-behavior: contain; padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 84px); }
@@ -710,8 +740,10 @@
     .story.is-welcome { display: flex; flex-direction: column; padding-bottom: 0; }
     .story.is-welcome .st-text { flex: 1; display: flex; flex-direction: column; }
     .story.is-welcome .st-nav { position: static; border: 0; background: none; }
-    .story.is-welcome .st-nav { gap: 10px; }
-    .story.is-welcome .st-next, .story.is-welcome .st-skip2 { font-size: 1rem; padding: 12px 12px 11px; min-height: 52px; }
+    .story.is-welcome .st-nav { gap: 10px; flex-wrap: wrap; }
+    .story.is-welcome .st-next, .story.is-welcome .st-skip2 { flex: 1 1 0; width: auto; max-width: 17rem; min-height: 58px; padding: 10px 10px 9px; }
+    .story.is-welcome .st-next { font-size: 1.05rem; }
+    .story.is-welcome .st-skip2 { font-size: 0.95rem; }
     .story.is-welcome .st-next svg { display: none; }
     .st-h { font-size: 1.6rem; }
     .st-tbig { font-size: 2.3rem; }
@@ -736,7 +768,7 @@
     .st-pr { grid-template-columns: 5.5em minmax(0, 1fr) 4.8em; }
   }
   @media (prefers-reduced-motion: reduce) {
-    .st-body.in > *, .st-pop, .st-waffle i, #st-map .st-seat.rise, .st-hello-h span span, .st-hello-p, .story.is-welcome .st-topmark, .story.is-welcome .st-nav { animation: none; }
+    .st-body.in .st-inner > *, .st-pop, .st-waffle i, #st-map .st-seat.rise, .st-hello-h span span, .st-hello-p, .story.is-welcome .st-topmark, .story.is-welcome .st-nav { animation: none; }
     .st-rband, .st-rm, .st-bt i, .st-pr .trk i, .st-split i, .st-flyr .trk i, .st-rsbar i, #st-map .st-seat, #st-map, .st-scene, .st-gapmark span, .st-scene .st-rv { transition: none; }
   }
 
@@ -960,14 +992,14 @@
   </div>
   <div class="st-vis" id="st-vis">
     <div class="st-vtop"><button type="button" class="st-expand" id="st-expand">Explore this in full</button></div>
-    <div class="st-group" id="st-group">
+    <div class="st-group" id="st-group"><div class="st-ginner">
       <div class="st-take" id="st-take" hidden><p class="st-tbig" id="st-tbig"></p><p class="st-tline" id="st-tline"></p></div>
       <div class="st-stage" id="st-stage">
         <svg id="st-map" role="img" aria-label="Map of England's 543 parliamentary constituencies"></svg>
         <div class="st-scene chart off" id="st-scene"></div>
       </div>
       <div class="st-legend" id="st-legend"></div>
-    </div>
+    </div></div>
     <svg class="wm" aria-hidden="true" focusable="false"><use href="#asi-mark"/></svg>
   </div>
 </div>
@@ -2199,7 +2231,7 @@
   // on phones the chart sits below the text, so bring it into view once there is something to see
   const showChart = () => { if (PHONE()) byId("st-vis").scrollIntoView({ behavior: REDUCED ? "auto" : "smooth", block: "start" }); };
   // height left for a chart under the step's key message
-  const stageRoom = () => Math.max(240, ST.group.clientHeight - (ST.take.hidden ? 0 : ST.take.offsetHeight + 16));
+  const stageRoom = () => Math.max(240, ST.group.clientHeight - 8 - (ST.take.hidden ? 0 : ST.take.offsetHeight + 16));
 
   // figures the story quotes, all read from the model
   const REG = W.regions.slice().sort((a, b) => b.npa - a.npa);
@@ -2236,7 +2268,7 @@
   const stNorth = new Map(feats.map(f => [f.id, path.centroid(f)[1] / VH]));
   let regionEdges = null;
   const regionEdge = r => (regionEdges = regionEdges || Object.fromEntries(REGIONS.map(n => [n, outlineD(seats.filter(s => s.region === n))])))[r];
-  const stMapOn = on => { stSvg.classed("off", !on); ST.stage.classList.toggle("is-map", on); };
+  const stMapOn = on => { stSvg.classed("off", !on); ST.stage.classList.toggle("is-map", on); ST.group.classList.toggle("is-map", on); };
   const stPaint = fn => stSeats.style("fill", d => fn(byCode.get(d.id)));
   function stReset() {
     stEdges.selectAll("*").remove();
@@ -2384,12 +2416,16 @@
           ${rows.map(r => {
             const max = Math.max(r.hi, r.lo, r.eng) * 1.08, p = v => (v / max * 100).toFixed(1);
             return `<div class="st-flyr"><b class="v">${dumbFmt(r.hi, r.fmt)}</b>
-              <span class="trk l"><i style="background:var(--grp-hi)" data-w="${p(r.hi)}"></i><u style="right:${p(r.eng)}%"></u></span>
+              <span class="trk l"><i style="background:var(--grp-hi)" data-w="${p(r.hi)}"></i><u data-f="${r.eng / max}"></u></span>
               <span class="mid"><b>${esc(r.label)}</b><small>England ${dumbFmt(r.eng, r.fmt)}</small></span>
-              <span class="trk r"><i style="background:var(--grp-lo)" data-w="${p(r.lo)}"></i><u style="left:${p(r.eng)}%"></u></span>
+              <span class="trk r"><i style="background:var(--grp-lo)" data-w="${p(r.lo)}"></i><u data-f="${r.eng / max}"></u></span>
               <b class="v">${dumbFmt(r.lo, r.fmt)}</b></div>`;
           }).join("")}
           <p class="st-cap">Bars grow out from the middle. Each row has its own scale, and the dark tick marks the England average.</p></div>`;
+        el.querySelectorAll(".st-flyr .trk").forEach(trk => {
+          const u = trk.querySelector("u"), w = trk.clientWidth, f = +u.dataset.f;
+          u.style.left = (Math.round(trk.classList.contains("l") ? w - f * w : f * w) - 1) + "px";
+        });
       },
       update: growBars,
     },
@@ -2497,8 +2533,10 @@
             <div class="st-rsends"><span>Largest net recipient</span><span>Largest net contributor</span></div></div></div>`;
         const loc = d3.select(el).select(".st-loc");
         loc.selectAll("path").data(feats).join("path").attr("d", path).attr("class", d => d.id === s.code ? "me" : null);
-        const [cx, cy] = path.centroid(featBy.get(s.code));
-        loc.append("circle").attr("cx", cx).attr("cy", cy).attr("r", 36);
+        // a ring that fits around the seat, never smaller than the base size used for small urban seats
+        const [[bx0, by0], [bx1, by1]] = path.bounds(featBy.get(s.code));
+        loc.append("circle").attr("cx", (bx0 + bx1) / 2).attr("cy", (by0 + by1) / 2)
+          .attr("r", Math.max(36, Math.hypot(bx1 - bx0, by1 - by0) / 2 + 14));
       },
       update(el) {
         growBars(el);
@@ -2741,7 +2779,7 @@
     const n = STEPS.length - 1;
     if (!ST.steps.childElementCount) {
       ST.steps.innerHTML = d3.range(1, STEPS.length).map(j => `<button type="button" data-j="${j}" aria-label="Go to step ${j} of ${n}"></button>`).join("");
-      ST.steps.querySelectorAll("button").forEach(b => b.addEventListener("click", () => { const j = +b.dataset.j; go(j, j < tour.i); }));
+      ST.steps.querySelectorAll("button").forEach(b => b.addEventListener("click", () => go(+b.dataset.j)));
     }
     ST.steps.querySelectorAll("button").forEach(b => {
       const j = +b.dataset.j;
@@ -2773,7 +2811,7 @@
       if (st.find) html += findHTML();
     }
     ST.body.classList.remove("in");
-    ST.body.innerHTML = html;
+    ST.body.innerHTML = `<div class="st-inner">${html}</div>`;
     if (entering) { ST.body.scrollTop = 0; ST.el.scrollTop = 0; ST.group.scrollTop = 0; void ST.body.offsetWidth; ST.body.classList.add("in"); }
     wireStep(st);
     drawProgress();
@@ -2802,18 +2840,20 @@
       byId("st-gv").textContent = st.guess.fmt(v);
       range.style.setProperty("--pct", pos(v, st.guess) + "%");
     });
-    ST.body.querySelectorAll(".st-choice").forEach(b => b.addEventListener("click", () => answer(st, b.dataset.v)));
+    ST.body.querySelectorAll(".st-choice").forEach(b => b.addEventListener("click", e => answer(st, b.dataset.v, e.detail === 0)));
     const form = byId("st-find");
     if (form) form.addEventListener("submit", async e => {
       e.preventDefault();
       const q = byId("st-q"), err = byId("st-err"), btn = byId("st-go");
       tour.draft.q = q.value;
       if (!q.value.trim()) { err.textContent = "Type a place name, an MP, or a postcode."; return; }
+      const byKey = document.activeElement === q;
       btn.disabled = true; btn.textContent = "Searching";
       try {
         const s = await findWhere(q.value);
         tour.ans.seat = s.code;
         render(false);
+        if (byKey) ST.next.focus({ preventScroll: true });
         showChart();
       } catch (ex) {
         err.textContent = ex.message;
@@ -2866,22 +2906,29 @@
     throw new Error(`${place.name_1} could not be matched to a constituency. Try a postcode instead.`);
   }
 
+  const answered = st => st.find ? !!tour.ans.seat : (st.guess || st.choices) ? (st.key in tour.ans) : false;
   function resetStep(st) {
-    if (!st.guess && !st.choices) return;
+    if (st.find) { delete tour.ans.seat; tour.sceneSeat = null; return; }
     delete tour.ans[st.key];
     delete tour.draft[st.key];
   }
-  function answer(st, v) {
+  // keyboard users keep their place on the Next button; a mouse click moves no focus
+  function answer(st, v, byKey) {
     tour.ans[st.key] = v;
     render(false);
-    ST.next.focus({ preventScroll: true });
+    if (byKey) ST.next.focus({ preventScroll: true });
     showChart();
   }
-  // going back to a question clears it, so it can be answered afresh
-  function go(i, back) {
+  function go(i) {
     tour.i = Math.max(0, Math.min(STEPS.length - 1, i));
-    if (back) resetStep(STEPS[tour.i]);
     render(true);
+  }
+  // Back on an answered question clears it in place, so it can be tried again; otherwise it steps back.
+  // Answers are kept when moving forward or back through steps.
+  function back() {
+    const st = STEPS[tour.i];
+    if (answered(st)) { resetStep(st); render(true); }
+    else if (tour.i > 0) go(tour.i - 1);
   }
   function openTour(i, fresh) {
     if (fresh) { tour.ans = {}; tour.draft = {}; }
@@ -2892,7 +2939,8 @@
     ST.ret.hidden = true;
     document.documentElement.classList.add("touring");
     go(i);
-    ST.next.focus({ preventScroll: true });
+    // focus the heading (no visible box) so screen readers start at the top of the step
+    byId("st-h").focus({ preventScroll: true });
   }
   function closeTour(canReturn) {
     tour.open = false;
@@ -2909,7 +2957,7 @@
     if (st.choices && !done) return answer(st, null);
     go(tour.i + 1);
   });
-  ST.back.addEventListener("click", () => go(tour.i - 1, true));
+  ST.back.addEventListener("click", back);
   ["st-skip", "st-skip2"].forEach(id => byId(id).addEventListener("click", () => { closeTour(false); window.scrollTo(0, 0); }));
   ST.expand.addEventListener("click", () => { const st = STEPS[tour.i]; closeTour(true); st.expand(); });
   ST.ret.addEventListener("click", () => openTour(tour.i, false));
@@ -2920,7 +2968,7 @@
     const tag = (e.target.tagName || "").toLowerCase();
     if (tag === "input" || tag === "textarea" || tag === "select") return;
     if (e.key === "ArrowRight") { e.preventDefault(); ST.next.click(); }
-    else if (e.key === "ArrowLeft" && tour.i > 0) { e.preventDefault(); go(tour.i - 1, true); }
+    else if (e.key === "ArrowLeft") { e.preventDefault(); back(); }
   });
   // keep keyboard focus inside the walkthrough while it is open
   ST.el.addEventListener("keydown", e => {
