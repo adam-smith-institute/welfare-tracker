@@ -8,12 +8,12 @@ attachment, or a file double-clicked inside a zip) those are missing and the pag
 
 This script inlines everything - data, boundaries, d3, logo and fonts - and adds the
 document shell (doctype, UTF-8 charset, viewport) the artifact host normally supplies.
-Output: ../England-Welfare-Tracker-2026.html. Works offline in any modern browser.
+Output: ../English-Welfare-Tracker-2026.html. Works offline in any modern browser.
 """
 import base64, os
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-OUT = os.path.join(HERE, "..", "England-Welfare-Tracker-2026.html")
+OUT = os.path.join(HERE, "..", "English-Welfare-Tracker-2026.html")
 
 
 def read(name, mode="r"):

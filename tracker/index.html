@@ -1,6 +1,6 @@
 <meta charset="utf-8">
-<title>England Welfare Tracker</title>
-<meta name="description" content="Adam Smith Institute England Welfare Tracker 2026: income tax, National Insurance, and DWP welfare spending for all 543 English constituencies, by party of sitting MP.">
+<title>English Welfare Tracker</title>
+<meta name="description" content="Adam Smith Institute English Welfare Tracker 2026: income tax, National Insurance, and DWP welfare spending for all 543 English constituencies, by party of sitting MP.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Josefin+Sans:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap">
@@ -836,7 +836,6 @@
   <div class="wrap">
     <div class="mast-top">
       <div class="mast-text">
-        <p class="eyebrow">England Welfare Tracker 2026</p>
         <h1 id="headline">Only <span class="hl">145 of 543</span> English seats pay more in income tax and NI than they receive in welfare.</h1>
         <p class="lead" id="lead">Workers in England pay &pound;213.0bn a year in income tax and National Insurance on their wages. The ten DWP benefits in this model cost &pound;266.1bn: &pound;1.25 in welfare for every &pound;1 of that tax.</p>
       </div>
@@ -962,7 +961,7 @@
           <h2 id="ben-h">State Pension and Universal Credit make up most of the bill.</h2>
           <p>Annual spending across England on the ten DWP benefits in the model.</p>
         </div>
-        <div class="bars" id="c-ben" style="max-width: 820px"></div>
+        <div class="bars" id="c-ben"></div>
       </div>
 
       <div class="block" id="b-table">
@@ -1997,7 +1996,13 @@
     const band = narrow ? 50 : 38;
     const w = W0 - m.l - m.r, h = data.length * band;
     const x = d3.scaleLinear([0, Math.max(2.4, d3.max(data, d => d.ratio) * 1.08)], [0, w]);
-    const g = d3.select(el).append("svg").attr("width", W0).attr("height", h + m.t + m.b).append("g").attr("transform", `translate(${m.l},${m.t})`);
+    const svgEl = d3.select(el).append("svg").attr("width", W0).attr("height", h + m.t + m.b);
+    // green below break-even, turning red above it; the gradient is fixed to the scale, not to each bar
+    const grad = svgEl.append("defs").append("linearGradient").attr("id", "rg-grad").attr("gradientUnits", "userSpaceOnUse")
+      .attr("x1", 0).attr("x2", w).attr("y1", 0).attr("y2", 0);
+    [[0, 6], [0.6, 5], [0.95, 4], [1.05, 2], [1.6, 1], [2.3, 0]].forEach(([v, i]) =>
+      grad.append("stop").attr("offset", Math.min(1, x(v) / w)).attr("style", `stop-color: var(--fs-${i})`));
+    const g = svgEl.append("g").attr("transform", `translate(${m.l},${m.t})`);
     const xt = [0, 0.5, 1, 1.5, 2];
     g.append("g").attr("class", "grid").selectAll("line").data(xt.slice(1)).join("line").attr("x1", d => x(d)).attr("x2", d => x(d)).attr("y1", 0).attr("y2", h);
     g.append("line").attr("class", "axis-line").attr("x1", 0).attr("x2", w).attr("y1", h).attr("y2", h);
@@ -2006,7 +2011,7 @@
     const row = g.append("g").selectAll("g").data(data).join("g").attr("transform", (d, i) => `translate(0,${i * band})`);
     const by = narrow ? band - barH - 4 : (band - barH) / 2;
     row.append("text").attr("x", narrow ? 0 : -12).attr("y", narrow ? by - 6 : by + barH / 2 + 5).attr("text-anchor", narrow ? "start" : "end").style("font-size", "14px").style("fill", "var(--ink)").text(d => d.name);
-    row.append("rect").attr("x", 0).attr("y", by).attr("height", barH).attr("width", d => x(d.ratio)).style("fill", d => d.ratio > 1 ? "var(--fs-1)" : "var(--fs-5)");
+    row.append("rect").attr("x", 0).attr("y", by).attr("height", barH).attr("width", d => x(d.ratio)).style("fill", "url(#rg-grad)");
     row.append("text").attr("class", "lab").attr("x", d => x(d.ratio) + 8).attr("y", by + barH / 2 + 5).style("font-size", "14px").text(d => ratio(d.ratio));
     g.append("line").attr("class", "be").attr("x1", x(1)).attr("x2", x(1)).attr("y1", -6).attr("y2", h);
     g.append("text").attr("class", "lab").attr("x", x(1) - 6).attr("y", -12).attr("text-anchor", "end").text("Break-even £1.00");
@@ -2549,7 +2554,7 @@
     // header: the flat ASI field, with the mark top right
     ctx.fillStyle = XC.field; ctx.fillRect(0, 0, XW, 164);
     ctx.font = xFont(600, 14); ctx.fillStyle = XC.fieldHl; ctx.textAlign = "left";
-    xSpaced(ctx, "ENGLAND WELFARE TRACKER 2026", 40, 48, 5);
+    xSpaced(ctx, "ENGLISH WELFARE TRACKER 2026", 40, 48, 5);
     let ts = 52;
     ctx.font = xFont(600, ts);
     while (ctx.measureText(sc.title).width > 1360 && ts > 30) { ts -= 2; ctx.font = xFont(600, ts); }
@@ -3225,7 +3230,7 @@
       const letters = "Welcome.".split("").map((c, k) => `<span style="animation-delay:${REDUCED ? 0 : 150 + k * 70}ms">${c}</span>`).join("");
       html = `<div class="st-hello">
         <h2 class="st-hello-h" id="st-h" tabindex="-1" aria-label="Welcome."><span aria-hidden="true">${letters}</span></h2>
-        <p class="st-hello-p">The Adam Smith Institute’s England Welfare Tracker follows the money through every one of England’s ${seats.length} constituencies: what workers pay in income tax and National Insurance, and what is spent on welfare.</p></div>`;
+        <p class="st-hello-p">The Adam Smith Institute’s English Welfare Tracker follows the money through every one of England’s ${seats.length} constituencies: what workers pay in income tax and National Insurance, and what is spent on welfare.</p></div>`;
     } else {
       html = `<h2 class="st-h" id="st-h" tabindex="-1">${st.h}</h2>`;
       html += done && st.reveal ? `<p class="st-p${entering ? "" : " st-pop"}">${st.reveal()}</p>` : `<p class="st-p">${st.p}</p>`;
