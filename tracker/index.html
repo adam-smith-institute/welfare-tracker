@@ -414,6 +414,8 @@
   }
   .story :focus-visible { outline: 3px solid var(--field-ink); outline-offset: 3px; }
   .st-vis :focus-visible { outline-color: var(--ink); }
+  /* headings take focus for screen readers only; they never show a box */
+  .story [tabindex="-1"]:focus, .story [tabindex="-1"]:focus-visible { outline: none; }
 
   /* top: progress bar and a clear way out */
   .st-top { display: flex; align-items: flex-start; gap: 20px; min-height: 48px; }
