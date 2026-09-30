@@ -774,6 +774,33 @@
     .st-rband, .st-rm, .st-bt i, .st-pr .trk i, .st-split i, .st-flyr .trk i, .st-rsbar i, #st-map .st-seat, #st-map, .st-scene, .st-gapmark span, .st-scene .st-rv { transition: none; }
   }
 
+  /* ---------- Export infographic ---------- */
+  .p-tools { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; min-height: 40px; }
+  .export-btn {
+    margin-left: auto; display: inline-flex; align-items: center; gap: 8px; background: none; border: 1.5px solid var(--ink); color: var(--ink);
+    padding: 7px 12px 6px; font-size: 0.92rem; font-weight: 600; cursor: pointer; min-height: 38px;
+  }
+  .export-btn:hover { background: var(--ink); color: var(--ground); }
+  .export-btn svg, .ex-dl svg { width: 15px; height: 15px; flex: none; }
+  .ex-modal { position: fixed; inset: 0; z-index: 120; background: rgba(14, 21, 36, 0.72); display: grid; place-items: center; padding: 16px; }
+  .ex-box { background: var(--ground); color: var(--ink); width: min(1180px, 100%); max-height: 100%; overflow: auto; display: grid; gap: 14px; padding: 18px 20px 20px; }
+  .ex-top { display: flex; justify-content: space-between; align-items: center; gap: 16px; }
+  .ex-top h2 { font-size: 1.35rem; outline: none; }
+  .ex-close { background: none; border: 1.5px solid var(--ink); color: var(--ink); padding: 7px 14px 6px; font-weight: 600; cursor: pointer; min-height: 40px; }
+  .ex-close:hover { background: var(--ink); color: var(--ground); }
+  .ex-prev { border: 1px solid var(--rule-2); background: var(--track); aspect-ratio: 16 / 10; display: grid; place-items: center; }
+  .ex-prev img { width: 100%; height: 100%; display: block; }
+  .ex-wait { color: var(--ink-2); }
+  .ex-actions { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px 20px; }
+  .ex-note { font-size: 0.92rem; color: var(--ink-2); max-width: 70ch; }
+  .ex-note span { display: block; color: var(--ink-3); }
+  .ex-dl {
+    display: inline-flex; align-items: center; gap: 10px; background: var(--field); color: #ffffff; border: 0;
+    padding: 12px 20px 11px; font-weight: 600; font-size: 1.02rem; cursor: pointer; min-height: 48px;
+  }
+  .ex-dl:hover { background: var(--ink); }
+  .ex-dl:disabled { opacity: 0.5; cursor: progress; }
+
   /* ---------- Footer ---------- */
   .foot { padding-block: 32px 48px; border-top: 1px solid var(--rule); }
   .foot .rule { width: 160px; height: 4px; background: var(--ink); margin-bottom: 12px; }
@@ -1003,6 +1030,16 @@
       <div class="st-legend" id="st-legend"></div>
     </div></div>
     <svg class="wm" aria-hidden="true" focusable="false"><use href="#asi-mark"/></svg>
+  </div>
+</div>
+<div class="ex-modal" id="ex-modal" role="dialog" aria-modal="true" aria-labelledby="ex-h" hidden>
+  <div class="ex-box">
+    <div class="ex-top"><h2 id="ex-h" tabindex="-1">Export infographic</h2><button type="button" class="ex-close" id="ex-close">Close</button></div>
+    <div class="ex-prev"><p class="ex-wait" id="ex-wait">Drawing the infographic</p><img id="ex-img" alt="" hidden></div>
+    <div class="ex-actions">
+      <p class="ex-note">The infographic shows the view selected in the tracker, with the map coloured the same way. <span id="ex-name"></span></p>
+      <button type="button" class="ex-dl" id="ex-dl" disabled><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.5v9M4 7l4 4 4-4M2 14.5h12" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>Download PNG</button>
+    </div>
   </div>
 </div>
 <button type="button" class="st-return" id="st-return" hidden>Back to the walkthrough <svg aria-hidden="true"><use href="#i-arrow"/></svg></button>
@@ -1570,7 +1607,7 @@
     const jpa = s.jobs / s.adults;
     panel.innerHTML = `
       <div class="p-head">
-        <button type="button" class="back" id="back">${arrow}${back}</button>
+        <div class="p-tools"><button type="button" class="back" id="back">${arrow}${back}</button>${EXPORT_BTN}</div>
         <p class="p-kind">${esc(kind)}</p>
         <h2>${esc(s.name)}</h2>
         <div class="p-mp"><span class="party"><span class="sw" style="background:${pc(s.g)}"></span>${esc(s.party)}</span>${mpLine}</div>
@@ -1659,7 +1696,7 @@
       : `<div class="sec"><h3>${list.length > 1 ? "Seats" : "Seat"}</h3>${list.length > 1 ? `<p class="sub">Ranked by income tax and NI minus welfare, per adult.</p>` : ""}<ul class="list">${byNpa.map(seatLi).join("")}</ul></div>`;
     panel.innerHTML = `
       <div class="p-head">
-        <button type="button" class="back" id="back">${arrow}${kind === "city" ? "Back to all cities" : "Back to England"}</button>
+        <div class="p-tools"><button type="button" class="back" id="back">${arrow}${kind === "city" ? "Back to all cities" : "Back to England"}</button>${EXPORT_BTN}</div>
         <p class="p-kind">${{ region: "Region", city: "City", party: "Party of sitting MP" }[kind]}</p>
         <h2>${esc(title)}</h2>
       </div>
@@ -1708,6 +1745,7 @@
     }).join("");
     panel.innerHTML = `
       <div class="p-head">
+        <div class="p-tools">${EXPORT_BTN}</div>
         <p class="p-kind">England&rsquo;s cities</p>
         <h2>Select a city</h2>
         <p class="intro">London and ${inWords(CITIES.length - 1)} other cities hold ${all.length} of England&rsquo;s ${seats.length} seats. Click a city on the map, or pick one below or from the menu on the map. Each city is the set of constituencies containing its council&rsquo;s wards, so a few seats cross the city boundary.</p>
@@ -1737,6 +1775,7 @@
     const big = state.mode === "share" && state.basis === "share" ? `${sgbp(E.npa)}<small>net per adult, England</small>` : `${fig.big}<small>${fig.small}, England</small>`;
     panel.innerHTML = `
       <div class="p-head">
+        <div class="p-tools">${EXPORT_BTN}</div>
         <p class="p-kind">England</p>
         <h2>Select a constituency</h2>
         <p class="intro">Click any seat on the map, search above, or pick a region from the menu on the map. The panel shows the seat&rsquo;s tax and welfare, its sitting MP, and how it compares with the rest of England.</p>
@@ -2209,6 +2248,392 @@
   }
   window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", onTheme);
   new MutationObserver(onTheme).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+
+  // ---------- export infographic ----------
+  // Draws a one-page summary of whatever the panel shows (England, a region, a city, a party's seats,
+  // or one constituency): the map on the left, figures and charts on the right. Saved as a PNG.
+  const EXPORT_BTN = `<button type="button" class="export-btn" id="export"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.5v9M4 7l4 4 4-4M2 14.5h12" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>Export infographic</button>`;
+  // fixed light colours, so an export looks the same whichever theme the viewer uses
+  const XC = {
+    ground: "#ffffff", field: "#224191", fieldInk2: "#dfe3f2", fieldHl: "#b3b6e6", ink: "#1b2a4a", ink2: "#46536f", ink3: "#657089",
+    rule: "#e1e4ec", track: "#eceef4", panel: "#eef1f7", context: "#d3d8e3", accent: "#224191", eng: "#7a8193",
+    good: "#2f9e5a", bad: "#d4453a", goodInk: "#1d7a43", badInk: "#b3261e",
+    party: { lab: "#d7263d", con: "#0a6fc2", ld: "#f29a1b", ref: "#12a9c0", grn: "#2e9a4e", yp: "#9b3a9a", rb: "#2d3a70", ind: "#8b919c", spk: "#4a5160" },
+    fs: ["#9e1b28", "#d24b3e", "#eea08a", "#e5e4e1", "#9ccf97", "#3e9a5a", "#17613a"],
+    sq: ["#f0edf8", "#cbc2e6", "#9a89c9", "#6a4fa8", "#3e1d78"],
+  };
+  const xFiscal = d3.scaleLinear().domain([-1, -2 / 3, -1 / 3, 0, 1 / 3, 2 / 3, 1]).range(XC.fs).interpolate(d3.interpolateLab).clamp(true);
+  const xShare = d3.scaleLinear().domain([0, 0.25, 0.5, 0.75, 1]).range(XC.sq).interpolate(d3.interpolateLab).clamp(true);
+  // the map follows whatever colouring the tracker is set to
+  const xFill = s => state.mode === "party" ? XC.party[s.g] : state.mode === "share" ? xShare(amountT(s)) : xFiscal(fiscalT(s, state.metric));
+  const xFont = (w, px) => `${w} ${px}px "Josefin Sans", system-ui, sans-serif`;
+  const XMARK = new Path2D(document.querySelector("#asi-mark path").getAttribute("d"));
+
+  function exportScope() {
+    const n = list => `${list.length} constituencies`;
+    if (state.sel) {
+      const s = byCode.get(state.sel);
+      const place = [s.region, inCities() && s.city && s.city !== s.region ? s.city : null].filter(Boolean).join(" · ");
+      const mp = !s.mp ? "Seat vacant" : s.party === "Speaker" ? `${s.mp}, Speaker` : `${s.mp}, ${s.party} MP`;
+      return { kind: "seat", title: s.name, sub: `Constituency · ${place} · ${mp}`, list: [s], o: s, s, here: "This seat" };
+    }
+    if (inCities() && state.city) {
+      const l = CITY_SEATS[state.city];
+      return { kind: "city", title: state.city, sub: `City · ${n(l)}`, list: l, o: CITY_AGG[state.city], here: "This city" };
+    }
+    if (inCities()) {
+      const l = seats.filter(s => s.city);
+      return { kind: "cities", title: "England’s cities", sub: `London and ${inWords(CITIES.length - 1)} other cities · ${n(l)}`, list: l, o: agg(l), here: "The cities" };
+    }
+    if (state.iso && state.mode === "party") {
+      const l = seats.filter(s => s.g === state.iso);
+      return { kind: "party", title: `${groupName(state.iso)} seats`, sub: `Party of sitting MP, ${W.partyAsOf} · ${n(l)}`, list: l, o: agg(l), here: "These seats" };
+    }
+    if (state.region) {
+      const l = seats.filter(s => s.region === state.region);
+      return { kind: "region", title: state.region, sub: `Region · ${n(l)}`, list: l, o: agg(l), here: "This region" };
+    }
+    return { kind: "england", title: "England", sub: `All ${n(seats)}`, list: seats, o: E, here: "England" };
+  }
+
+  // ----- drawing helpers -----
+  function xMark(ctx, x, y, size, color) {
+    ctx.save();
+    ctx.translate(x, y); ctx.scale(size / 1788, size / 1788); ctx.translate(0, 1788); ctx.scale(0.1, -0.1);
+    ctx.fillStyle = color; ctx.fill(XMARK);
+    ctx.restore();
+  }
+  function xSpaced(ctx, str, x, y, gap) {
+    for (const ch of str) { ctx.fillText(ch, x, y); x += ctx.measureText(ch).width + gap; }
+  }
+  function xWrap(ctx, text, x, y, maxW, lh, maxLines) {
+    const lines = [];
+    let line = "";
+    for (const word of text.split(" ")) {
+      const t = line ? line + " " + word : word;
+      if (ctx.measureText(t).width > maxW && line) { lines.push(line); line = word; } else line = t;
+    }
+    if (line) lines.push(line);
+    lines.slice(0, maxLines).forEach((l, i) => ctx.fillText(l, x, y + i * lh));
+  }
+  function xText(ctx, str, x, y, weight, size, color, align = "left") {
+    ctx.font = xFont(weight, size); ctx.fillStyle = color; ctx.textAlign = align; ctx.fillText(str, x, y);
+  }
+  const xTitle = (ctx, str, x, y) => xText(ctx, str, x, y, 600, 18, XC.ink);
+  function xGradient(ctx, stops, x, y, w, h) {
+    const g = ctx.createLinearGradient(x, 0, x + w, 0);
+    stops.forEach((c, i) => g.addColorStop(i / (stops.length - 1), c));
+    ctx.fillStyle = g; ctx.fillRect(x, y, w, h);
+  }
+  // outer boundary of a group of seats: the edges only one of its seats uses
+  const xSegCache = new Map();
+  function xEdges(key, list) {
+    if (xSegCache.has(key)) return xSegCache.get(key);
+    const count = new Map(), segs = [];
+    list.forEach(s => {
+      const g = featBy.get(s.code).geometry;
+      (g.type === "Polygon" ? [g.coordinates] : g.coordinates).forEach(poly => poly.forEach(r => {
+        for (let i = 1; i < r.length; i++) {
+          const a = r[i - 1], b = r[i], ka = a.join(","), kb = b.join(",");
+          const k = ka < kb ? ka + "|" + kb : kb + "|" + ka;
+          count.set(k, (count.get(k) || 0) + 1);
+          segs.push([k, a, b]);
+        }
+      }));
+    });
+    const out = segs.filter(([k]) => count.get(k) === 1).map(([, a, b]) => [a, b]);
+    xSegCache.set(key, out);
+    return out;
+  }
+  function xStrokeEdges(ctx, p, segs, color, lw) {
+    ctx.beginPath();
+    segs.forEach(([a, b]) => { const s = p(a), t = p(b); ctx.moveTo(s[0], s[1]); ctx.lineTo(t[0], t[1]); });
+    ctx.strokeStyle = color; ctx.lineWidth = lw; ctx.lineCap = "round"; ctx.stroke();
+  }
+
+  // ----- the map: the area in its setting, plus a small locator for anything smaller than England -----
+  function xMap(ctx, sc, x, y, w, h) {
+    const inScope = new Set(sc.list.map(s => s.code));
+    const wide = sc.kind === "england" || sc.kind === "party" || sc.kind === "cities";
+    const pad = sc.kind === "seat" ? Math.min(w, h) * 0.24 : 28;
+    const focus = { type: "FeatureCollection", features: sc.list.map(s => featBy.get(s.code)) };
+    const p = d3.geoIdentity().reflectY(true).fitExtent([[x + pad, y + pad], [x + w - pad, y + h - pad]], wide ? GEO : focus);
+    const gp = d3.geoPath(p, ctx);
+    ctx.save();
+    ctx.fillStyle = XC.panel; ctx.fillRect(x, y, w, h);
+    ctx.beginPath(); ctx.rect(x, y, w, h); ctx.clip();
+    ctx.lineJoin = "round";
+    for (const f of feats) {
+      ctx.beginPath(); gp(f);
+      ctx.fillStyle = inScope.has(f.id) ? xFill(byCode.get(f.id)) : XC.context; ctx.fill();
+      ctx.strokeStyle = "#ffffff"; ctx.lineWidth = wide ? 0.45 : 1; ctx.stroke();
+    }
+    if (sc.kind === "seat") { ctx.beginPath(); gp(featBy.get(sc.s.code)); ctx.strokeStyle = XC.ink; ctx.lineWidth = 3; ctx.stroke(); }
+    else if (sc.kind === "region" || sc.kind === "city") xStrokeEdges(ctx, p, xEdges(sc.kind + ":" + sc.title, sc.list), XC.ink, 2);
+    else if (sc.kind === "cities") CITIES.forEach(c => xStrokeEdges(ctx, p, xEdges("city:" + c, CITY_SEATS[c]), XC.ink, 1.2));
+    ctx.restore();
+    if (!wide) xInset(ctx, sc, inScope, x + w - 142, y + h - 158, 130, 146);
+  }
+  function xInset(ctx, sc, inScope, x, y, w, h) {
+    const p = d3.geoIdentity().reflectY(true).fitExtent([[x + 8, y + 8], [x + w - 8, y + h - 8]], GEO), gp = d3.geoPath(p, ctx);
+    ctx.save();
+    ctx.fillStyle = "#ffffff"; ctx.fillRect(x, y, w, h);
+    ctx.strokeStyle = XC.rule; ctx.lineWidth = 1; ctx.strokeRect(x + 0.5, y + 0.5, w - 1, h - 1);
+    ctx.beginPath(); feats.forEach(f => { if (!inScope.has(f.id)) gp(f); }); ctx.fillStyle = XC.context; ctx.fill();
+    ctx.beginPath(); feats.forEach(f => { if (inScope.has(f.id)) gp(f); }); ctx.fillStyle = XC.ink; ctx.fill();
+    if (sc.kind === "seat") {
+      const [[a, b], [c, d]] = gp.bounds(featBy.get(sc.s.code));
+      ctx.beginPath(); ctx.arc((a + c) / 2, (b + d) / 2, Math.max(7, Math.hypot(c - a, d - b) / 2 + 4), 0, 2 * Math.PI);
+      ctx.strokeStyle = XC.ink; ctx.lineWidth = 1.8; ctx.stroke();
+    }
+    ctx.restore();
+  }
+  function xLegend(ctx, sc, x, y, w) {
+    if (state.mode === "party") {
+      xText(ctx, `Map: party of sitting MP, ${W.partyAsOf}.`, x, y, 400, 14, XC.ink2);
+      const counts = GROUPS.map(G => ({ G, n: sc.list.filter(s => s.g === G.g).length })).filter(c => c.n);
+      let cx = x, cy = y + 28;
+      ctx.font = xFont(400, 13);
+      counts.forEach(({ G, n }) => {
+        const t = `${groupName(G.g)} ${n}`, tw = ctx.measureText(t).width + 32;
+        if (cx + tw > x + w) { cx = x; cy += 22; }
+        ctx.fillStyle = XC.party[G.g]; ctx.fillRect(cx, cy - 10, 12, 12);
+        ctx.fillStyle = XC.ink; ctx.textAlign = "left"; ctx.fillText(t, cx + 18, cy);
+        cx += tw;
+      });
+      return;
+    }
+    let stops, ticks, text, ends = "Red: deficit. Green: surplus.";
+    if (state.mode === "share") {
+      const noun = SHARE[state.share].noun;
+      text = state.basis === "adult" ? `Map: ${noun} per adult, on a log scale.` : `Map: each seat’s share of England’s ${noun}, on a log scale.`;
+      stops = XC.sq; ticks = [[0, "Smaller"], [1, "Larger"]]; ends = "";
+    } else if (state.metric === "ratio") {
+      const at = r => (clampT(-Math.log(r) / Math.log(RATIO_MAX)) + 1) / 2;
+      text = "Map: welfare spending per £1 of income tax and NI, on a log scale.";
+      stops = XC.fs; ticks = [[at(3), "£3.00"], [at(1), "£1.00"], [at(1 / 3), "£0.33"]];
+    } else {
+      text = "Map: income tax and NI minus welfare spending, per adult.";
+      stops = XC.fs; ticks = [[0, `${MINUS}£5k`], [0.5, "£0"], [1, "+£5k"]];
+    }
+    xText(ctx, text, x, y, 400, 14, XC.ink2);
+    const bw = 320, by = y + 16;
+    xGradient(ctx, stops, x, by, bw, 12);
+    ticks.forEach(([t, l]) => xText(ctx, l, x + t * bw, by + 30, 400, 13, XC.ink3, t < 0.05 ? "left" : t > 0.95 ? "right" : "center"));
+    if (ends) xText(ctx, ends, x + bw + 18, by + 11, 400, 13, XC.ink2);
+  }
+
+  // ----- the figures -----
+  function xCompare(ctx, sc, x, y, w) {
+    xTitle(ctx, "Compared with England", x, y);
+    const rows = [["Income tax and NI per worker", sc.o.tpw, E.tpw, gbp, true], ["Welfare spending per adult", sc.o.wpa, E.wpa, gbp, false],
+      ["Welfare per £1 of tax", sc.o.ratio, E.ratio, ratio, false]];
+    rows.forEach(([label, v, e, fmt, hiGood], i) => {
+      const ry = y + 32 + i * 74, max = Math.max(v, e) * 1.1, better = hiGood ? v >= e : v <= e, diff = v / e - 1;
+      const tag = Math.abs(diff) < 0.005 ? "In line with England" : `${pct(Math.abs(diff))} ${diff > 0 ? "above" : "below"} England`;
+      xText(ctx, label, x, ry, 600, 15, XC.ink);
+      xText(ctx, tag, x + w, ry, 600, 13, better ? XC.goodInk : XC.badInk, "right");
+      [[sc.here, v, better ? XC.good : XC.bad], ["England", e, XC.eng]].forEach(([lab, val, col], j) => {
+        const by = ry + 11 + j * 22, bx = x + 92, bl = w - 92 - 76;
+        xText(ctx, lab, x, by + 11, 400, 13, XC.ink2);
+        ctx.fillStyle = XC.track; ctx.fillRect(bx, by, bl, 13);
+        ctx.fillStyle = col; ctx.fillRect(bx, by, bl * val / max, 13);
+        xText(ctx, fmt(val), x + w, by + 11, 600, 14, XC.ink, "right");
+      });
+    });
+  }
+  function xRegions(ctx, x, y, w) {
+    xTitle(ctx, "Net contribution per adult, by region", x, y);
+    const reg = W.regions.slice().sort((a, b) => b.npa - a.npa);
+    const lx = x + 182, lw = w - 182 - 66, sx = d3.scaleLinear([Math.min(0, d3.min(reg, r => r.npa)), Math.max(0, d3.max(reg, r => r.npa))], [lx, lx + lw]);
+    reg.forEach((r, i) => {
+      const ry = y + 28 + i * 24;
+      xText(ctx, r.name, x, ry + 11, 400, 13, XC.ink);
+      ctx.fillStyle = r.npa < 0 ? XC.bad : XC.good;
+      ctx.fillRect(Math.min(sx(0), sx(r.npa)), ry, Math.abs(sx(r.npa) - sx(0)), 14);
+      xText(ctx, sgbp(r.npa), x + w, ry + 11, 600, 13, XC.ink, "right");
+    });
+    ctx.fillStyle = XC.ink; ctx.fillRect(Math.round(sx(0)) - 1, y + 22, 2, reg.length * 24 + 2);
+  }
+  function xBenefits(ctx, sc, x, y, w) {
+    const eng = sc.kind === "england";
+    xTitle(ctx, "Welfare per adult, by benefit", x, y);
+    if (!eng) {
+      ctx.fillStyle = XC.ink; ctx.fillRect(x + w - 112, y - 12, 3, 15);
+      xText(ctx, "England average", x + w, y, 400, 12.5, XC.ink2, "right");
+    }
+    const order = d3.range(10).sort((a, b) => E.ben[b] - E.ben[a]), top = order.slice(0, 6), rest = order.slice(6);
+    const rows = top.map(i => [BEN_SHORT[i], sc.o.ben[i] / sc.o.adults, E.ben[i] / E.adults])
+      .concat([["Four smaller benefits", d3.sum(rest, i => sc.o.ben[i]) / sc.o.adults, d3.sum(rest, i => E.ben[i]) / E.adults]]);
+    const max = d3.max(rows, r => Math.max(r[1], r[2])) * 1.05;
+    rows.forEach(([name, v, e], k) => {
+      const ry = y + 30 + k * 30, bx = x + 156, bl = w - 156 - 66;
+      xText(ctx, name, x, ry + 11, 400, 14, XC.ink);
+      ctx.fillStyle = XC.track; ctx.fillRect(bx, ry, bl, 13);
+      ctx.fillStyle = XC.accent; ctx.fillRect(bx, ry, bl * v / max, 13);
+      if (!eng) { ctx.fillStyle = XC.ink; ctx.fillRect(Math.round(bx + bl * e / max) - 1, ry - 4, 3, 21); }
+      xText(ctx, gbp(v), x + w, ry + 11, 600, 14, XC.ink, "right");
+    });
+  }
+  function xParties(ctx, sc, x, y, w) {
+    if (sc.kind === "party") {
+      // one party's seats: where they are
+      xTitle(ctx, "Seats by region", x, y);
+      const counts = REGIONS.map(r => [r, sc.list.filter(s => s.region === r).length]).filter(c => c[1]).sort((a, b) => b[1] - a[1]);
+      counts.slice(0, 10).forEach(([r, c], i) => {
+        const cx = x + (i % 2) * (w / 2), cy = y + 30 + Math.floor(i / 2) * 22;
+        xText(ctx, r, cx, cy, 400, 13, XC.ink);
+        xText(ctx, String(c), cx + w / 2 - 20, cy, 600, 13, XC.ink, "right");
+      });
+      return;
+    }
+    xTitle(ctx, "Seats by party of sitting MP", x, y);
+    const counts = GROUPS.map(G => ({ G, n: sc.list.filter(s => s.g === G.g).length })).filter(c => c.n), tot = sc.list.length;
+    const by = y + 14, gap = 2, avail = w - gap * (counts.length - 1);
+    let bx = x;
+    counts.forEach(({ G, n }) => { const bw = avail * n / tot; ctx.fillStyle = XC.party[G.g]; ctx.fillRect(bx, by, bw, 22); bx += bw + gap; });
+    let cx = x, cy = by + 46;
+    ctx.font = xFont(400, 13);
+    counts.forEach(({ G, n }) => {
+      const t = `${groupName(G.g).replace(" (incl. Co-op)", "")} ${n}`, tw = ctx.measureText(t).width + 30;
+      if (cx + tw > x + w) { cx = x; cy += 21; }
+      ctx.fillStyle = XC.party[G.g]; ctx.fillRect(cx, cy - 10, 12, 12);
+      ctx.fillStyle = XC.ink; ctx.textAlign = "left"; ctx.fillText(t, cx + 18, cy);
+      cx += tw;
+    });
+  }
+  function xSurplus(ctx, sc, x, y, w) {
+    const n = sc.list.length, sur = sc.list.filter(s => s.net > 0).length, gw = w * sur / n;
+    xTitle(ctx, "Seats that pay their way", x, y);
+    xText(ctx, `${sur} of ${n}`, x, y + 44, 600, 32, sur / n >= 0.5 ? XC.goodInk : XC.badInk);
+    const by = y + 58;
+    ctx.fillStyle = XC.good; ctx.fillRect(x, by, Math.max(0, gw - 1), 18);
+    ctx.fillStyle = XC.bad; ctx.fillRect(x + gw + (sur ? 1 : 0), by, Math.max(0, w - gw - (sur ? 1 : 0)), 18);
+    ctx.font = xFont(400, 13); ctx.fillStyle = XC.ink2; ctx.textAlign = "left";
+    xWrap(ctx, `${pct(sur / n)} pay in more than they receive. ${n - sur} receive more than they pay in.`, x, by + 40, w, 18, 2);
+  }
+  function xRank(ctx, s, x, y, w) {
+    xTitle(ctx, "Rank for net contribution per adult", x, y);
+    xText(ctx, `${ord(s.rank)} of ${seats.length}`, x, y + 42, 600, 30, s.net < 0 ? XC.badInk : XC.goodInk);
+    const by = y + 58, mx = Math.round(x + w * (seats.length - s.rank) / (seats.length - 1));
+    xGradient(ctx, XC.fs, x, by, w, 14);
+    ctx.fillStyle = "#ffffff"; ctx.fillRect(mx - 4, by - 9, 8, 32);
+    ctx.fillStyle = XC.ink; ctx.fillRect(mx - 3, by - 8, 6, 30);
+    xText(ctx, "Largest net recipient", x, by + 38, 400, 12.5, XC.ink3);
+    xText(ctx, "Largest net contributor", x + w, by + 38, 400, 12.5, XC.ink3, "right");
+  }
+  function xHealth(ctx, s, x, y, w) {
+    xTitle(ctx, "Work, pay, and health", x, y);
+    const h = s.h || {};
+    [["Employment rate", h.emp, E.h.emp, v => pct(v, 1)], ["Economically inactive", h.inact, E.h.inact, v => pct(v, 1)],
+      ["Median annual pay", s.medPay, E.medPay, gbp], ["Life expectancy", h.le, E.h.le, v => v.toFixed(1) + " years"]].forEach(([l, v, e, fmt], i) => {
+      const ry = y + 34 + i * 29;
+      xText(ctx, l, x, ry, 400, 14, XC.ink);
+      xText(ctx, v == null ? "n/a" : fmt(v), x + w - 118, ry, 600, 16, XC.ink, "right");
+      xText(ctx, `England ${fmt(e)}`, x + w, ry, 400, 12.5, XC.ink3, "right");
+      if (i < 3) { ctx.fillStyle = XC.rule; ctx.fillRect(x, ry + 10, w, 1); }
+    });
+  }
+
+  // ----- the page -----
+  const XW = 1600, XH = 1000, XS = 2;
+  async function buildInfographic() {
+    try { await Promise.all(["300", "400", "600"].map(w => document.fonts.load(`${w} 24px "Josefin Sans"`))); } catch (e) { /* fall back to system fonts */ }
+    const sc = exportScope(), o = sc.o;
+    const cv = document.createElement("canvas");
+    cv.width = XW * XS; cv.height = XH * XS;
+    const ctx = cv.getContext("2d");
+    ctx.scale(XS, XS);
+    ctx.fillStyle = XC.ground; ctx.fillRect(0, 0, XW, XH);
+
+    // header: the flat ASI field, with the mark top right
+    ctx.fillStyle = XC.field; ctx.fillRect(0, 0, XW, 164);
+    ctx.font = xFont(600, 14); ctx.fillStyle = XC.fieldHl; ctx.textAlign = "left";
+    xSpaced(ctx, "ENGLAND WELFARE TRACKER 2026", 40, 48, 5);
+    let ts = 52;
+    ctx.font = xFont(600, ts);
+    while (ctx.measureText(sc.title).width > 1360 && ts > 30) { ts -= 2; ctx.font = xFont(600, ts); }
+    ctx.fillStyle = "#ffffff"; ctx.fillText(sc.title, 40, 108);
+    xText(ctx, sc.sub, 40, 142, 300, 20, XC.fieldInk2);
+    xMark(ctx, XW - 40 - 88, 38, 88, "#ffffff");
+
+    // left: the map
+    xMap(ctx, sc, 40, 196, 560, 610);
+    xLegend(ctx, sc, 40, 836, 560);
+
+    // right: the figures
+    const X = 650, RW = 910;
+    let fig = figure(o, false);
+    if (sc.kind === "england" && state.mode === "share" && state.basis === "share") fig = { big: sgbp(E.npa), small: "net per adult" };
+    const tone = state.mode === "share" ? XC.ink : state.mode === "fiscal" && state.metric === "ratio" ? (o.ratio <= 1 ? XC.goodInk : XC.badInk) : (o.npa >= 0 ? XC.goodInk : XC.badInk);
+    xText(ctx, fig.big, X, 268, 600, 70, tone);
+    const bw = ctx.measureText(fig.big).width;
+    xText(ctx, fig.small, X + bw + 14, 268, 400, 20, XC.ink2);
+    ctx.font = xFont(400, 21); ctx.fillStyle = XC.ink; ctx.textAlign = "left";
+    xWrap(ctx, o.net < 0 ? `Welfare spending exceeds income tax and NI by ${money(-o.net)} a year.` : `Income tax and NI exceed welfare spending by ${money(o.net)} a year.`, X, 308, RW, 28, 2);
+
+    const tiles = [
+      ["Income tax and NI paid", money(o.tax), `${gbp(o.tpw)} per worker`],
+      ["Welfare spending", money(o.wel), `${gbp(o.wpa)} per adult`],
+      ["Welfare per £1 of tax", ratio(o.ratio), sc.kind === "england" ? "Break-even is £1.00" : `England ${ratio(E.ratio)}`],
+      sc.kind === "seat" ? ["Adults living here", f0(o.adults), `${f0(o.jobs)} jobs held by residents`] : ["Seats in surplus", `${o.surplus} of ${o.seats}`, `${pct(o.surplus / o.seats)} pay their way`],
+    ];
+    const tw = (RW - 60) / 4;
+    tiles.forEach(([l, v, sub], i) => {
+      const tx = X + i * (tw + 20);
+      ctx.fillStyle = XC.accent; ctx.fillRect(tx, 352, tw, 3);
+      xText(ctx, l, tx, 382, 400, 15, XC.ink2);
+      xText(ctx, v, tx, 422, 600, 32, XC.ink);
+      xText(ctx, sub, tx, 446, 400, 14, XC.ink3);
+    });
+
+    ctx.fillStyle = XC.rule; ctx.fillRect(X, 474, RW, 1);
+    const CW = (RW - 30) / 2, X2 = X + CW + 30;
+    if (sc.kind === "england") xRegions(ctx, X, 504, CW); else xCompare(ctx, sc, X, 504, CW);
+    xBenefits(ctx, sc, X2, 504, CW);
+
+    ctx.fillStyle = XC.rule; ctx.fillRect(X, 756, RW, 1);
+    if (sc.kind === "seat") { xRank(ctx, sc.s, X, 786, CW); xHealth(ctx, sc.s, X2, 786, CW); }
+    else { xParties(ctx, sc, X, 786, CW); xSurplus(ctx, sc, X2, 786, CW); }
+
+    // footer, after the ASI cards: a short rule and the web address
+    ctx.fillStyle = XC.ink; ctx.fillRect(40, 930, 120, 4);
+    xText(ctx, "adamsmith.org", 40, 966, 600, 19, XC.ink);
+    ctx.font = xFont(400, 12.5); ctx.fillStyle = XC.ink3; ctx.textAlign = "left";
+    const today = new Date().toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
+    xWrap(ctx, `Source: Adam Smith Institute modelling, using DWP Stat-Xplore, ONS ASHE 2025, ONS mid-2024 population estimates, Census 2021, ONS APS, and NHS QOF 2024/25. Tax is income tax and employee National Insurance on wages; welfare is ten DWP benefits. Party of sitting MP as at ${W.partyAsOf}. Boundaries: ONS, contains OS data © Crown copyright and database right 2024. Exported ${today}.`, 260, 944, 1300, 18, 3);
+    return { cv, sc };
+  }
+
+  // ----- preview and download -----
+  const exM = document.getElementById("ex-modal"), exImg = document.getElementById("ex-img"), exWait = document.getElementById("ex-wait");
+  const exDl = document.getElementById("ex-dl"), exName = document.getElementById("ex-name");
+  let exURL = null, exFile = "";
+  async function openExport() {
+    exM.hidden = false;
+    exImg.hidden = true; exWait.hidden = false; exDl.disabled = true; exName.textContent = "";
+    document.getElementById("ex-h").focus({ preventScroll: true });
+    const { cv, sc } = await buildInfographic();
+    cv.toBlob(blob => {
+      if (exURL) URL.revokeObjectURL(exURL);
+      exURL = URL.createObjectURL(blob);
+      exFile = `ASI_WelfareTracker_${sc.title.replace(/[^A-Za-z0-9]+/g, "")}.png`;
+      exImg.src = exURL; exImg.alt = `Infographic: ${sc.title}`;
+      exImg.hidden = false; exWait.hidden = true;
+      exName.textContent = `${exFile} · ${XW * XS} × ${XH * XS} pixels`;
+      exDl.disabled = false;
+    }, "image/png");
+  }
+  function closeExport() { exM.hidden = true; }
+  panel.addEventListener("click", e => { if (e.target.closest("#export")) openExport(); });
+  exDl.addEventListener("click", () => {
+    const a = document.createElement("a");
+    a.href = exURL; a.download = exFile;
+    document.body.appendChild(a); a.click(); a.remove();
+  });
+  document.getElementById("ex-close").addEventListener("click", closeExport);
+  exM.addEventListener("click", e => { if (e.target === exM) closeExport(); });
+  document.addEventListener("keydown", e => { if (e.key === "Escape" && !exM.hidden) closeExport(); });
 
   // ---------- walkthrough ----------
   // A short presentation that opens on arrival: a welcome, guesses, reveals, and a seat search.
