@@ -7,12 +7,12 @@ from sibling files and d3 and Josefin Sans from CDNs. Opened on its own (an emai
 attachment, or a file double-clicked inside a zip) those are missing and the page is blank.
 
 This script inlines everything - data, boundaries, d3, logo and fonts - into one file.
-Output: ../English-Welfare-Tracker-2026.html. Works offline in any modern browser.
+Output: ../Welfare-Sustainability-Tracker-2026.html. Works offline in any modern browser.
 """
 import base64, os
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-OUT = os.path.join(HERE, "..", "English-Welfare-Tracker-2026.html")
+OUT = os.path.join(HERE, "..", "Welfare-Sustainability-Tracker-2026.html")
 
 
 def read(name, mode="r"):

@@ -1,27 +1,40 @@
-"""Build the tracker's data files from the welfare workbook.
+"""Build the tracker's data files from the England and Wales welfare workbooks.
 
     pip install openpyxl
     python3 build_data.py
 
-Reads  ../A Tale of Two Cities (Welfare Analysis) 2026.xlsx
+Reads  ../A Tale of Two Cities (Welfare Analysis) 2026.xlsx           (England, 543 seats)
+       ../A Tale of Two Cities Welfare Analysis 2026 - Wales.xlsx      (Wales, 32 seats)
        ../Westminster_Parliamentary_Constituencies_July_2024_Boundaries_UK_BUC_*.geojson
+       ../wales_pcon2024_simplified.geojson   Welsh boundaries, simplified from wales_pcon2024_bgc.geojson with
+                                              npx mapshaper wales_pcon2024_bgc.geojson -simplify dp interval=300 keep-shapes
+                                              -o wales_pcon2024_simplified.geojson precision=0.00001
        UK Parliament Members API (current MPs, fetched live)
-Writes data.js   window.WT  = {england, regions, parties, seats, dumbbell, method, ...}
-       geo.js    window.GEO = England constituency boundaries, pre-projected to a flat
-                             plane (x = lon * cos 52.7deg, y = lat) so the page can draw
-                             them with d3.geoIdentity and no winding-order issues.
+Writes data.js   window.WT  = {england, wales, regions, parties, seats, dumbbell, method, ...}
+       geo.js    window.GEO = constituency boundaries, pre-projected to a flat plane
+                             (x = lon * cos 52.7deg, y = lat) so the page can draw them with
+                             d3.geoIdentity and no winding-order issues.
 
-Re-run whenever the workbook changes. The page reads only these two files.
+If the Wales workbook was saved without calculated values (openpyxl reads its formula cells as
+empty until Excel has opened and saved it), its results are recomputed with model.py, which
+follows the workbook's own formulas.
+
+Re-run whenever a workbook changes. The page reads only data.js and geo.js.
+Set WT_ROOT to read the input files from another folder.
 """
 import glob, json, math, os, re, unicodedata, urllib.request
 from datetime import date
 
 import openpyxl
 
+import model
+
 HERE = os.path.dirname(os.path.abspath(__file__))
-ROOT = os.path.join(HERE, "..")
+ROOT = os.environ.get("WT_ROOT", os.path.join(HERE, ".."))
 XLSX = os.path.join(ROOT, "A Tale of Two Cities (Welfare Analysis) 2026.xlsx")
+WALES_XLSX = os.path.join(ROOT, "A Tale of Two Cities Welfare Analysis 2026 - Wales.xlsx")
 GEOJSON = glob.glob(os.path.join(ROOT, "Westminster_Parliamentary_Constituencies_July_2024_*.geojson"))[0]
+WALES_GEOJSON = os.path.join(ROOT, "wales_pcon2024_simplified.geojson")
 MEMBERS_URL = "https://members-api.parliament.uk/api/Members/Search?House=1&IsCurrentMember=true&skip={}&take=20"
 
 REGIONS = ["North East", "North West", "Yorkshire and The Humber", "East Midlands", "West Midlands",
@@ -66,7 +79,7 @@ for r in rows("Constituency Summary", 3):
         "jobs": int(r[8]), "adults": adults,
         "relR": num(r[9], 4), "relE": num(r[10], 4),
         "ben": [round(v) for v in r[13:23]],
-        "meanEst": bool(r[23]), "imputed": int(r[24] or 0), "flag": bool(r[25]),
+        "meanEst": bool(r[23]), "imputed": int(r[24] or 0), "flag": bool(r[25]), "country": "England",
     }
 assert len(seats) == 543, len(seats)
 
@@ -113,6 +126,31 @@ for r in rows("Annual Pay Across Percentiles", 4)[:18]:
         name = r[0].replace("Yorkshire & The Humber", "Yorkshire and The Humber")
         reg_pay[name] = [round(v) for v in (r[2], r[3], r[4], r[5], r[6], r[7], r[8], r[9])]
 
+# ---------- Wales ----------
+wwb = openpyxl.load_workbook(WALES_XLSX, read_only=True, data_only=True)
+wales_seats, wales_extra = model.compute_wales(openpyxl.load_workbook(WALES_XLSX, data_only=False))
+# once the workbook has been opened and saved in Excel it carries Excel's own results: compare them
+saved = {str(r[0]).strip(): r for r in wwb["Constituency Summary"].iter_rows(min_row=3, values_only=True) if r[0] and isinstance(r[3], (int, float))}
+if saved:
+    gap = max(max(abs(w["tax"] / 1e9 - saved[w["name"]][3]), abs(w["wel"] / 1e9 - saved[w["name"]][5])) for w in wales_seats)
+    print(f"Wales: recomputed figures differ from Excel's saved results by at most £{gap * 1e9:,.0f} per seat.")
+wales_method = [list(r[:2]) for r in wwb["Methodology & Scope"].iter_rows(min_row=3, values_only=True)]
+wales_tax_note = wwb["Tax Assumptions"]["A23"].value
+for w in wales_seats:
+    tax, welfare, adults = w["tax"], w["wel"], w["adults"]
+    seats[key(w["name"])] = {
+        "name": w["name"], "region": "Wales", "party": w["party"].strip(), "code": w["code"], "country": "Wales",
+        "tax": round(tax), "tpw": round(w["tpw"]), "wel": round(welfare), "wpa": round(welfare / adults),
+        "net": round(tax - welfare), "npa": round((tax - welfare) / adults), "ratio": round(welfare / tax, 4),
+        "jobs": int(round(w["jobs"])), "adults": int(adults), "relR": None, "relE": None,
+        "ben": [round(v) for v in w["ben"]], "claims": [int(c) for c in w["claims"]], "h": None,
+        "pay": [round(v) for v in w["pay"]], "meanPay": round(w["meanPay"]), "medPay": round(w["medPay"]) if isinstance(w["medPay"], (int, float)) else None,
+        "jobsSplit": [int(round(v)) for v in w["jobsSplit"]], "meanEst": w["meanEst"], "imputed": w["imputed"],
+        "flag": w["meanEst"] or w["imputed"] >= 2, "mpSheet": w["mpSheet"],
+    }
+reg_pay["Wales"] = [round(v) for v in wales_extra["regionPay"]]
+assert len(seats) == 575, len(seats)
+
 # ---------- MPs: UK Parliament Members API ----------
 mps = {}
 skip = 0
@@ -136,6 +174,8 @@ for k, s in seats.items():
         s["mp"], s["mpSince"], s["mpId"] = mp["name"], mp["since"], mp["id"]
         if mp["party"] != s["party"]:
             party_mismatch.append((s["name"], s["party"], mp["party"]))
+    elif s.get("mpSheet"):
+        s["mp"] = re.sub(r"^(Mr|Mrs|Ms|Miss|Mx)\.?\s+", "", s["mpSheet"])
     else:
         s["mp"] = None
 no_mp = [s["name"] for s in seats.values() if not s["mp"]]
@@ -153,13 +193,15 @@ def agg(group):
 
 
 all_seats = list(seats.values())
-england = agg(all_seats)
+england_seats = [s for s in all_seats if s["country"] == "England"]
+england = agg(england_seats)
 england["h"] = {}
+wales = agg([s for s in all_seats if s["country"] == "Wales"])
 regions = []
-for name in REGIONS:
+for name in REGIONS + ["Wales"]:
     g = [s for s in all_seats if s["region"] == name]
     regions.append({"name": name, **agg(g), "pay": reg_pay.get(name)})
-party_order = ["Labour", "Labour (Co-op)", "Conservative", "Liberal Democrat", "Reform UK", "Green Party",
+party_order = ["Labour", "Labour (Co-op)", "Conservative", "Liberal Democrat", "Reform UK", "Plaid Cymru", "Green Party",
                "Independent", "Your Party", "Restore Britain", "Speaker"]
 assert set(s["party"] for s in all_seats) <= set(party_order), set(s["party"] for s in all_seats)
 parties = []
@@ -182,8 +224,10 @@ nat = avg_rows["National Average (England)"]
 england["h"] = {"le": num(nat[6], 2), "obesity": num(nat[7], 2), "diabetes": num(nat[8], 2),
                 "hyper": num(nat[9], 2), "depress": num(nat[10], 2), "asthma": num(nat[11], 2),
                 "emp": num(nat[13], 4), "inact": num(nat[14], 4)}
-england["medPay"] = round(sum(s["medPay"] * s["jobs"] for s in all_seats if s.get("medPay")) /
-                          sum(s["jobs"] for s in all_seats if s.get("medPay")))
+england["medPay"] = round(sum(s["medPay"] * s["jobs"] for s in england_seats if s.get("medPay")) /
+                          sum(s["jobs"] for s in england_seats if s.get("medPay")))
+wales["medPay"] = round(sum(s["medPay"] * s["jobs"] for s in all_seats if s["country"] == "Wales" and s.get("medPay")) /
+                        sum(s["jobs"] for s in all_seats if s["country"] == "Wales" and s.get("medPay")))
 
 # ---------- Dumbbell: 10 highest- vs 10 lowest-welfare seats ----------
 def block(title):
@@ -221,6 +265,18 @@ for r in rows("Methodology & Scope", 3):
         method.append([r[0], None])
     elif r[1]:
         method.append([None, r[1]])
+wm = {r[0]: r[1] for r in wales_method if r[0] and r[1]}
+method += [["6. Wales", None],
+           ["Tax rates", wales_tax_note],
+           ["Welfare data", "Stat-Xplore API, pulled 30 September 2026, using the same databases and measures as the England extract."],
+           ["Not included", "As for England, plus Welsh Government schemes such as the Discretionary Assistance Fund and the "
+                            "Council Tax Reduction Scheme."],
+           ["Sparse percentiles", wm.get("Sparse percentiles")],
+           ["Validation", wm.get("Validation")],
+           ["Demographics", "The demographic, health, and work comparisons in the tracker cover England only."],
+           ["Sources", "DWP Stat-Xplore API (30 Sep 2026); ONS ASHE 2025 provisional (Tables 10.7a and 10.1a); ONS mid-2024 population "
+                       "estimates by July 2024 Westminster constituency; UK Parliament Members API (party of current MP, 30 Sep 2026); "
+                       "ONS Open Geography Portal, Westminster Parliamentary Constituencies (July 2024) Boundaries UK BGC."]]
 
 # ---------- Write data.js ----------
 out_seats = []
@@ -228,10 +284,10 @@ for s in sorted(all_seats, key=lambda s: s["name"]):
     out_seats.append({k: s.get(k) for k in (
         "code", "name", "region", "party", "mp", "mpSince", "tax", "tpw", "wel", "wpa", "net", "npa", "ratio",
         "jobs", "adults", "relR", "relE", "ben", "claims", "h", "pay", "meanPay", "medPay", "jobsSplit",
-        "meanEst", "imputed", "flag")})
+        "meanEst", "imputed", "flag", "country")})
 
-WT = {"edition": 2026, "partyAsOf": "23 September 2026", "mpAsOf": date.today().isoformat(), "benefits": BENEFITS, "pcts": PCTS,
-      "england": england, "regions": regions, "parties": parties, "seats": out_seats,
+WT = {"edition": 2026, "partyAsOf": "September 2026", "mpAsOf": date.today().isoformat(), "benefits": BENEFITS, "pcts": PCTS,
+      "england": england, "wales": wales, "regions": regions, "parties": parties, "seats": out_seats,
       "dumbbell": dumbbell, "method": method}
 with open(os.path.join(HERE, "data.js"), "w", encoding="utf-8") as f:
     f.write("window.WT=")
@@ -253,6 +309,7 @@ def ring(coords):
 
 
 geo = json.load(open(GEOJSON, encoding="utf-8"))
+geo["features"] += json.load(open(WALES_GEOJSON, encoding="utf-8"))["features"]
 codes = {s["code"] for s in all_seats}
 feats = []
 for f in geo["features"]:
@@ -265,7 +322,7 @@ for f in geo["features"]:
     else:
         coords = [[ring(r) for r in poly] for poly in g["coordinates"]]
     feats.append({"type": "Feature", "id": code, "geometry": {"type": g["type"], "coordinates": coords}})
-assert len(feats) == 543, len(feats)
+assert len(feats) == 575, len(feats)
 with open(os.path.join(HERE, "geo.js"), "w", encoding="utf-8") as f:
     f.write("window.GEO=")
     json.dump({"type": "FeatureCollection", "features": feats}, f, separators=(",", ":"))
@@ -273,8 +330,9 @@ with open(os.path.join(HERE, "geo.js"), "w", encoding="utf-8") as f:
 
 print(f"{len(out_seats)} seats -> data.js ({os.path.getsize(os.path.join(HERE, 'data.js')) / 1e3:.0f} KB); "
       f"geo.js ({os.path.getsize(os.path.join(HERE, 'geo.js')) / 1e3:.0f} KB)")
-print(f"England: tax £{england['tax'] / 1e9:.1f}bn, welfare £{england['wel'] / 1e9:.1f}bn, "
-      f"net £{england['net'] / 1e9:.1f}bn, {england['surplus']} seats in surplus")
+for label, a in (("England", england), ("Wales", wales)):
+    print(f"{label}: tax £{a['tax'] / 1e9:.2f}bn, welfare £{a['wel'] / 1e9:.2f}bn, "
+          f"net £{a['net'] / 1e9:.2f}bn, {a['surplus']} of {a['seats']} seats in surplus")
 if no_mp:
     print("No current MP found for:", no_mp)
 if party_mismatch:

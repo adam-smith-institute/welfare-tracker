@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>English Welfare Tracker</title>
-<meta name="description" content="Adam Smith Institute English Welfare Tracker 2026: income tax, National Insurance, and DWP welfare spending for all 543 English constituencies, by party of sitting MP.">
+<title>Welfare Sustainability Tracker 2026: England and Wales</title>
+<meta name="description" content="Adam Smith Institute Welfare Sustainability Tracker 2026: income tax, National Insurance, and DWP welfare spending for all 575 constituencies in England and Wales, by party of sitting MP.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Josefin+Sans:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap">
@@ -49,6 +49,7 @@
     --p-rb: #2d3a70;
     --p-ind: #8b919c;
     --p-spk: #4a5160;
+    --p-pc: #005b54;
 
     /* fiscal balance: red (deficit) to green (surplus), neutral grey midpoint */
     --fs-0: #9e1b28;
@@ -59,7 +60,7 @@
     --fs-5: #3e9a5a;
     --fs-6: #17613a;
 
-    /* share of England's total: one purple hue, light to dark */
+    /* share of the total: one purple hue, light to dark */
     --sq-0: #f0edf8;
     --sq-1: #cbc2e6;
     --sq-2: #9a89c9;
@@ -91,7 +92,7 @@
       --lav: #a3a6dc;
       --st-neutral: #2a3452;
       --p-lab: #e23a4f; --p-con: #3d74e0; --p-ld: #f29a1b; --p-ref: #16b3c9; --p-grn: #3aa85a;
-      --p-yp: #b35ccc; --p-rb: #b7b0e8; --p-ind: #8d94a3; --p-spk: #d0d4dc;
+      --p-yp: #b35ccc; --p-rb: #b7b0e8; --p-ind: #8d94a3; --p-spk: #d0d4dc; --p-pc: #3fb3a1;
       --fs-0: #ff6b57; --fs-1: #d4513f; --fs-2: #8a4440; --fs-3: #3a4254;
       --fs-4: #3f6e4c; --fs-5: #3f9e5d; --fs-6: #62d08a;
       --sq-0: #221b3a; --sq-1: #3d2f6b; --sq-2: #6650a6; --sq-3: #9b86dc; --sq-4: #d6caff;
@@ -118,7 +119,7 @@
     --lav: #a3a6dc;
     --st-neutral: #2a3452;
     --p-lab: #e23a4f; --p-con: #3d74e0; --p-ld: #f29a1b; --p-ref: #16b3c9; --p-grn: #3aa85a;
-    --p-yp: #b35ccc; --p-rb: #b7b0e8; --p-ind: #8d94a3; --p-spk: #d0d4dc;
+    --p-yp: #b35ccc; --p-rb: #b7b0e8; --p-ind: #8d94a3; --p-spk: #d0d4dc; --p-pc: #3fb3a1;
     --fs-0: #ff6b57; --fs-1: #d4513f; --fs-2: #8a4440; --fs-3: #3a4254;
     --fs-4: #3f6e4c; --fs-5: #3f9e5d; --fs-6: #62d08a;
     --sq-0: #221b3a; --sq-1: #3d2f6b; --sq-2: #6650a6; --sq-3: #9b86dc; --sq-4: #d6caff;
@@ -157,6 +158,19 @@
   h1 { font-size: clamp(2rem, 4.4vw, 3.6rem); line-height: 1.2; letter-spacing: -0.005em; }
   h1 .hl { color: var(--field-hl); }
   .lead { font-weight: 300; font-size: clamp(1.1rem, 1.5vw, 1.3rem); line-height: 1.4; max-width: 62ch; }
+  .scope { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: clamp(20px, 3vw, 32px); }
+  .scope-l { font-size: 0.95rem; color: var(--field-ink-2); margin-right: 4px; }
+  .scope button {
+    background: none; border: 1.5px solid var(--field-ink-2); color: var(--field-ink); cursor: pointer;
+    padding: 6px 14px 5px; font-size: 0.95rem; min-height: 38px;
+  }
+  .scope button:hover { border-color: var(--field-ink); }
+  .scope button[aria-pressed="true"] { background: var(--field-ink); color: var(--field); border-color: var(--field-ink); font-weight: 600; }
+  @media (max-width: 480px) {
+    .scope { gap: 6px; }
+    .scope-l { display: none; }
+    .scope button { padding: 6px 10px 5px; font-size: 0.9rem; }
+  }
   .mast-nav { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 4px 32px; margin-top: clamp(26px, 3.5vw, 44px); }
   .tabs { display: flex; gap: 4px 32px; flex-wrap: wrap; }
   .tour-btn {
@@ -204,6 +218,7 @@
   #map path.seat.out { opacity: 0.25; }
   #map path.seat.dim { opacity: 0.5; }
   #map path.seat.inert { cursor: default; }
+  #map .context path { fill: var(--fade); stroke: var(--map-edge); stroke-width: 0.6; vector-effect: non-scaling-stroke; pointer-events: none; }
   #map .city-edge { fill: none; stroke: var(--ink); stroke-width: 1.6; stroke-linecap: round; vector-effect: non-scaling-stroke; pointer-events: none; transition: opacity 0.3s; }
   #map .city-edge.out { opacity: 0.25; }
   #map .hov.city { stroke-width: 3.2; stroke-linecap: round; }
@@ -344,6 +359,7 @@
   .block-head p { color: var(--ink-2); }
   .block-foot { font-size: 0.9rem; color: var(--ink-2); max-width: 80ch; }
   .multiples { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 32px 36px; }
+  @media (min-width: 1081px) { .multiples.four { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 28px 28px; } }
   .mult h3 { font-size: 1.15rem; display: flex; align-items: center; gap: 8px; }
   .mult p { font-size: 0.9rem; color: var(--ink-2); margin-bottom: 4px; }
   .table-tools { display: flex; flex-wrap: wrap; gap: 12px 32px; align-items: flex-end; justify-content: space-between; }
@@ -514,8 +530,10 @@
   .st-rm-a { background: var(--field-ink); }
   .st-rm em { position: absolute; left: 50%; transform: translateX(-50%); display: grid; white-space: nowrap; font-style: normal; font-size: 1rem; line-height: 1.25; text-align: center; }
   .st-rm em b { font-size: 1.4rem; font-weight: 600; }
-  .st-rm.l em { left: 0; transform: none; text-align: left; }
-  .st-rm.r em { left: auto; right: 0; transform: none; text-align: right; }
+  /* labels at either end sit inside the track, clear of the column edge */
+  .st-rm.l em { left: 4px; transform: none; text-align: left; }
+  .st-rm.r em { left: auto; right: 4px; transform: none; text-align: right; }
+  .st-hidden { visibility: hidden; }
   .st-rm-g em { top: 44px; color: var(--field-hl); }
   .st-rm-a em { bottom: 44px; }
   .st-verdict { font-size: 1.35rem; font-weight: 600; }
@@ -613,7 +631,12 @@
   .st-two { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: clamp(16px, 3vw, 40px); align-items: end; }
   .st-city { margin: 0; display: grid; gap: 10px; }
   .st-city svg { width: 100%; height: min(30vh, 300px); display: block; }
+  .st-two.countries .st-city svg { height: min(19vh, 220px); }
+  .st-two.countries .st-city { gap: 6px; }
+  .st-cmps.countries .st-cmp { gap: 3px; }
+  .st-cmps.countries { gap: 10px; }
   .st-cseat { stroke: var(--map-edge); stroke-width: 0.8; vector-effect: non-scaling-stroke; }
+  .st-cseat.st-cfill { stroke-width: 0.35; transition: fill 0.8s; }
   .st-cedge { fill: none; stroke: var(--ink); stroke-width: 1.8; vector-effect: non-scaling-stroke; }
   .st-city h3 { font-size: 1.45rem; }
   .st-city p { color: var(--ink-2); font-size: 1.05rem; }
@@ -694,7 +717,7 @@
   .st-tag { font-size: 0.98rem; font-weight: 600; }
   .st-tag.good { color: var(--good-ink); }
   .st-tag.bad { color: var(--bad-ink); }
-  .st-pr { display: grid; grid-template-columns: 7.5em minmax(0, 1fr) 5.2em; gap: 12px; align-items: center; }
+  .st-pr { display: grid; grid-template-columns: 9em minmax(0, 1fr) 5.2em; gap: 12px; align-items: center; }
   .st-pr > span:first-child { font-size: 1rem; color: var(--ink-2); }
   .st-pr .trk { position: relative; height: 15px; background: var(--track); }
   .st-pr .trk i { position: absolute; left: 0; top: 0; bottom: 0; transition: width 1s cubic-bezier(0.2, 0.7, 0.2, 1); }
@@ -775,7 +798,8 @@
     .st-flyr .mid small { font-size: 0.78rem; }
     .st-rhead { grid-template-columns: 1fr; }
     .st-loc { display: none; }
-    .st-pr { grid-template-columns: 5.5em minmax(0, 1fr) 4.8em; }
+    .st-pr { grid-template-columns: 6.5em minmax(0, 1fr) 4.8em; }
+    .st-pr > span:first-child { line-height: 1.2; }
   }
 
   /* phones held sideways: the side-by-side layout, compacted, with Back and Next always on one row */
@@ -848,7 +872,8 @@
     .st-rname { font-size: 1.4rem; }
     .st-rbig { font-size: 2rem; }
     .st-rline, .st-cmph { font-size: 0.92rem; }
-    .st-pr { grid-template-columns: 5.5em minmax(0, 1fr) 4.8em; }
+    .st-pr { grid-template-columns: 6.5em minmax(0, 1fr) 4.8em; }
+    .st-pr > span:first-child { line-height: 1.2; }
     .story.is-welcome .st-top { padding-top: 2vh; min-height: 0; }
     .story.is-welcome .st-topmark { width: 48px; }
     .st-hello { gap: 10px; }
@@ -937,7 +962,7 @@
     .multiples { grid-template-columns: 1fr; }
     .method dl div { grid-template-columns: 1fr; }
     .mark { width: 52px; }
-    .zoom select { max-width: 150px; }
+    .zoom select { max-width: 200px; }
   }
   @media (prefers-reduced-motion: reduce) {
     #map path.seat, .wheel-hint { transition: none; }
@@ -957,15 +982,21 @@
   <div class="wrap">
     <div class="mast-top">
       <div class="mast-text">
-        <h1 id="headline">Only <span class="hl">145 of 543</span> English seats pay more in income tax and NI than they receive in welfare.</h1>
-        <p class="lead" id="lead">Workers in England pay &pound;213.0bn a year in income tax and National Insurance on their wages. The ten DWP benefits in this model cost &pound;266.1bn: &pound;1.25 in welfare for every &pound;1 of that tax.</p>
+        <h1 id="headline">Only <span class="hl">145 of 575</span> seats in England and Wales pay more in income tax and NI than they receive in welfare.</h1>
+        <p class="lead" id="lead">Workers in England and Wales pay &pound;221.9bn a year in income tax and National Insurance on their wages. The ten DWP benefits in this model cost &pound;282.9bn: &pound;1.27 in welfare for every &pound;1 of that tax.</p>
       </div>
       <img class="mark" src="asi_logo_white.svg" alt="Adam Smith Institute" width="88" height="88">
+    </div>
+    <div class="scope" role="group" aria-labelledby="scope-l">
+      <span class="scope-l" id="scope-l">Show</span>
+      <button type="button" data-scope="all" aria-pressed="true">England and Wales</button>
+      <button type="button" data-scope="england" aria-pressed="false">England</button>
+      <button type="button" data-scope="wales" aria-pressed="false">Wales</button>
     </div>
     <div class="mast-nav">
     <div class="tabs" role="tablist" aria-label="Tracker views">
       <button type="button" role="tab" id="tab-map" aria-controls="view-map" aria-selected="true">Constituency map</button>
-      <button type="button" role="tab" id="tab-cities" aria-controls="view-map" aria-selected="false" tabindex="-1">Explore England&rsquo;s cities</button>
+      <button type="button" role="tab" id="tab-cities" aria-controls="view-map" aria-selected="false" tabindex="-1">Explore the cities</button>
       <button type="button" role="tab" id="tab-nat" aria-controls="view-nat" aria-selected="false" tabindex="-1">National picture</button>
     </div>
     <button type="button" class="tour-btn" id="tour-open">Take the walkthrough <svg aria-hidden="true"><use href="#i-arrow"/></svg></button>
@@ -1003,7 +1034,7 @@
           <div class="ctl" id="basis-ctl" hidden>
             <span class="ctl-label" id="basis-l">Show as</span>
             <div class="seg" role="group" aria-labelledby="basis-l">
-              <button type="button" data-basis="share" aria-pressed="true">Share of England&rsquo;s total</button>
+              <button type="button" data-basis="share" aria-pressed="true">Share of the total</button>
               <button type="button" data-basis="adult" aria-pressed="false">Per adult</button>
             </div>
           </div>
@@ -1019,7 +1050,7 @@
       <div class="map-layout">
         <div class="map-col">
           <div class="map-box" id="map-box">
-            <svg id="map" role="img" aria-label="Map of England's 543 parliamentary constituencies"></svg>
+            <svg id="map" role="img" aria-label="Map of parliamentary constituencies in England and Wales"></svg>
             <div class="zoom">
               <label class="sr-only" for="region">Show region</label>
               <select id="region"></select>
@@ -1042,7 +1073,7 @@
     <div class="wrap nat">
       <div class="block" id="b-regions">
         <div class="block-head">
-          <h2>London is the only region where income tax and NI clearly cover welfare.</h2>
+          <h2 id="regions-h">London is the only region where income tax and NI clearly cover welfare.</h2>
           <p>Welfare spending for every &pound;1 of income tax and National Insurance paid on wages, by region.</p>
         </div>
         <div class="chart" id="c-regions"></div>
@@ -1051,17 +1082,17 @@
       <div class="block" id="b-scatter">
         <div class="block-head">
           <h2>Seats below the line pay in more than they take out.</h2>
-          <p>Income tax and NI per worker against welfare spending per adult, all 543 English constituencies. Click a party to pick out its seats; click a seat to open it on the map.</p>
+          <p id="scatter-p">Income tax and NI per worker against welfare spending per adult, all 575 constituencies in England and Wales. Click a party to pick out its seats; click a seat to open it on the map.</p>
         </div>
         <div id="scatter-legend" class="legend"></div>
         <div class="chart" id="c-scatter"></div>
-        <p class="block-foot">The break-even line assumes England&rsquo;s average of 0.51 jobs per adult. A seat with more jobs per adult breaks even above the line; one with fewer, below it.</p>
+        <p class="block-foot" id="be-foot"></p>
       </div>
 
       <div class="block" id="b-parties">
         <div class="block-head">
           <h2 id="party-h">Of the larger parties, only Liberal Democrat seats pay in more than they receive.</h2>
-          <p>Each panel picks out one party&rsquo;s seats against all 543. Axes as above.</p>
+          <p id="mult-p">Each panel picks out one party&rsquo;s seats against all 575. Axes as above.</p>
         </div>
         <div class="multiples" id="c-mult"></div>
         <div class="table-scroll short"><table id="t-party"></table></div>
@@ -1069,7 +1100,7 @@
 
       <div class="block" id="b-dumb">
         <div class="block-head">
-          <h2>High-welfare seats have fewer people in work and more in poor health.</h2>
+          <h2>In England, high-welfare seats have fewer people in work and more in poor health.</h2>
           <p>The ten English seats with the highest welfare spending per adult against the ten with the lowest, measured as the difference from the England average. Labels give each group&rsquo;s actual value.</p>
         </div>
         <div class="key" id="dumb-key"></div>
@@ -1080,7 +1111,7 @@
       <div class="block" id="b-ben">
         <div class="block-head">
           <h2 id="ben-h">State Pension and Universal Credit make up most of the bill.</h2>
-          <p>Annual spending across England on the ten DWP benefits in the model.</p>
+          <p id="ben-p">Annual spending across England and Wales on the ten DWP benefits in the model.</p>
         </div>
         <div class="bars" id="c-ben"></div>
       </div>
@@ -1144,7 +1175,7 @@
     <div class="st-group" id="st-group"><div class="st-ginner">
       <div class="st-take" id="st-take" hidden><p class="st-tbig" id="st-tbig"></p><p class="st-tline" id="st-tline"></p></div>
       <div class="st-stage" id="st-stage">
-        <svg id="st-map" role="img" aria-label="Map of England's 543 parliamentary constituencies"></svg>
+        <svg id="st-map" role="img" aria-label="Map of parliamentary constituencies in England and Wales"></svg>
         <div class="st-scene chart off" id="st-scene"></div>
       </div>
       <div class="st-legend" id="st-legend"></div>
@@ -1170,11 +1201,20 @@
 <script>
 (function () {
   "use strict";
-  const W = window.WT, GEO = window.GEO, E = W.england;
-  const seats = W.seats;
+  const W = window.WT, GEO = window.GEO;
+  const byId = id => document.getElementById(id);
+  // The area shown: England and Wales together (the default), or one of them, chosen with ?c=england or ?c=wales.
+  const SCOPE = (() => { const c = new URLSearchParams(location.search).get("c"); return c === "england" || c === "wales" ? c : "all"; })();
+  const AREA = { all: "England and Wales", england: "England", wales: "Wales" }[SCOPE];
+  const IN_AREA = "in " + AREA;
+  const ofArea = noun => SCOPE === "all" ? `of all ${noun} in England and Wales` : `of ${AREA}’s ${noun}`;
+  const seats = SCOPE === "all" ? W.seats : W.seats.filter(s => s.country.toLowerCase() === SCOPE);
   const byCode = new Map(seats.map(s => [s.code, s]));
   const REDUCED = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  const REGIONS = W.regions.map(r => r.name);
+  const REGIONS = W.regions.map(r => r.name).filter(r => seats.some(s => s.region === r));
+  // the benchmark every seat is compared with: the area shown. Work and health averages exist for England only.
+  const withPay = seats.filter(s => s.medPay);
+  const E = Object.assign(agg(seats), { h: W.england.h, medPay: d3.sum(withPay, s => s.medPay * s.jobs) / d3.sum(withPay, s => s.jobs) });
 
   // ---------- parties ----------
   const GROUPS = [
@@ -1182,6 +1222,7 @@
     { g: "con", name: "Conservative", shape: d3.symbolSquare },
     { g: "ld", name: "Liberal Democrat", shape: d3.symbolTriangle },
     { g: "ref", name: "Reform UK", shape: d3.symbolDiamond },
+    { g: "pc", name: "Plaid Cymru", shape: d3.symbolCircle },
     { g: "grn", name: "Green Party", shape: d3.symbolCircle },
     { g: "ind", name: "Independent", shape: d3.symbolCircle },
     { g: "yp", name: "Your Party", shape: d3.symbolCircle },
@@ -1191,7 +1232,7 @@
   const GROUP = Object.fromEntries(GROUPS.map(x => [x.g, x]));
   const PARTY_G = {
     "Labour": "lab", "Labour (Co-op)": "lab", "Conservative": "con", "Liberal Democrat": "ld",
-    "Reform UK": "ref", "Green Party": "grn", "Independent": "ind", "Your Party": "yp",
+    "Reform UK": "ref", "Plaid Cymru": "pc", "Green Party": "grn", "Independent": "ind", "Your Party": "yp",
     "Restore Britain": "rb", "Speaker": "spk",
   };
   seats.forEach(s => { s.g = PARTY_G[s.party]; });
@@ -1214,17 +1255,21 @@
     "Bradford": ["Bradford East", "Bradford South", "Bradford West", "Keighley and Ilkley", "Shipley"],
     "Leicester": ["Leicester East", "Leicester South", "Leicester West"],
     "Coventry": ["Coventry East", "Coventry North West", "Coventry South"],
+    "Cardiff": ["Cardiff East", "Cardiff North", "Cardiff South and Penarth", "Cardiff West"],
   };
   const CITY_NOTES = {
     Leeds: "Selby, Wakefield and Rothwell, and Wetherby and Easingwold cross the city boundary; each contains Leeds City Council wards.",
+    Cardiff: "Cardiff South and Penarth crosses the city boundary: Penarth is in the Vale of Glamorgan.",
   };
   const byName = new Map(seats.map(s => [s.name, s]));
-  const CITIES = ["London", ...Object.keys(CITY_LIST)];
   const CITY_SEATS = { London: seats.filter(s => s.region === "London") };
   for (const [c, names] of Object.entries(CITY_LIST)) CITY_SEATS[c] = names.map(n => byName.get(n)).filter(Boolean);
+  const CITIES = ["London", ...Object.keys(CITY_LIST)].filter(c => CITY_SEATS[c].length);
   CITIES.forEach(c => CITY_SEATS[c].forEach(s => { s.city = c; }));
   const CITY_COUNT = CITIES.reduce((n, c) => n + CITY_SEATS[c].length, 0);
-  const inWords = n => ["no", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten"][n] || String(n);
+  const inWords = n => ["no", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "eleven", "twelve"][n] || String(n);
+  // "London and ten other cities", or the cities by name when London is not among them
+  const citiesPhrase = () => CITIES.length === 1 ? CITIES[0] : CITIES.includes("London") ? `London and ${inWords(CITIES.length - 1)} other cities` : `the ${inWords(CITIES.length)} cities`;
 
   const BEN_SHORT = ["JSA", "Universal Credit", "State Pension", "Pension Credit", "Housing Benefit", "PIP", "DLA", "ESA", "Carer's Allowance", "Attendance Allowance"];
   const JOBS_PER_ADULT = E.jobs / E.adults;
@@ -1273,7 +1318,7 @@
   const NPA_MAX = 5000, RATIO_MAX = 3;
   const clampT = t => Math.max(-1, Math.min(1, t));
   const fiscalT = (o, metric) => clampT(metric === "ratio" ? -Math.log(o.ratio) / Math.log(RATIO_MAX) : o.npa / NPA_MAX);
-  // tax and welfare maps: each seat as a share of England's total, or divided by its adult population
+  // tax and welfare maps: each seat as a share of the area's total, or divided by its adult population
   const SHARE = {
     tax: { of: o => o.tax / E.tax, per: o => o.tax / o.adults, noun: "income tax and NI" },
     wel: { of: o => o.wel / E.wel, per: o => o.wel / o.adults, noun: "welfare spending" },
@@ -1287,12 +1332,12 @@
   const amount = o => state.basis === "adult" ? SHARE[state.share].per(o) : SHARE[state.share].of(o);
   const amountT = o => SHARE[state.share].scale[state.basis](amount(o));
   const amountFmt = v => state.basis === "adult" ? gbp(v) : share(v);
-  const amountNoun = () => state.basis === "adult" ? `${SHARE[state.share].noun} per adult` : `of England’s ${SHARE[state.share].noun}`;
+  const amountNoun = () => state.basis === "adult" ? `${SHARE[state.share].noun} per adult` : ofArea(SHARE[state.share].noun);
   const gradCSS = (prefix, n) => "linear-gradient(90deg," + d3.range(n).map(i => `var(--${prefix}-${i}) ${(i / (n - 1) * 100).toFixed(1)}%`).join(",") + ")";
   const fiscalCSS = () => gradCSS("fs", 7), shareCSS = () => gradCSS("sq", 5);
 
   // ---------- state ----------
-  // scope: a selected seat beats an isolated party, which beats a region, which beats England.
+  // scope: a selected seat beats an isolated party, which beats a region, which beats the whole area.
   // On the cities tab: a selected seat beats a city, which beats all cities.
   const state = { mode: "party", metric: "npa", share: "tax", basis: "share", sel: null, iso: null, region: null, city: null, tab: "map" };
   let mapScope = "map"; // which map tab was shown last: "map" or "cities"
@@ -1300,8 +1345,24 @@
 
   // ---------- masthead ----------
   const surplusSeats = seats.filter(s => s.net > 0).length;
-  document.getElementById("headline").innerHTML = `Only <span class="hl">${surplusSeats} of ${seats.length}</span> English seats pay more in income tax and NI than they receive in welfare.`;
-  document.getElementById("lead").textContent = `Workers in England pay ${bn(E.tax)} a year in income tax and National Insurance on their wages. The ten DWP benefits in this model cost ${bn(E.wel)}: ${ratio(E.ratio)} in welfare for every £1 of that tax.`;
+  document.getElementById("headline").innerHTML = surplusSeats
+    ? `Only <span class="hl">${surplusSeats} of ${seats.length}</span> seats ${IN_AREA} pay more in income tax and NI than they receive in welfare.`
+    : `<span class="hl">None</span> of the ${seats.length} seats ${IN_AREA} pay more in income tax and NI than they receive in welfare.`;
+  document.getElementById("lead").textContent = `Workers ${IN_AREA} pay ${bn(E.tax)} a year in income tax and National Insurance on their wages. The ten DWP benefits in this model cost ${bn(E.wel)}: ${ratio(E.ratio)} in welfare for every £1 of that tax.`;
+
+  // ---------- England and Wales toggle ----------
+  // each choice reloads the page for that area, keeping the tab (and the seat, if it is in the new area)
+  document.querySelectorAll("[data-scope]").forEach(b => {
+    b.setAttribute("aria-pressed", b.dataset.scope === SCOPE);
+    b.addEventListener("click", () => {
+      const c = b.dataset.scope;
+      if (c === SCOPE) return;
+      let hash = state.tab === "nat" ? "#national" : state.tab === "cities" ? "#cities" : "#map";
+      const s = state.sel && byCode.get(state.sel);
+      if (s && state.tab === "map" && (c === "all" || s.country.toLowerCase() === c)) hash = "#seat=" + s.code;
+      location.href = location.pathname + (c === "all" ? "" : "?c=" + c) + hash;
+    });
+  });
 
   // ---------- tabs ----------
   // the map and cities tabs share one map; the national tab has its own view
@@ -1341,15 +1402,17 @@
   // ---------- map ----------
   const VW = 800, VH = 900;
   const svg = d3.select("#map").attr("viewBox", `0 0 ${VW} ${VH}`).attr("preserveAspectRatio", "xMidYMid meet");
-  const proj = d3.geoIdentity().reflectY(true).fitExtent([[10, 10], [VW - 10, VH - 10]], GEO);
+  const feats = GEO.features.filter(f => byCode.has(f.id));
+  const proj = d3.geoIdentity().reflectY(true).fitExtent([[10, 10], [VW - 10, VH - 10]], { type: "FeatureCollection", features: feats });
   const path = d3.geoPath(proj);
   const gRoot = svg.append("g");
+  // seats outside the area shown, for context only
+  gRoot.append("g").attr("class", "context").selectAll("path").data(GEO.features.filter(f => !byCode.has(f.id))).join("path").attr("d", path);
   const gSeats = gRoot.append("g");
   const gEdges = gRoot.append("g");
   const hov = gRoot.append("path").attr("class", "hov");
   const selPath = gRoot.append("path").attr("class", "sel");
   const gLabels = svg.append("g").attr("pointer-events", "none");
-  const feats = GEO.features.filter(f => byCode.has(f.id));
   const featBy = new Map(feats.map(f => [f.id, f]));
   const seatPaths = gSeats.selectAll("path").data(feats, d => d.id).join("path").attr("class", "seat").attr("d", path);
 
@@ -1418,8 +1481,9 @@
     document.querySelector('label[for="region"]').textContent = cities ? "Show city" : "Show region";
     regionSel.innerHTML = cities
       ? `<option value="">All cities</option>` + CITIES.map(c => `<option value="${esc(c)}">${esc(c)}</option>`).join("")
-      : `<option value="">England</option>` + REGIONS.map(r => `<option value="${esc(r)}">${esc(r)}</option>`).join("");
+      : `<option value="">${esc(AREA)}</option>` + REGIONS.map(r => `<option value="${esc(r)}">${esc(r)}</option>`).join("");
     regionSel.value = (cities ? state.city : state.region) || "";
+    regionSel.hidden = (cities ? CITIES.length : REGIONS.length) < 2;
   }
   fillScopeMenu();
   regionSel.addEventListener("change", () => inCities() ? setCity(regionSel.value || null) : setRegion(regionSel.value || null));
@@ -1448,7 +1512,7 @@
   // City names sit just outside each city's seats, pushed in these directions (screen pixels,
   // so the labels stay the same size at every zoom). Shown on the all-cities view only.
   const LABEL_DIR = {
-    London: [1, 0], Birmingham: [-1, 0], Coventry: [0.6, 0.8], Leicester: [1, 0], Bristol: [-1, 0],
+    London: [1, 0], Birmingham: [-1, 0], Coventry: [0.6, 0.8], Leicester: [1, 0], Bristol: [1, 0.3], Cardiff: [-1, 0.3],
     Liverpool: [-1, 0], Manchester: [0, 1], Sheffield: [1, 0.25], Leeds: [1, -0.35], Bradford: [-1, -0.3],
   };
   const CITY_BOX = Object.fromEntries(CITIES.map(c => [c, boundsOf(CITY_SEATS[c])]));
@@ -1566,12 +1630,12 @@
         if (!ticks.length || t - ticks[ticks.length - 1][0] >= 0.16) ticks.push([t, perAdult ? kfmt(v) : share(v)]);
       });
       const ref = perAdult ? SHARE[k].per(E) : 1 / seats.length;
-      marker = `<i style="left:${(sc(ref) * 100).toFixed(1)}%" title="${perAdult ? "England average" : "Average seat"}"></i>`;
+      marker = `<i style="left:${(sc(ref) * 100).toFixed(1)}%" title="${perAdult ? `${AREA} average` : "Average seat"}"></i>`;
       ends = perAdult ? ["Less per adult", "More per adult"] : ["Smaller share", "Larger share"];
       const noun = SHARE[k].noun;
       cap.textContent = (perAdult
-        ? `${noun[0].toUpperCase() + noun.slice(1)} divided by each seat’s adult population, on a log scale. The black mark is England’s average (${gbp(ref)}).`
-        : `Each seat’s share of England’s ${noun}, on a log scale. The black mark is an average seat’s share (${share(ref)}).`) + next;
+        ? `${noun[0].toUpperCase() + noun.slice(1)} divided by each seat’s adult population, on a log scale. The black mark is the ${AREA} average (${gbp(ref)}).`
+        : `Each seat’s share ${ofArea(noun)}, on a log scale. The black mark is an average seat’s share (${share(ref)}).`) + next;
     } else if (state.metric === "npa") {
       ticks = [[0, MINUS + "£5k"], [0.25, MINUS + "£2.5k"], [0.5, "£0"], [0.75, "+£2.5k"], [1, "+£5k"]];
       ends = ["Deficit", "Surplus"];
@@ -1722,7 +1786,7 @@
     const mpLine = s.mp
       ? `<span>${esc(s.mp)}</span><span class="since">MP since ${monthYear(s.mpSince)}</span>`
       : `<span>Seat vacant (${monthYear(W.mpAsOf)})</span>`;
-    const back = inCities() && state.city ? `Back to ${esc(state.city)}` : state.iso ? `Back to ${esc(groupName(state.iso))}` : state.region ? `Back to ${esc(state.region)}` : "Back to England";
+    const back = inCities() && state.city ? `Back to ${esc(state.city)}` : state.iso ? `Back to ${esc(groupName(state.iso))}` : state.region ? `Back to ${esc(state.region)}` : `Back to ${esc(AREA)}`;
     const kind = inCities() && s.city && s.city !== s.region ? `${s.city}, ${s.region}` : s.region;
     const jpa = s.jobs / s.adults;
     panel.innerHTML = `
@@ -1741,27 +1805,27 @@
       <div class="sec">
         <h3>Tax and welfare</h3>
         <dl class="ledger">
-          <div><dt>Income tax and NI paid</dt><dd>${money(s.tax)}</dd><span class="ctx">${gbp(s.tpw)} per worker (England ${gbp(E.tpw)}) · ${share(s.tax / E.tax)} of England&rsquo;s total</span></div>
-          <div><dt>Welfare spending</dt><dd>${money(s.wel)}</dd><span class="ctx">${gbp(s.wpa)} per adult (England ${gbp(E.wpa)}) · ${share(s.wel / E.wel)} of England&rsquo;s total</span></div>
-          <div><dt>Welfare per £1 of tax</dt><dd>${ratio(s.ratio)}</dd><span class="ctx">England ${ratio(E.ratio)}</span></div>
-          <div><dt>Jobs per adult</dt><dd>${jpa.toFixed(2)}</dd><span class="ctx">${f0(s.jobs)} jobs, ${f0(s.adults)} adults (England ${JOBS_PER_ADULT.toFixed(2)})</span></div>
+          <div><dt>Income tax and NI paid</dt><dd>${money(s.tax)}</dd><span class="ctx">${gbp(s.tpw)} per worker (${AREA} ${gbp(E.tpw)}) · ${share(s.tax / E.tax)} of the total</span></div>
+          <div><dt>Welfare spending</dt><dd>${money(s.wel)}</dd><span class="ctx">${gbp(s.wpa)} per adult (${AREA} ${gbp(E.wpa)}) · ${share(s.wel / E.wel)} of the total</span></div>
+          <div><dt>Welfare per £1 of tax</dt><dd>${ratio(s.ratio)}</dd><span class="ctx">${AREA} ${ratio(E.ratio)}</span></div>
+          <div><dt>Jobs per adult</dt><dd>${jpa.toFixed(2)}</dd><span class="ctx">${f0(s.jobs)} jobs, ${f0(s.adults)} adults (${AREA} ${JOBS_PER_ADULT.toFixed(2)})</span></div>
         </dl>
       </div>
       <div class="sec">
         <h3>Compared with every seat</h3>
-        <p class="sub">Income tax and NI per worker against welfare spending per adult. Grey dots are the other 542 seats.</p>
+        <p class="sub">Income tax and NI per worker against welfare spending per adult. Grey dots are the other ${seats.length - 1} seats.</p>
         <div class="chart" id="p-scatter"></div>
       </div>
       <div class="sec">
         <h3>Welfare by benefit</h3>
         <p class="sub">Spending per adult on each benefit.</p>
-        <div class="key"><span><span class="sw" style="background:var(--accent)"></span>${esc(s.name)}</span><span><span class="tick"></span>England average</span></div>
+        <div class="key"><span><span class="sw" style="background:var(--accent)"></span>${esc(s.name)}</span><span><span class="tick"></span>${AREA} average</span></div>
         <div class="bars" id="p-ben"></div>
       </div>
       <div class="sec">
-        <h3>Compared with England</h3>
-        <p class="sub">Each track spans all 543 seats; faint ticks mark every seat.</p>
-        <div class="key"><span><span class="dot" style="background:var(--accent)"></span>${esc(s.name)}</span><span><span class="tick"></span>England</span></div>
+        <h3>Compared with ${AREA}</h3>
+        <p class="sub">Each track spans every seat ${IN_AREA}, with a faint tick for each. ${!s.h || SCOPE === "england" ? `The dark tick is the ${AREA} average.` : `The dark tick is the average: ${AREA} for money, England for work and health.`}</p>
+        <div class="key"><span><span class="dot" style="background:var(--accent)"></span>${esc(s.name)}</span><span><span class="tick"></span>Average</span></div>
         <div class="strips" id="p-strips"></div>
       </div>
       <div class="sec">
@@ -1789,7 +1853,7 @@
     const A = kind === "city" ? CITY_AGG[key] : agg(list);
     const fig = figure(A, false);
     const title = kind === "party" ? groupName(key) : key;
-    const where = kind === "region" ? `across the region’s ${A.seats} seats` : kind === "city" ? `across the city’s ${A.seats} seats` : `across the ${A.seats} seats it holds`;
+    const where = kind === "region" ? `across ${key === "Wales" ? "Wales’s" : "the region’s"} ${A.seats} seats` : kind === "city" ? `across the city’s ${A.seats} seats` : `across the ${A.seats} seats it holds`;
     const verdict = A.net < 0
       ? `Welfare spending exceeds income tax and NI by <strong>${money(-A.net)}</strong> a year ${where}.`
       : `Income tax and NI exceed welfare spending by <strong>${money(A.net)}</strong> a year ${where}.`;
@@ -1816,8 +1880,8 @@
       : `<div class="sec"><h3>${list.length > 1 ? "Seats" : "Seat"}</h3>${list.length > 1 ? `<p class="sub">Ranked by income tax and NI minus welfare, per adult.</p>` : ""}<ul class="list">${byNpa.map(seatLi).join("")}</ul></div>`;
     panel.innerHTML = `
       <div class="p-head">
-        <div class="p-tools"><button type="button" class="back" id="back">${arrow}${kind === "city" ? "Back to all cities" : "Back to England"}</button>${EXPORT_BTN}</div>
-        <p class="p-kind">${{ region: "Region", city: "City", party: "Party of sitting MP" }[kind]}</p>
+        <div class="p-tools"><button type="button" class="back" id="back">${arrow}${kind === "city" ? "Back to all cities" : `Back to ${esc(AREA)}`}</button>${EXPORT_BTN}</div>
+        <p class="p-kind">${{ region: key === "Wales" ? "Country" : "Region", city: "City", party: "Party of sitting MP" }[kind]}</p>
         <h2>${esc(title)}</h2>
       </div>
       <div class="verdict">
@@ -1829,10 +1893,10 @@
       <div class="sec">
         <h3>Tax and welfare</h3>
         <dl class="ledger">
-          <div><dt>Income tax and NI paid</dt><dd>${bn(A.tax)}</dd><span class="ctx">${gbp(A.tpw)} per worker (England ${gbp(E.tpw)}) · ${share(A.tax / E.tax)} of England&rsquo;s total</span></div>
-          <div><dt>Welfare spending</dt><dd>${bn(A.wel)}</dd><span class="ctx">${gbp(A.wpa)} per adult (England ${gbp(E.wpa)}) · ${share(A.wel / E.wel)} of England&rsquo;s total</span></div>
-          <div><dt>Welfare per £1 of tax</dt><dd>${ratio(A.ratio)}</dd><span class="ctx">England ${ratio(E.ratio)}</span></div>
-          <div><dt>Jobs per adult</dt><dd>${(A.jobs / A.adults).toFixed(2)}</dd><span class="ctx">England ${JOBS_PER_ADULT.toFixed(2)}</span></div>
+          <div><dt>Income tax and NI paid</dt><dd>${bn(A.tax)}</dd><span class="ctx">${gbp(A.tpw)} per worker (${AREA} ${gbp(E.tpw)}) · ${share(A.tax / E.tax)} of the total</span></div>
+          <div><dt>Welfare spending</dt><dd>${bn(A.wel)}</dd><span class="ctx">${gbp(A.wpa)} per adult (${AREA} ${gbp(E.wpa)}) · ${share(A.wel / E.wel)} of the total</span></div>
+          <div><dt>Welfare per £1 of tax</dt><dd>${ratio(A.ratio)}</dd><span class="ctx">${AREA} ${ratio(E.ratio)}</span></div>
+          <div><dt>Jobs per adult</dt><dd>${(A.jobs / A.adults).toFixed(2)}</dd><span class="ctx">${AREA} ${JOBS_PER_ADULT.toFixed(2)}</span></div>
         </dl>
       </div>
       ${mix}
@@ -1840,7 +1904,7 @@
       <div class="sec">
         <h3>Welfare by benefit</h3>
         <p class="sub">Spending per adult on each benefit.</p>
-        <div class="key"><span><span class="sw" style="background:var(--accent)"></span>${esc(title)}</span><span><span class="tick"></span>England average</span></div>
+        <div class="key"><span><span class="sw" style="background:var(--accent)"></span>${esc(title)}</span><span><span class="tick"></span>${AREA} average</span></div>
         <div class="bars" id="p-ben"></div>
       </div>`;
     document.getElementById("back").addEventListener("click", kind === "city" ? () => setCity(null) : toEngland);
@@ -1852,26 +1916,26 @@
     const all = seats.filter(s => s.city);
     const A = agg(all), fig = figure(A, false);
     const ranked = CITIES.slice().sort((a, b) => CITY_AGG[a].rank - CITY_AGG[b].rank);
+    const across = CITIES.length === 1 ? `In ${CITIES[0]}` : `Across the ${inWords(CITIES.length)} cities`;
     const verdict = A.net < 0
-      ? `Across the ${inWords(CITIES.length)} cities, welfare spending exceeds income tax and NI by <strong>${bn(-A.net)}</strong> a year.`
-      : `Across the ${inWords(CITIES.length)} cities, income tax and NI exceed welfare spending by <strong>${bn(A.net)}</strong> a year.`;
-    const compare = [
-      ["London", CITY_SEATS.London],
-      [`The other ${inWords(CITIES.length - 1)} cities`, all.filter(s => s.city !== "London")],
-      ["Rest of England", seats.filter(s => !s.city)],
-    ].map(([label, list]) => {
+      ? `${across}, welfare spending exceeds income tax and NI by <strong>${bn(-A.net)}</strong> a year.`
+      : `${across}, income tax and NI exceed welfare spending by <strong>${bn(A.net)}</strong> a year.`;
+    const withLondon = CITIES.includes("London") && CITIES.length > 1;
+    const phrase = citiesPhrase(), Phrase = phrase[0].toUpperCase() + phrase.slice(1);
+    const compare = (withLondon ? [["London", CITY_SEATS.London], [`The other ${inWords(CITIES.length - 1)} cities`, all.filter(s => s.city !== "London")]] : [[Phrase, all]])
+      .concat([[`Rest of ${AREA}`, seats.filter(s => !s.city)]]).filter(([, list]) => list.length).map(([label, list]) => {
       const G = agg(list);
       return `<div><dt>${esc(label)}</dt><dd>${sgbp(G.npa)}</dd><span class="ctx">${G.seats} seats · ${G.surplus} in surplus · ${ratio(G.ratio)} welfare per £1 of tax</span></div>`;
     }).join("");
     panel.innerHTML = `
       <div class="p-head">
         <div class="p-tools">${EXPORT_BTN}</div>
-        <p class="p-kind">England&rsquo;s cities</p>
+        <p class="p-kind">The cities</p>
         <h2>Select a city</h2>
-        <p class="intro">London and ${inWords(CITIES.length - 1)} other cities hold ${all.length} of England&rsquo;s ${seats.length} seats. Click a city on the map, or pick one below or from the menu on the map. Each city is the set of constituencies containing its council&rsquo;s wards, so a few seats cross the city boundary.</p>
+        <p class="intro">${Phrase} ${CITIES.length === 1 ? "holds" : "hold"} ${all.length} of the ${seats.length} seats ${IN_AREA}. Click a city on the map, or pick one below or from the menu on the map. Each city is the set of constituencies containing its council&rsquo;s wards, so a few seats cross the city boundary.</p>
       </div>
       <div class="verdict">
-        <div class="big">${fig.big}<small>${fig.small}, all ${inWords(CITIES.length)} cities</small></div>
+        <div class="big">${fig.big}<small>${fig.small}, ${CITIES.length === 1 ? CITIES[0] : `all ${inWords(CITIES.length)} cities`}</small></div>
         <p>${verdict}</p>
       </div>
       <div class="sec">
@@ -1880,7 +1944,7 @@
         <dl class="ledger">${ranked.map(c => { const G = CITY_AGG[c]; return `<div><dt><button type="button" data-city="${esc(c)}">${esc(c)}</button></dt><dd>${sgbp(G.npa)}</dd><span class="ctx">${G.surplus} of ${G.seats} seats in surplus · ${ratio(G.ratio)} welfare per £1 of tax</span></div>`; }).join("")}</dl>
       </div>
       <div class="sec">
-        <h3>London and the rest</h3>
+        <h3>${withLondon ? "London and the rest" : "The cities and the rest"}</h3>
         <p class="sub">Income tax and NI minus welfare, per adult.</p>
         <dl class="ledger">${compare}</dl>
       </div>`;
@@ -1889,25 +1953,28 @@
 
   function renderEngland() {
     const byNpa = seats.slice().sort((a, b) => b.npa - a.npa);
-    const reg = W.regions.slice().sort((a, b) => b.npa - a.npa);
+    const reg = W.regions.filter(r => REGIONS.includes(r.name)).sort((a, b) => b.npa - a.npa);
     const fig = figure(E, false);
-    // England's own share of England is always 100%, so the share view falls back to net per adult
-    const big = state.mode === "share" && state.basis === "share" ? `${sgbp(E.npa)}<small>net per adult, England</small>` : `${fig.big}<small>${fig.small}, England</small>`;
+    // the area's own share of itself is always 100%, so the share view falls back to net per adult
+    const big = state.mode === "share" && state.basis === "share" ? `${sgbp(E.npa)}<small>net per adult, ${AREA}</small>` : `${fig.big}<small>${fig.small}, ${AREA}</small>`;
+    const surplusLine = surplusSeats
+      ? `${surplusSeats} seats pay in more than they receive; ${seats.length - surplusSeats} receive more than they pay in.`
+      : `None of the ${seats.length} seats pays in more than it receives.`;
     panel.innerHTML = `
       <div class="p-head">
         <div class="p-tools">${EXPORT_BTN}</div>
-        <p class="p-kind">England</p>
+        <p class="p-kind">${esc(AREA)}</p>
         <h2>Select a constituency</h2>
-        <p class="intro">Click any seat on the map, search above, or pick a region from the menu on the map. The panel shows the seat&rsquo;s tax and welfare, its sitting MP, and how it compares with the rest of England.</p>
+        <p class="intro">Click any seat on the map${REGIONS.length > 1 ? ", search above, or pick a region from the menu on the map" : " or search above"}. The panel shows the seat&rsquo;s tax and welfare, its sitting MP, and how it compares with the rest of ${esc(AREA)}.</p>
       </div>
       <div class="verdict">
         <div class="big">${big}</div>
-        <p>Welfare spending exceeds income tax and NI by <strong>${bn(-E.net)}</strong> a year. ${surplusSeats} seats pay in more than they receive; ${seats.length - surplusSeats} receive more than they pay in.</p>
+        <p>Welfare spending exceeds income tax and NI by <strong>${bn(-E.net)}</strong> a year. ${surplusLine}</p>
       </div>
-      <div class="sec">
-        <h3>Regions</h3>
+      ${reg.length > 1 ? `<div class="sec">
+        <h3>${SCOPE === "all" ? "Regions and Wales" : "Regions"}</h3>
         <dl class="ledger">${reg.map(r => `<div><dt><button type="button" data-region="${esc(r.name)}">${esc(r.name)}</button></dt><dd>${sgbp(r.npa)}</dd><span class="ctx">${r.surplus} of ${r.seats} seats in surplus · ${ratio(r.ratio)} welfare per £1 of tax</span></div>`).join("")}</dl>
-      </div>
+      </div>` : ""}
       <div class="sec">
         <h3>Largest net contributors</h3>
         <p class="sub">Income tax and NI minus welfare, per adult.</p>
@@ -2012,7 +2079,7 @@
     g.append("circle").attr("cx", x(E.tpw)).attr("cy", y(E.wpa)).attr("r", 5).attr("fill", "none").style("stroke", "var(--ink)").attr("stroke-width", 1.5);
     g.append("circle").attr("cx", x(s.tpw)).attr("cy", y(s.wpa)).attr("r", 7).style("fill", pc(s.g)).style("stroke", "var(--ground)").attr("stroke-width", 2);
     const pts = seats.map(o => ({ s: o, px: x(o.tpw), py: y(o.wpa) }));
-    placeLabels(g, [{ text: s.name, px: x(s.tpw), py: y(s.wpa) }, { text: "England", px: x(E.tpw), py: y(E.wpa) }], pts, w, h);
+    placeLabels(g, [{ text: s.name, px: x(s.tpw), py: y(s.wpa) }, { text: AREA, px: x(E.tpw), py: y(E.wpa) }], pts, w, h);
     const tipEl = chartTip(el), ring = hoverRing(g);
     voronoiHover(g, pts, w, h, (p, ev) => {
       ring.at(p);
@@ -2055,10 +2122,11 @@
     it.ext = d3.extent(it.vals);
   }));
   function strips(el, s) {
-    el.innerHTML = INDICATORS.map((G, gi) => `<div class="strip-g"><h4>${G.grp}</h4>${G.items.map((it, ii) => {
+    const groups = INDICATORS.map((G, gi) => ({ G, gi })).filter(({ G }) => G.grp === "Money" || s.h);
+    el.innerHTML = groups.map(({ G, gi }) => `<div class="strip-g"><h4>${G.grp}</h4>${G.items.map((it, ii) => {
       const v = it.get(s);
       return `<div class="srow"><span>${it.label}</span><span class="val num">${v == null ? "n/a" : it.fmt(v)} <span class="muted">/ ${it.fmt(it.eng)}</span></span><svg data-i="${gi}-${ii}" aria-hidden="true"></svg></div>`;
-    }).join("")}</div>`).join("");
+    }).join("")}</div>`).join("") + (s.h ? "" : `<p class="sub">Work and health figures cover England only.</p>`);
     el.querySelectorAll("svg[data-i]").forEach(node => {
       const [gi, ii] = node.dataset.i.split("-").map(Number);
       const it = INDICATORS[gi].items[ii];
@@ -2101,6 +2169,12 @@
 
   // ---------- national ----------
   function drawNational() {
+    // text that depends on the area shown
+    byId("scatter-p").textContent = `Income tax and NI per worker against welfare spending per adult, all ${seats.length} constituencies ${IN_AREA}. Click a party to pick out its seats; click a seat to open it on the map.`;
+    byId("be-foot").textContent = `The break-even line assumes the ${AREA} average of ${JOBS_PER_ADULT.toFixed(2)} jobs per adult. A seat with more jobs per adult breaks even above the line; one with fewer, below it.`;
+    byId("mult-p").textContent = `Each panel picks out one party’s seats against all ${seats.length}. Axes as above.`;
+    byId("ben-p").textContent = `Annual spending across ${AREA} on the ten DWP benefits in the model.`;
+    byId("b-dumb").hidden = SCOPE === "wales"; // the demographic comparison covers England only
     regionsChart(); bigScatter(); multiples(); partyTable(); dumbbell(); benefitsNational(); seatsTable(); methodology();
   }
   function redrawNationalCharts() {
@@ -2111,7 +2185,12 @@
   function regionsChart() {
     const el = document.getElementById("c-regions");
     el.innerHTML = "";
-    const data = W.regions.slice().sort((a, b) => b.ratio - a.ratio);
+    const data = W.regions.filter(r => REGIONS.includes(r.name)).sort((a, b) => b.ratio - a.ratio);
+    const clear = data.filter(r => r.ratio < 0.95);
+    byId("regions-h").textContent = data.length === 1 ? `${data[0].name} spends ${ratio(data[0].ratio)} on welfare for every £1 of income tax and NI.`
+      : clear.length === 1 ? `${clear[0].name} is the only region where income tax and NI clearly cover welfare.`
+      : clear.length ? `Income tax and NI clearly cover welfare in ${clear.map(r => r.name).join(" and ")}.` : "No region’s income tax and NI cover its welfare.";
+    byId("regions-h").nextElementSibling.textContent = `Welfare spending for every £1 of income tax and National Insurance paid on wages${data.length > 1 ? (SCOPE === "all" ? ", by region, with Wales as a whole" : ", by region") : ""}.`;
     const W0 = el.clientWidth, narrow = W0 < 560;
     const m = { t: 28, r: 56, b: 28, l: narrow ? 8 : 210 };
     const band = narrow ? 50 : 38;
@@ -2136,8 +2215,10 @@
     row.append("text").attr("class", "lab").attr("x", d => x(d.ratio) + 8).attr("y", by + barH / 2 + 5).style("font-size", "14px").text(d => ratio(d.ratio));
     g.append("line").attr("class", "be").attr("x1", x(1)).attr("x2", x(1)).attr("y1", -6).attr("y2", h);
     g.append("text").attr("class", "lab").attr("x", x(1) - 6).attr("y", -12).attr("text-anchor", "end").text("Break-even £1.00");
-    g.append("line").style("stroke", "var(--ink-3)").attr("stroke-width", 2).attr("x1", x(E.ratio)).attr("x2", x(E.ratio)).attr("y1", -6).attr("y2", h);
-    g.append("text").attr("class", "lab-2").attr("x", x(E.ratio) + 6).attr("y", -12).text("England " + ratio(E.ratio));
+    if (data.length > 1) {
+      g.append("line").style("stroke", "var(--ink-3)").attr("stroke-width", 2).attr("x1", x(E.ratio)).attr("x2", x(E.ratio)).attr("y1", -6).attr("y2", h);
+      g.append("text").attr("class", "lab-2").attr("x", x(E.ratio) + 6).attr("y", -12).text(AREA + " " + ratio(E.ratio));
+    }
     const tipEl = chartTip(el);
     row.append("rect").attr("class", "hit").attr("x", narrow ? 0 : -m.l).attr("y", 0).attr("width", w + (narrow ? 0 : m.l)).attr("height", band).attr("fill", "transparent")
       .on("pointermove", function (ev, d) {
@@ -2202,7 +2283,9 @@
   function multiples() {
     const el = document.getElementById("c-mult");
     el.innerHTML = "";
-    ["lab", "con", "ld", "ref", "ind", "grn"].map(g => GROUP[g]).filter(x => x.n).forEach(G => {
+    const shown = ["lab", "con", "ld", "ref", "pc", "ind", "grn"].map(g => GROUP[g]).filter(x => x.n);
+    el.classList.toggle("four", shown.length >= 7);
+    shown.forEach(G => {
       const div = document.createElement("div");
       div.className = "mult chart";
       div.innerHTML = `<h3><span class="sw" style="background:${pc(G.g)}"></span>${esc(groupName(G.g))}</h3><p>${G.n} seats · ${G.surplus} in surplus</p>`;
@@ -2224,9 +2307,12 @@
         const [cx, cy] = d3.pointer(ev, div); placeTip(tipEl, div, cx, cy);
       }, () => { tipEl.hidden = true; ring.hide(); }, p => openSeat(p.s.code), 16);
     });
-    const ld = W.parties.find(p => p.name === "Liberal Democrat");
     stamp(el);
-    if (ld && ld.net <= 0) document.getElementById("party-h").textContent = "Seats by party of sitting MP.";
+    // name the one larger party (20+ seats) whose seats pay in overall, if there is exactly one
+    const larger = GROUPS.filter(G => G.n >= 20).map(G => ({ G, A: agg(seats.filter(s => s.g === G.g)) }));
+    const paying = larger.filter(x => x.A.net > 0);
+    byId("party-h").textContent = paying.length === 1 && larger.length > 1
+      ? `Of the larger parties, only ${groupName(paying[0].G.g)} seats pay in more than they receive.` : "Seats by party of sitting MP.";
   }
 
   function partyTable() {
@@ -2236,8 +2322,8 @@
       <td>${p.seats}</td><td>${p.surplus} <span class="muted">(${pct(p.surplus / p.seats)})</span></td><td>${bn(p.tax)}</td><td>${bn(p.wel)}</td>
       <td class="${p.net < 0 ? "neg" : ""}">${bn(p.net)}</td><td>${ratio(p.ratio)}</td><td class="${p.npa < 0 ? "neg" : ""}">${sgbp(p.npa)}</td></tr>`;
     t.innerHTML = `<caption class="sr-only">Fiscal summary by party of sitting MP</caption><thead><tr>${cols.map((c, i) => `<th class="${i === 0 ? "l" : ""}"><span>${c}</span></th>`).join("")}</tr></thead>
-      <tbody>${W.parties.map(row).join("")}</tbody>
-      <tfoot><tr><td class="l">England</td><td>${E.seats}</td><td>${E.surplus} <span class="muted">(${pct(E.surplus / E.seats)})</span></td><td>${bn(E.tax)}</td><td>${bn(E.wel)}</td><td>${bn(E.net)}</td><td>${ratio(E.ratio)}</td><td>${sgbp(E.npa)}</td></tr></tfoot>`;
+      <tbody>${W.parties.map(p => ({ name: p.name, ...agg(seats.filter(s => s.party === p.name)) })).filter(p => p.seats).map(row).join("")}</tbody>
+      <tfoot><tr><td class="l">${esc(AREA)}</td><td>${E.seats}</td><td>${E.surplus} <span class="muted">(${pct(E.surplus / E.seats)})</span></td><td>${bn(E.tax)}</td><td>${bn(E.wel)}</td><td>${bn(E.net)}</td><td>${ratio(E.ratio)}</td><td>${sgbp(E.npa)}</td></tr></tfoot>`;
   }
 
   function dumbbell() {
@@ -2318,7 +2404,7 @@
       const col = TCOLS.find(c => c.k === tsort.k);
       const list = seats.filter(s => !term || [s.name, s.mp || "", s.party, s.region].some(v => v.toLowerCase().includes(term)))
         .sort((a, b) => { const A = col.get(a), B = col.get(b); return (typeof A === "string" ? A.localeCompare(B) : A - B) * tsort.dir; });
-      t.innerHTML = `<caption class="sr-only">All 543 English constituencies</caption><thead><tr>${TCOLS.map(c => `<th class="${c.l ? "l" : ""}" aria-sort="${c.k === tsort.k ? (tsort.dir > 0 ? "ascending" : "descending") : "none"}"><button type="button" data-k="${c.k}">${c.label}</button></th>`).join("")}</tr></thead>
+      t.innerHTML = `<caption class="sr-only">All ${seats.length} constituencies ${IN_AREA}</caption><thead><tr>${TCOLS.map(c => `<th class="${c.l ? "l" : ""}" aria-sort="${c.k === tsort.k ? (tsort.dir > 0 ? "ascending" : "descending") : "none"}"><button type="button" data-k="${c.k}">${c.label}</button></th>`).join("")}</tr></thead>
         <tbody>${list.map(s => `<tr class="click" data-code="${s.code}">${TCOLS.map(c => `<td class="${c.l ? "l" : ""} ${c.cls || ""}">${c.fmt(s)}</td>`).join("")}</tr>`).join("")}</tbody>`;
       document.getElementById("t-count").textContent = term ? `${list.length} of ${seats.length} seats match.` : `${seats.length} seats.`;
       t.querySelectorAll("th button").forEach(b => b.addEventListener("click", () => {
@@ -2353,7 +2439,7 @@
   }
 
   document.getElementById("sources").textContent =
-    `Data: Adam Smith Institute modelling, using DWP Stat-Xplore, ONS ASHE 2025, ONS mid-2024 population estimates, Census 2021, ONS APS, and NHS QOF 2024/25. Party of sitting MP as at ${W.partyAsOf}; MP names from the UK Parliament Members API, ${monthYear(W.mpAsOf)}. Boundaries: ONS Westminster Parliamentary Constituencies (July 2024), Open Government Licence v3.0; contains OS data © Crown copyright and database right 2024.`;
+    `Data: Adam Smith Institute modelling, using DWP Stat-Xplore, ONS ASHE 2025, and ONS mid-2024 population estimates, and, for England only, Census 2021, ONS APS, and NHS QOF 2024/25. Party of sitting MP as at ${W.partyAsOf}; MP names from the UK Parliament Members API, ${monthYear(W.mpAsOf)}. Boundaries: ONS Westminster Parliamentary Constituencies (July 2024), Open Government Licence v3.0; contains OS data © Crown copyright and database right 2024.`;
 
   // ---------- resize & theme ----------
   let rT, lastW = 0;
@@ -2384,7 +2470,7 @@
     ground: "#ffffff", field: "#224191", fieldInk2: "#dfe3f2", fieldHl: "#b3b6e6", ink: "#1b2a4a", ink2: "#46536f", ink3: "#657089",
     rule: "#e1e4ec", track: "#eceef4", panel: "#eef1f7", context: "#d3d8e3", accent: "#224191", eng: "#7a8193",
     good: "#2f9e5a", bad: "#d4453a", goodInk: "#1d7a43", badInk: "#b3261e",
-    party: { lab: "#d7263d", con: "#0a6fc2", ld: "#f29a1b", ref: "#12a9c0", grn: "#2e9a4e", yp: "#9b3a9a", rb: "#2d3a70", ind: "#8b919c", spk: "#4a5160" },
+    party: { lab: "#d7263d", con: "#0a6fc2", ld: "#f29a1b", ref: "#12a9c0", pc: "#005b54", grn: "#2e9a4e", yp: "#9b3a9a", rb: "#2d3a70", ind: "#8b919c", spk: "#4a5160" },
     fs: ["#9e1b28", "#d24b3e", "#eea08a", "#e5e4e1", "#9ccf97", "#3e9a5a", "#17613a"],
     sq: ["#f0edf8", "#cbc2e6", "#9a89c9", "#6a4fa8", "#3e1d78"],
   };
@@ -2409,7 +2495,8 @@
     }
     if (inCities()) {
       const l = seats.filter(s => s.city);
-      return { kind: "cities", title: "England’s cities", sub: `London and ${inWords(CITIES.length - 1)} other cities · ${n(l)}`, list: l, o: agg(l), here: "The cities" };
+      const phrase = citiesPhrase();
+      return { kind: "cities", title: "The cities", sub: `${phrase[0].toUpperCase() + phrase.slice(1)} · ${n(l)}`, list: l, o: agg(l), here: "The cities" };
     }
     if (state.iso && state.mode === "party") {
       const l = seats.filter(s => s.g === state.iso);
@@ -2417,9 +2504,10 @@
     }
     if (state.region) {
       const l = seats.filter(s => s.region === state.region);
-      return { kind: "region", title: state.region, sub: `Region · ${n(l)}`, list: l, o: agg(l), here: "This region" };
+      const country = state.region === "Wales";
+      return { kind: "region", title: state.region, sub: `${country ? "Country" : "Region"} · ${n(l)}`, list: l, o: agg(l), here: country ? "Wales" : "This region" };
     }
-    return { kind: "england", title: "England", sub: `All ${n(seats)}`, list: seats, o: E, here: "England" };
+    return { kind: "area", title: AREA, sub: `All ${n(seats)}`, list: seats, o: E, here: AREA };
   }
 
   // ----- drawing helpers -----
@@ -2477,19 +2565,19 @@
     ctx.strokeStyle = color; ctx.lineWidth = lw; ctx.lineCap = "round"; ctx.stroke();
   }
 
-  // ----- the map: the area in its setting, plus a small locator for anything smaller than England -----
+  // ----- the map: the area in its setting, plus a small locator for anything smaller than the area shown -----
   function xMap(ctx, sc, x, y, w, h) {
     const inScope = new Set(sc.list.map(s => s.code));
-    const wide = sc.kind === "england" || sc.kind === "party" || sc.kind === "cities";
+    const wide = sc.kind === "area" || sc.kind === "party" || sc.kind === "cities";
     const pad = sc.kind === "seat" ? Math.min(w, h) * 0.24 : 28;
     const focus = { type: "FeatureCollection", features: sc.list.map(s => featBy.get(s.code)) };
-    const p = d3.geoIdentity().reflectY(true).fitExtent([[x + pad, y + pad], [x + w - pad, y + h - pad]], wide ? GEO : focus);
+    const p = d3.geoIdentity().reflectY(true).fitExtent([[x + pad, y + pad], [x + w - pad, y + h - pad]], wide ? { type: "FeatureCollection", features: feats } : focus);
     const gp = d3.geoPath(p, ctx);
     ctx.save();
     ctx.fillStyle = XC.panel; ctx.fillRect(x, y, w, h);
     ctx.beginPath(); ctx.rect(x, y, w, h); ctx.clip();
     ctx.lineJoin = "round";
-    for (const f of feats) {
+    for (const f of GEO.features) {
       ctx.beginPath(); gp(f);
       ctx.fillStyle = inScope.has(f.id) ? xFill(byCode.get(f.id)) : XC.context; ctx.fill();
       ctx.strokeStyle = "#ffffff"; ctx.lineWidth = wide ? 0.45 : 1; ctx.stroke();
@@ -2505,8 +2593,8 @@
     ctx.save();
     ctx.fillStyle = "#ffffff"; ctx.fillRect(x, y, w, h);
     ctx.strokeStyle = XC.rule; ctx.lineWidth = 1; ctx.strokeRect(x + 0.5, y + 0.5, w - 1, h - 1);
-    ctx.beginPath(); feats.forEach(f => { if (!inScope.has(f.id)) gp(f); }); ctx.fillStyle = XC.context; ctx.fill();
-    ctx.beginPath(); feats.forEach(f => { if (inScope.has(f.id)) gp(f); }); ctx.fillStyle = XC.ink; ctx.fill();
+    ctx.beginPath(); GEO.features.forEach(f => { if (!inScope.has(f.id)) gp(f); }); ctx.fillStyle = XC.context; ctx.fill();
+    ctx.beginPath(); GEO.features.forEach(f => { if (inScope.has(f.id)) gp(f); }); ctx.fillStyle = XC.ink; ctx.fill();
     if (sc.kind === "seat") {
       const [[a, b], [c, d]] = gp.bounds(featBy.get(sc.s.code));
       ctx.beginPath(); ctx.arc((a + c) / 2, (b + d) / 2, Math.max(7, Math.hypot(c - a, d - b) / 2 + 4), 0, 2 * Math.PI);
@@ -2532,7 +2620,7 @@
     let stops, ticks, text, ends = "Red: deficit. Green: surplus.";
     if (state.mode === "share") {
       const noun = SHARE[state.share].noun;
-      text = state.basis === "adult" ? `Map: ${noun} per adult, on a log scale.` : `Map: each seat’s share of England’s ${noun}, on a log scale.`;
+      text = state.basis === "adult" ? `Map: ${noun} per adult, on a log scale.` : `Map: each seat’s share ${ofArea(noun)}, on a log scale.`;
       stops = XC.sq; ticks = [[0, "Smaller"], [1, "Larger"]]; ends = "";
     } else if (state.metric === "ratio") {
       const at = r => (clampT(-Math.log(r) / Math.log(RATIO_MAX)) + 1) / 2;
@@ -2551,16 +2639,18 @@
 
   // ----- the figures -----
   function xCompare(ctx, sc, x, y, w) {
-    xTitle(ctx, "Compared with England", x, y);
+    xTitle(ctx, `Compared with ${AREA}`, x, y);
+    ctx.font = xFont(400, 13);
+    const lw = Math.max(80, ctx.measureText(sc.here).width, ctx.measureText(AREA).width) + 12;
     const rows = [["Income tax and NI per worker", sc.o.tpw, E.tpw, gbp, true], ["Welfare spending per adult", sc.o.wpa, E.wpa, gbp, false],
       ["Welfare per £1 of tax", sc.o.ratio, E.ratio, ratio, false]];
     rows.forEach(([label, v, e, fmt, hiGood], i) => {
       const ry = y + 32 + i * 74, max = Math.max(v, e) * 1.1, better = hiGood ? v >= e : v <= e, diff = v / e - 1;
-      const tag = Math.abs(diff) < 0.005 ? "In line with England" : `${pct(Math.abs(diff))} ${diff > 0 ? "above" : "below"} England`;
+      const tag = Math.abs(diff) < 0.005 ? "In line with the average" : `${pct(Math.abs(diff))} ${diff > 0 ? "above" : "below"} ${AREA}`;
       xText(ctx, label, x, ry, 600, 15, XC.ink);
       xText(ctx, tag, x + w, ry, 600, 13, better ? XC.goodInk : XC.badInk, "right");
-      [[sc.here, v, better ? XC.good : XC.bad], ["England", e, XC.eng]].forEach(([lab, val, col], j) => {
-        const by = ry + 11 + j * 22, bx = x + 92, bl = w - 92 - 76;
+      [[sc.here, v, better ? XC.good : XC.bad], [AREA, e, XC.eng]].forEach(([lab, val, col], j) => {
+        const by = ry + 11 + j * 22, bx = x + lw, bl = w - lw - 76;
         xText(ctx, lab, x, by + 11, 400, 13, XC.ink2);
         ctx.fillStyle = XC.track; ctx.fillRect(bx, by, bl, 13);
         ctx.fillStyle = col; ctx.fillRect(bx, by, bl * val / max, 13);
@@ -2569,24 +2659,33 @@
     });
   }
   function xRegions(ctx, x, y, w) {
-    xTitle(ctx, "Net contribution per adult, by region", x, y);
-    const reg = W.regions.slice().sort((a, b) => b.npa - a.npa);
+    let reg = W.regions.filter(r => REGIONS.includes(r.name)).sort((a, b) => b.npa - a.npa), title = "Net contribution per adult, by region";
+    if (reg.length < 2) {
+      const byN = seats.slice().sort((a, b) => b.npa - a.npa);
+      reg = byN.slice(0, 5).concat(byN.slice(-4));
+      title = "Net contribution per adult: highest and lowest seats";
+    }
+    xTitle(ctx, title, x, y);
     const lx = x + 182, lw = w - 182 - 66, sx = d3.scaleLinear([Math.min(0, d3.min(reg, r => r.npa)), Math.max(0, d3.max(reg, r => r.npa))], [lx, lx + lw]);
+    // rows share 218px, so ten regions fit as well as nine
+    const rh = Math.min(24, 218 / reg.length), bh = Math.min(14, rh - 8);
     reg.forEach((r, i) => {
-      const ry = y + 28 + i * 24;
-      xText(ctx, r.name, x, ry + 11, 400, 13, XC.ink);
+      const ry = y + 28 + i * rh;
+      xText(ctx, r.name, x, ry + bh / 2 + 4, 400, 13, XC.ink);
       ctx.fillStyle = r.npa < 0 ? XC.bad : XC.good;
-      ctx.fillRect(Math.min(sx(0), sx(r.npa)), ry, Math.abs(sx(r.npa) - sx(0)), 14);
-      xText(ctx, sgbp(r.npa), x + w, ry + 11, 600, 13, XC.ink, "right");
+      ctx.fillRect(Math.min(sx(0), sx(r.npa)), ry, Math.abs(sx(r.npa) - sx(0)), bh);
+      xText(ctx, sgbp(r.npa), x + w, ry + bh / 2 + 4, 600, 13, XC.ink, "right");
     });
-    ctx.fillStyle = XC.ink; ctx.fillRect(Math.round(sx(0)) - 1, y + 22, 2, reg.length * 24 + 2);
+    ctx.fillStyle = XC.ink; ctx.fillRect(Math.round(sx(0)) - 1, y + 22, 2, reg.length * rh + 2);
   }
   function xBenefits(ctx, sc, x, y, w) {
-    const eng = sc.kind === "england";
+    const eng = sc.kind === "area";
     xTitle(ctx, "Welfare per adult, by benefit", x, y);
     if (!eng) {
-      ctx.fillStyle = XC.ink; ctx.fillRect(x + w - 112, y - 12, 3, 15);
-      xText(ctx, "England average", x + w, y, 400, 12.5, XC.ink2, "right");
+      ctx.font = xFont(400, 12.5);
+      const kw = ctx.measureText(`${AREA} average`).width;
+      ctx.fillStyle = XC.ink; ctx.fillRect(x + w - kw - 10, y - 12, 3, 15);
+      xText(ctx, `${AREA} average`, x + w, y, 400, 12.5, XC.ink2, "right");
     }
     const order = d3.range(10).sort((a, b) => E.ben[b] - E.ben[a]), top = order.slice(0, 6), rest = order.slice(6);
     const rows = top.map(i => [BEN_SHORT[i], sc.o.ben[i] / sc.o.adults, E.ben[i] / E.adults])
@@ -2649,16 +2748,23 @@
     xText(ctx, "Largest net contributor", x + w, by + 38, 400, 12.5, XC.ink3, "right");
   }
   function xHealth(ctx, s, x, y, w) {
-    xTitle(ctx, "Work, pay, and health", x, y);
-    const h = s.h || {};
-    [["Employment rate", h.emp, E.h.emp, v => pct(v, 1)], ["Economically inactive", h.inact, E.h.inact, v => pct(v, 1)],
-      ["Median annual pay", s.medPay, E.medPay, gbp], ["Life expectancy", h.le, E.h.le, v => v.toFixed(1) + " years"]].forEach(([l, v, e, fmt], i) => {
+    // work and health figures exist for English seats only
+    const h = s.h, pct1 = v => pct(v, 1);
+    const rows = h
+      ? [["Employment rate", h.emp, E.h.emp, pct1, "England"], ["Economically inactive", h.inact, E.h.inact, pct1, "England"],
+         ["Median annual pay", s.medPay, E.medPay, gbp, AREA], ["Life expectancy", h.le, E.h.le, v => v.toFixed(1) + " years", "England"]]
+      : [["Median annual pay", s.medPay, E.medPay, gbp, AREA], ["Jobs per adult", s.jobs / s.adults, JOBS_PER_ADULT, v => v.toFixed(2), AREA]];
+    xTitle(ctx, h ? "Work, pay, and health" : "Work and pay", x, y);
+    ctx.font = xFont(400, 12.5);
+    const refW = d3.max(rows, r => ctx.measureText(`${r[4]} ${r[3](r[2])}`).width) + 18;
+    rows.forEach(([l, v, e, fmt, ref], i) => {
       const ry = y + 34 + i * 29;
       xText(ctx, l, x, ry, 400, 14, XC.ink);
-      xText(ctx, v == null ? "n/a" : fmt(v), x + w - 118, ry, 600, 16, XC.ink, "right");
-      xText(ctx, `England ${fmt(e)}`, x + w, ry, 400, 12.5, XC.ink3, "right");
-      if (i < 3) { ctx.fillStyle = XC.rule; ctx.fillRect(x, ry + 10, w, 1); }
+      xText(ctx, v == null ? "n/a" : fmt(v), x + w - refW, ry, 600, 16, XC.ink, "right");
+      xText(ctx, `${ref} ${fmt(e)}`, x + w, ry, 400, 12.5, XC.ink3, "right");
+      if (i < rows.length - 1) { ctx.fillStyle = XC.rule; ctx.fillRect(x, ry + 10, w, 1); }
     });
+    if (!h) xText(ctx, "Work and health figures cover England only.", x, y + 34 + rows.length * 29, 400, 12.5, XC.ink3);
   }
 
   // ----- the page -----
@@ -2675,7 +2781,7 @@
     // header: the flat ASI field, with the mark top right
     ctx.fillStyle = XC.field; ctx.fillRect(0, 0, XW, 164);
     ctx.font = xFont(600, 14); ctx.fillStyle = XC.fieldHl; ctx.textAlign = "left";
-    xSpaced(ctx, "ENGLISH WELFARE TRACKER 2026", 40, 48, 5);
+    xSpaced(ctx, "WELFARE SUSTAINABILITY TRACKER 2026: ENGLAND AND WALES", 40, 48, 5);
     let ts = 52;
     ctx.font = xFont(600, ts);
     while (ctx.measureText(sc.title).width > 1360 && ts > 30) { ts -= 2; ctx.font = xFont(600, ts); }
@@ -2690,7 +2796,7 @@
     // right: the figures
     const X = 650, RW = 910;
     let fig = figure(o, false);
-    if (sc.kind === "england" && state.mode === "share" && state.basis === "share") fig = { big: sgbp(E.npa), small: "net per adult" };
+    if (sc.kind === "area" && state.mode === "share" && state.basis === "share") fig = { big: sgbp(E.npa), small: "net per adult" };
     const tone = state.mode === "share" ? XC.ink : state.mode === "fiscal" && state.metric === "ratio" ? (o.ratio <= 1 ? XC.goodInk : XC.badInk) : (o.npa >= 0 ? XC.goodInk : XC.badInk);
     xText(ctx, fig.big, X, 268, 600, 70, tone);
     const bw = ctx.measureText(fig.big).width;
@@ -2701,7 +2807,7 @@
     const tiles = [
       ["Income tax and NI paid", money(o.tax), `${gbp(o.tpw)} per worker`],
       ["Welfare spending", money(o.wel), `${gbp(o.wpa)} per adult`],
-      ["Welfare per £1 of tax", ratio(o.ratio), sc.kind === "england" ? "Break-even is £1.00" : `England ${ratio(E.ratio)}`],
+      ["Welfare per £1 of tax", ratio(o.ratio), sc.kind === "area" ? "Break-even is £1.00" : `${AREA} ${ratio(E.ratio)}`],
       sc.kind === "seat" ? ["Adults living here", f0(o.adults), `${f0(o.jobs)} jobs held by residents`] : ["Seats in surplus", `${o.surplus} of ${o.seats}`, `${pct(o.surplus / o.seats)} pay their way`],
     ];
     const tw = (RW - 60) / 4;
@@ -2715,7 +2821,7 @@
 
     ctx.fillStyle = XC.rule; ctx.fillRect(X, 474, RW, 1);
     const CW = (RW - 30) / 2, X2 = X + CW + 30;
-    if (sc.kind === "england") xRegions(ctx, X, 504, CW); else xCompare(ctx, sc, X, 504, CW);
+    if (sc.kind === "area") xRegions(ctx, X, 504, CW); else xCompare(ctx, sc, X, 504, CW);
     xBenefits(ctx, sc, X2, 504, CW);
 
     ctx.fillStyle = XC.rule; ctx.fillRect(X, 756, RW, 1);
@@ -2727,7 +2833,7 @@
     xText(ctx, "adamsmith.org", 40, 966, 600, 19, XC.ink);
     ctx.font = xFont(400, 12.5); ctx.fillStyle = XC.ink3; ctx.textAlign = "left";
     const today = new Date().toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
-    xWrap(ctx, `Source: Adam Smith Institute modelling, using DWP Stat-Xplore, ONS ASHE 2025, ONS mid-2024 population estimates, Census 2021, ONS APS, and NHS QOF 2024/25. Tax is income tax and employee National Insurance on wages; welfare is ten DWP benefits. Party of sitting MP as at ${W.partyAsOf}. Boundaries: ONS, contains OS data © Crown copyright and database right 2024. Exported ${today}.`, 260, 944, 1300, 18, 3);
+    xWrap(ctx, `Source: Adam Smith Institute modelling, using DWP Stat-Xplore, ONS ASHE 2025, and ONS mid-2024 population estimates, and, for England only, Census 2021, ONS APS, and NHS QOF 2024/25. Tax is income tax and employee National Insurance on wages; welfare is ten DWP benefits. Party of sitting MP as at ${W.partyAsOf}. Boundaries: ONS, contains OS data © Crown copyright and database right 2024. Exported ${today}.`, 260, 944, 1300, 18, 3);
     return { cv, sc };
   }
 
@@ -2743,7 +2849,7 @@
     cv.toBlob(blob => {
       if (exURL) URL.revokeObjectURL(exURL);
       exURL = URL.createObjectURL(blob);
-      exFile = `ASI_WelfareTracker_${sc.title.replace(/[^A-Za-z0-9]+/g, "")}.png`;
+      exFile = `ASI_WelfareSustainability_${sc.title.replace(/[^A-Za-z0-9]+/g, "")}.png`;
       exImg.src = exURL; exImg.alt = `Infographic: ${sc.title}`;
       exImg.hidden = false; exWait.hidden = true;
       exName.textContent = `${exFile} · ${XW * XS} × ${XH * XS} pixels`;
@@ -2764,7 +2870,6 @@
   // ---------- walkthrough ----------
   // A short presentation that opens on arrival: a welcome, guesses, reveals, and a seat search.
   // Every step can hand over to the matching view in the full tracker and be resumed.
-  const byId = id => document.getElementById(id);
   const ST = {
     el: byId("story"), body: byId("st-body"), next: byId("st-next"), back: byId("st-back"),
     steps: byId("st-steps"), stepLabel: byId("st-steplabel"), scene: byId("st-scene"), legend: byId("st-legend"),
@@ -2823,7 +2928,8 @@
   const REG_BY = Object.fromEntries(W.regions.map(r => [r.name, r]));
   const TOP_REG = REG[0], LOW_REG = REG[REG.length - 1];
   const EVEN = REG.filter(r => r !== TOP_REG && Math.abs(r.net / r.tax) < 0.05);
-  const LON = CITY_AGG.London, BHAM = CITY_AGG.Birmingham;
+  // the walkthrough always covers both countries; in a one-country view these can be missing, and are never shown
+  const LON = CITY_AGG.London || agg([]), BHAM = CITY_AGG.Birmingham || agg([]);
   const HI_PAY = seats.filter(s => s.tpw > E.tpw), LO_PAY = seats.filter(s => s.tpw <= E.tpw);
   const HI_PAY_SUR = HI_PAY.filter(s => s.net > 0).length, LO_PAY_SUR = LO_PAY.filter(s => s.net > 0).length;
   const benOf = n => E.ben[W.benefits.indexOf(n)];
@@ -2836,13 +2942,16 @@
   const DB = Object.fromEntries(W.dumbbell.groups.flatMap(g => g.rows).map(r => [r.label, r]));
   const TOUR_PARTIES = ["lab", "con", "ld", "ref"].map(g => GROUP[g]).filter(p => p.n);
   const BEST_PARTY = TOUR_PARTIES.slice().sort((a, b) => b.surplus / b.n - a.surplus / a.n)[0];
-  const PARTY_ROWS = ["lab", "con", "ld", "ref", "grn", "ind"].map(g => GROUP[g]).filter(p => p.n).map(p => {
+  const PARTY_ROWS = ["lab", "con", "ld", "ref", "pc", "grn", "ind"].map(g => GROUP[g]).filter(p => p.n).map(p => {
     const A = agg(seats.filter(s => s.g === p.g)), pen = pensionOf(A) / A.tax;
     return { g: p.g, n: p.n, surplus: p.surplus, A, pen, wa: A.ratio - pen };
   });
   const partyRow = g => PARTY_ROWS.find(p => p.g === g);
   const BEST_AGG = partyRow(BEST_PARTY.g).A;
   const fiscalOf = o => fiscalScale(fiscalT(o, "npa"));
+  const ENG_S = seats.filter(s => s.country === "England"), WAL_S = seats.filter(s => s.country === "Wales");
+  const ENG_A = agg(ENG_S), WAL_A = agg(WAL_S);
+  const WAL_BEST = WAL_S.slice().sort((a, b) => b.npa - a.npa)[0];
 
   // ----- the walkthrough's own map -----
   const stSvg = d3.select("#st-map").attr("viewBox", `0 0 ${VW} ${VH}`).attr("preserveAspectRatio", "xMidYMid meet");
@@ -2945,6 +3054,32 @@
         fiscalKey("Each seat coloured by income tax and NI minus welfare, per adult. The two cities are drawn at different scales.");
       },
     },
+    countries: {
+      build(el) {
+        const cmp = (label, a, b, fmt, higherGood) => {
+          const max = Math.max(a, b) * 1.12, aBetter = higherGood ? a >= b : a <= b;
+          return `<div class="st-cmp"><div class="st-cmph"><b>${label}</b></div>
+            <div class="st-pr"><span>England</span><span class="trk"><i style="width:0;background:var(--${aBetter ? "good" : "bad"})" data-w="${(a / max * 100).toFixed(1)}"></i></span><b>${fmt(a)}</b></div>
+            <div class="st-pr"><span>Wales</span><span class="trk"><i style="width:0;background:var(--${aBetter ? "bad" : "good"})" data-w="${(b / max * 100).toFixed(1)}"></i></span><b>${fmt(b)}</b></div></div>`;
+        };
+        el.innerHTML = `<div class="st-two countries">${[["England", ENG_A], ["Wales", WAL_A]].map(([name, A]) => `<figure class="st-city"><svg data-k="${name}" role="img" aria-label="Map of ${name}'s constituencies"></svg>
+            <figcaption><h3>${name}</h3><div class="st-rvc"><p class="st-cbig ${tone(A.npa)}">${sgbp(A.npa)}<small> net per adult</small></p>
+            <p>${A.surplus} of ${A.seats} seats pay in more than they receive</p><p>${ratio(A.ratio)} of welfare per £1 of tax</p></div></figcaption></figure>`).join("")}</div>
+          <div class="st-cmps countries st-rvc">${cmp("Income tax and NI per worker", ENG_A.tpw, WAL_A.tpw, gbp, true)}${cmp("Welfare spending per adult", ENG_A.wpa, WAL_A.wpa, gbp, false)}</div>`;
+        el.querySelectorAll("svg[data-k]").forEach(node => {
+          const list = node.dataset.k === "England" ? ENG_S : WAL_S;
+          const [[x0, y0], [x1, y1]] = boundsOf(list), pad = Math.max(x1 - x0, y1 - y0) * 0.04;
+          d3.select(node).attr("viewBox", `${x0 - pad} ${y0 - pad} ${x1 - x0 + 2 * pad} ${y1 - y0 + 2 * pad}`).attr("preserveAspectRatio", "xMidYMid meet")
+            .selectAll("path").data(list).join("path").attr("class", "st-cseat st-cfill").attr("d", s => path(featBy.get(s.code))).style("fill", "var(--st-neutral)");
+        });
+      },
+      // colours and figures appear once the guess is in
+      update(el, done) {
+        d3.select(el).selectAll("path.st-cfill").style("fill", s => done ? fiscalOf(s) : "var(--st-neutral)");
+        el.querySelectorAll(".st-rvc").forEach(n => n.classList.toggle("st-hidden", !done));
+        if (done) growBars(el);
+      },
+    },
     pay: {
       build(el) {
         const sides = [["Below-average tax per worker", LO_PAY, LO_PAY_SUR], ["Above-average tax per worker", HI_PAY, HI_PAY_SUR]];
@@ -2966,7 +3101,7 @@
         }
         const half = d3.max(ys, Math.abs) + r, h = 2 * half, ex = x(E.tpw);
         const g = d3.select(box).append("svg").attr("width", W0).attr("height", h + m.t + m.b).append("g").attr("transform", `translate(${m.l},${m.t})`);
-        // the two sides of the England average, each labelled with how many seats it holds
+        // the two sides of the average, each labelled with how many seats it holds
         g.append("rect").attr("x", ex).attr("y", -40).attr("width", w - ex).attr("height", h + 48).style("fill", "var(--track)").attr("opacity", 0.55);
         const lab = (x0, y, cls, text, anchor) => g.append("text").attr("class", cls + " halo").attr("x", x0).attr("y", y).attr("text-anchor", anchor).text(text);
         lab(ex - 10, -24, "lab", narrow ? "Below" : "Below average", "end");
@@ -2981,7 +3116,7 @@
         g.append("g").selectAll("text").data([5000, 10000, 15000, 20000, 25000, 30000, 35000]).join("text")
           .attr("x", d => x(d)).attr("y", h + 28).attr("text-anchor", "middle").text(kfmt);
         g.append("text").attr("x", w / 2).attr("y", h + 48).attr("text-anchor", "middle").style("font-size", "15px").style("fill", "var(--ink-2)")
-          .text(`Income tax and NI per worker (England average ${gbp(E.tpw)})`);
+          .text(`Income tax and NI per worker (average ${gbp(E.tpw)})`);
         const tipEl = chartTip(box), ring = hoverRing(g);
         voronoiHover(g, seats.map((s, i) => ({ s, px: xs[i], py: ys[i] + half })), w, h, (p, ev) => {
           ring.at(p);
@@ -3041,12 +3176,14 @@
         const W0 = el.clientWidth, narrow = W0 < 680;
         const m = { t: narrow ? 34 : 58, r: narrow ? 56 : 222, b: 30, l: narrow ? 4 : 196 };
         const band = narrow ? 88 : 56, barH = 28, w = W0 - m.l - m.r, h = rows.length * band;
-        const x = d3.scaleLinear([0, 2], [0, w]);
+        // the scale reaches the next 50p above the highest party
+        const top = Math.max(2, Math.ceil(d3.max(rows, p => p.A.ratio) * 2) / 2), xt = d3.range(0, top + 0.001, 0.5);
+        const x = d3.scaleLinear([0, top], [0, w]);
         const g = d3.select(el).append("svg").attr("width", W0).attr("height", h + m.t + m.b).append("g").attr("transform", `translate(${m.l},${m.t})`);
-        g.append("g").attr("class", "grid").selectAll("line").data([0.5, 1.5, 2]).join("line").attr("x1", d => x(d)).attr("x2", d => x(d)).attr("y1", 0).attr("y2", h);
+        g.append("g").attr("class", "grid").selectAll("line").data(xt.filter(v => v && v !== 1)).join("line").attr("x1", d => x(d)).attr("x2", d => x(d)).attr("y1", 0).attr("y2", h);
         g.append("line").attr("class", "axis-line").attr("x1", 0).attr("x2", w).attr("y1", h).attr("y2", h);
-        g.append("g").selectAll("text").data([0, 0.5, 1, 1.5, 2]).join("text").attr("x", d => x(d)).attr("y", h + 20)
-          .attr("text-anchor", (d, i) => i === 0 ? "start" : i === 4 ? "end" : "middle").text(d => "£" + d.toFixed(2));
+        g.append("g").selectAll("text").data(xt).join("text").attr("x", d => x(d)).attr("y", h + 20)
+          .attr("text-anchor", (d, i) => i === 0 ? "start" : i === xt.length - 1 ? "end" : "middle").text(d => "£" + d.toFixed(2));
         const light = new Set(["ld", "ref"]);
         rows.forEach((p, i) => {
           const row = g.append("g").attr("transform", `translate(0,${i * band})`), by = narrow ? band - barH - 8 : (band - barH) / 2, cy = by + barH / 2;
@@ -3078,7 +3215,7 @@
         g.append("line").attr("class", "be").attr("x1", x(1)).attr("x2", x(1)).attr("y1", -10).attr("y2", h);
         g.append("text").attr("class", "lab halo").attr("x", x(1) - 6).attr("y", -16).attr("text-anchor", "end").text("Break-even £1.00");
         g.append("line").style("stroke", "var(--ink-3)").attr("stroke-width", 2).attr("x1", x(E.ratio)).attr("x2", x(E.ratio)).attr("y1", -10).attr("y2", h);
-        g.append("text").attr("class", "lab-2 halo").attr("x", x(E.ratio) + 6).attr("y", -16).text("England " + ratio(E.ratio));
+        g.append("text").attr("class", "lab-2 halo").attr("x", x(E.ratio) + 6).attr("y", -16).text(AREA + " " + ratio(E.ratio));
         if (!narrow) {
           // the green key sits directly over the column it explains
           g.append("rect").attr("x", w + 56).attr("y", -47).attr("width", 12).attr("height", 12).style("fill", "var(--good)");
@@ -3098,10 +3235,10 @@
         const s = byCode.get(tour.ans.seat);
         const cmp = (label, v, e, fmt, higherGood) => {
           const max = Math.max(v, e) * 1.12, diff = v / e - 1, better = higherGood ? v >= e : v <= e;
-          const tag = Math.abs(diff) < 0.005 ? "In line with England" : `${pct(Math.abs(diff))} ${diff > 0 ? "above" : "below"} England`;
+          const tag = Math.abs(diff) < 0.005 ? "In line with the average" : `${pct(Math.abs(diff))} ${diff > 0 ? "above" : "below"} ${AREA}`;
           return `<div class="st-cmp"><div class="st-cmph"><b>${label}</b><span class="st-tag ${better ? "good" : "bad"}">${tag}</span></div>
             <div class="st-pr"><span>This seat</span><span class="trk"><i style="width:0;background:var(--${better ? "good" : "bad"})" data-w="${(v / max * 100).toFixed(1)}"></i></span><b>${fmt(v)}</b></div>
-            <div class="st-pr"><span>England</span><span class="trk"><i style="width:0;background:var(--ink-3)" data-w="${(e / max * 100).toFixed(1)}"></i></span><b>${fmt(e)}</b></div></div>`;
+            <div class="st-pr"><span>${AREA}</span><span class="trk"><i style="width:0;background:var(--ink-3)" data-w="${(e / max * 100).toFixed(1)}"></i></span><b>${fmt(e)}</b></div></div>`;
         };
         const verdict = s.net < 0
           ? `Welfare spending here exceeds income tax and NI by ${money(-s.net)} a year.`
@@ -3110,7 +3247,7 @@
           <div class="st-rhead"><div><h3 class="st-rname">${esc(s.name)}</h3>
             <p class="st-rmp"><span class="sw" style="background:${pc(s.g)}"></span>${s.mp ? esc(s.mp) : "Seat vacant"} · ${esc(s.party)}</p>
             <p class="st-rk">${esc(s.region)}</p></div>
-            <svg class="st-loc" viewBox="0 0 ${VW} ${VH}" role="img" aria-label="Where ${esc(s.name)} is in England"></svg></div>
+            <svg class="st-loc" viewBox="0 0 ${VW} ${VH}" role="img" aria-label="Where ${esc(s.name)} is on the map"></svg></div>
           <div><p class="st-rbig ${tone(s.net)}">${sgbp(s.npa)}<small>net per adult</small></p><p class="st-rline">${verdict}</p></div>
           <div class="st-cmps">
             ${cmp("Income tax and NI per worker", s.tpw, E.tpw, gbp, true)}
@@ -3186,7 +3323,7 @@
     },
     {
       key: "seats",
-      h: `How many of England’s ${seats.length} constituencies pay in more than they take out?`,
+      h: `How many of the ${seats.length} constituencies ${IN_AREA} pay in more than they take out?`,
       p: `A seat pays its way when its workers pay more in income tax and National Insurance than is spent there on welfare. Drag to guess.`,
       guess: {
         min: 0, max: seats.length, step: 1, init: Math.round(seats.length / 2), answer: surplusSeats, unit: "seats", fmt: v => f0(v),
@@ -3228,20 +3365,39 @@
       expandLabel: "Explore the regions",
       expand() { openMap("fiscal"); setRegion(REGIONS.includes(tour.ans.region) ? tour.ans.region : TOP_REG.name); },
     },
+    ...(ENG_A.seats && WAL_A.seats ? [{
+      key: "wales",
+      h: `How many of Wales’s ${WAL_A.seats} constituencies pay in more than they take out?`,
+      p: `In England, ${ENG_A.surplus} of ${ENG_A.seats} seats do. Drag to guess for Wales.`,
+      guess: {
+        min: 0, max: WAL_A.seats, step: 1, init: Math.round(WAL_A.seats * 0.4), answer: WAL_A.surplus, unit: "seats", fmt: v => f0(v),
+        gap: d => d === 0 ? "Your guess is exactly right." : `Your guess was ${f0(Math.abs(d))} too ${d < 0 ? "low" : "high"}.`,
+      },
+      reveal: () => (WAL_A.surplus
+        ? `<strong>${WAL_A.surplus}.</strong> ${WAL_A.surplus} of Wales’s ${WAL_A.seats} seats pay in more in income tax and NI than they receive in welfare.`
+        : `<strong>None.</strong> Every one of Wales’s ${WAL_A.seats} seats receives more in welfare than its workers pay in income tax and NI. The closest to breaking even is ${esc(WAL_BEST.name)}, at ${sgbp(WAL_BEST.npa)} per adult.`) +
+        ` Wales spends ${ratio(WAL_A.ratio)} on welfare for every £1 of tax. England spends ${ratio(ENG_A.ratio)}.`,
+      take: () => ({ big: `${WAL_A.surplus} of ${WAL_A.seats}`, line: `Welsh seats pay in more than they take out. In England, ${ENG_A.surplus} of ${ENG_A.seats} do.`, tone: WAL_A.surplus ? undefined : "bad" }),
+      show(done) {
+        stReset(); stMapOn(false); setScene("countries", done);
+        if (done) fiscalKey("Each seat coloured by income tax and NI minus welfare, per adult. The two countries are drawn at different scales.");
+      },
+      expandLabel: "Explore Wales", expand() { openMap("fiscal"); setRegion("Wales"); },
+    }] : []),
     {
       key: "cities",
       h: `A tale of two cities.`,
-      p: `London and Birmingham are England’s two largest cities. ${LON.surplus} of London’s ${LON.seats} seats pay in more than they receive. ` +
+      p: `London and Birmingham are the two largest cities ${IN_AREA}. ${LON.surplus} of London’s ${LON.seats} seats pay in more than they receive. ` +
         `${BHAM.surplus ? `${BHAM.surplus} of Birmingham’s ${BHAM.seats} do.` : `None of Birmingham’s ${BHAM.seats} do.`} ` +
         `Birmingham spends ${pence(BHAM.ratio)} on welfare for every £1 its workers pay in income tax and NI. London spends ${pence(LON.ratio)}.`,
       take: () => ({ big: `${BHAM.surplus} of ${BHAM.seats}`, line: `Birmingham seats pay their way. In London, ${LON.surplus} of ${LON.seats} do.`, tone: "bad" }),
       show() { stReset(); stMapOn(false); setScene("cities"); },
-      expandLabel: "Explore England’s cities", expand() { showTab("cities"); byId("view-map").scrollIntoView({ block: "start" }); },
+      expandLabel: "Explore the cities", expand() { showTab("cities"); byId("view-map").scrollIntoView({ block: "start" }); },
     },
     {
       key: "pay",
       h: `Where wages are high, seats pay their way.`,
-      p: `Each dot is a constituency, placed by the income tax and NI its average worker pays. The line marks the England average of ${gbp(E.tpw)}. ` +
+      p: `Each dot is a constituency, placed by the income tax and NI its average worker pays. The line marks the average for ${AREA}, ${gbp(E.tpw)}. ` +
         `Green seats pay in more than they receive, and red seats receive more than they pay in. ` +
         `To the right of the line, ${HI_PAY_SUR} of ${HI_PAY.length} seats are green. To the left, ${LO_PAY_SUR} of ${LO_PAY.length} are.`,
       take: () => ({ big: pct(HI_PAY_SUR / HI_PAY.length), line: `of seats with above-average tax per worker pay their way: ${HI_PAY_SUR} of ${HI_PAY.length}. Below the average, it is ${pct(LO_PAY_SUR / LO_PAY.length)}: ${LO_PAY_SUR} of ${LO_PAY.length}.`, tone: "good" }),
@@ -3250,8 +3406,8 @@
     },
     {
       key: "work",
-      h: `High-welfare seats have fewer people in work and more in poor health.`,
-      p: `Compare the ten seats with the highest welfare spending per adult with the ten with the lowest. In the first group, ${pct(DB["Employment rate"].hi)} of working-age adults have a job and ${pct(DB["No qualifications"].hi)} have no qualifications. ` +
+      h: `In England, high-welfare seats have fewer people in work and more in poor health.`,
+      p: `Compare the ten English seats with the highest welfare spending per adult with the ten with the lowest. In the first group, ${pct(DB["Employment rate"].hi)} of working-age adults have a job and ${pct(DB["No qualifications"].hi)} have no qualifications. ` +
         `In the second, the figures are ${pct(DB["Employment rate"].lo)} and ${pct(DB["No qualifications"].lo)}. ` +
         `Obesity is ${(DB.Obesity.hi / DB.Obesity.lo).toFixed(1)} times as common in the first group, and diabetes ${(DB.Diabetes.hi / DB.Diabetes.lo).toFixed(1)} times.`,
       take: () => ({ big: `${pct(DB["Employment rate"].hi)} against ${pct(DB["Employment rate"].lo)}`, line: `of working-age adults have a job in the ten highest-welfare seats and the ten lowest.` }),
@@ -3286,7 +3442,7 @@
     },
     {
       key: "seat", find: true,
-      h: `Search for any constituency in England.`,
+      h: `Search for any constituency ${IN_AREA}.`,
       p: `Try your home, work, or any other constituency. Type a place name, an MP, or a postcode.`,
       reveal: () => {
         const s = byCode.get(tour.ans.seat);
@@ -3294,7 +3450,7 @@
         const verdict = s.net < 0
           ? `Welfare spending here exceeds income tax and NI by ${money(-s.net)} a year, or ${gbp(-s.npa)} per adult.`
           : `Income tax and NI here exceed welfare spending by ${money(s.net)} a year, or ${gbp(s.npa)} per adult.`;
-        return `<strong>${esc(s.name)}</strong>, ${who}. ${verdict} It ranks ${ord(s.rank)} of England’s ${seats.length} seats. Search again to look up another.`;
+        return `<strong>${esc(s.name)}</strong>, ${who}. ${verdict} It ranks ${ord(s.rank)} of the ${seats.length} seats ${IN_AREA}. Search again to look up another.`;
       },
       show(done) {
         stReset();
@@ -3309,7 +3465,7 @@
     {
       key: "end",
       h: `Explore the full data.`,
-      p: `The tracker covers every constituency, region, city, and party, with each seat’s MP, its tax and welfare figures, and the method behind them.`,
+      p: `The tracker covers every constituency, region, city, and party ${IN_AREA}, with each seat’s MP, its tax and welfare figures, and the method behind them. Use the buttons at the top to show England and Wales together or one at a time.`,
       show() { stReset(); setScene(null); stMapOn(true); stPaint(s => pc(s.g)); stRise(); partyKey(); },
     },
   ];
@@ -3388,7 +3544,7 @@
       const letters = "Welcome.".split("").map((c, k) => `<span style="animation-delay:${REDUCED ? 0 : 150 + k * 70}ms">${c}</span>`).join("");
       html = `<div class="st-hello">
         <h2 class="st-hello-h" id="st-h" tabindex="-1" aria-label="Welcome."><span aria-hidden="true">${letters}</span></h2>
-        <p class="st-hello-p">The Adam Smith Institute’s English Welfare Tracker follows the money through every one of England’s ${seats.length} constituencies: what workers pay in income tax and National Insurance, and what is spent on welfare.</p>
+        <p class="st-hello-p">The Adam Smith Institute’s Welfare Sustainability Tracker follows the money through every one of the ${seats.length} constituencies ${IN_AREA}: what workers pay in income tax and National Insurance, and what is spent on welfare.</p>
         <p class="st-rotate"><svg class="st-rotate-ico" viewBox="0 0 56 56" aria-hidden="true"><g class="st-phone"><rect x="19" y="10" width="18" height="32" rx="2.5" fill="none" stroke="currentColor" stroke-width="2.4"/><path d="M25.5 37h5" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></g><path d="M40 7a20 20 0 0 1 10 12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><path d="M45.2 17.4l5 2 1.7-5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Turn your screen sideways for a better view of the charts.</span></p></div>`;
     } else {
       html = `<h2 class="st-h" id="st-h" tabindex="-1">${st.h}</h2>`;
@@ -3454,7 +3610,8 @@
     });
   }
 
-  // A search can be a postcode, a constituency, an MP, or any place in England.
+  // A search can be a postcode, a constituency, an MP, or any place in England or Wales.
+  const COVERED = ["England", "Wales"];
   const POSTCODE = /^[A-Z]{1,2}\d[A-Z\d]?\s*\d[A-Z]{2}$/i;
   const API = "https://api.postcodes.io";
   async function getJSON(url) {
@@ -3472,7 +3629,7 @@
       if (!j) throw new Error("That postcode was not found. Check it and try again.");
       const code = j.codes && (j.codes.parliamentary_constituency_2024 || j.codes.parliamentary_constituency);
       if (byCode.has(code)) return byCode.get(code);
-      if (j.country && j.country !== "England") throw new Error(`That postcode is in ${j.country}. The tracker covers England only.`);
+      if (j.country && !COVERED.includes(j.country)) throw new Error(`That postcode is in ${j.country}. The tracker covers England and Wales only.`);
       throw new Error("That postcode could not be matched to a constituency.");
     }
     const word = new RegExp(`\\b${t.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\b`, "i");
@@ -3482,13 +3639,13 @@
     // otherwise treat it as a place: find it, then the constituency it sits in
     let places = null;
     try { places = await getJSON(`${API}/places?limit=10&q=${encodeURIComponent(t)}`); } catch (e) { /* fall through */ }
-    const place = (places || []).find(p => p.country === "England") || (places || [])[0];
+    const place = (places || []).find(p => COVERED.includes(p.country)) || (places || [])[0];
     if (!place) {
       const loose = seats.find(s => s.name.toLowerCase().includes(lower) || (s.mp || "").toLowerCase().includes(lower));
       if (loose) return loose;
-      throw new Error("No English constituency, MP, or place matches that. Try a postcode instead.");
+      throw new Error("No constituency, MP, or place in England or Wales matches that. Try a postcode instead.");
     }
-    if (place.country !== "England") throw new Error(`${place.name_1} is in ${place.country}. The tracker covers England only.`);
+    if (!COVERED.includes(place.country)) throw new Error(`${place.name_1} is in ${place.country}. The tracker covers England and Wales only.`);
     for (const radius of [2000, 10000]) {
       let near = null;
       try { near = await getJSON(`${API}/postcodes?lon=${place.longitude}&lat=${place.latitude}&limit=1&radius=${radius}`); } catch (e) { break; }
@@ -3555,7 +3712,10 @@
   ["st-skip", "st-skip2"].forEach(id => byId(id).addEventListener("click", () => { closeTour(false); window.scrollTo(0, 0); }));
   ST.expand.addEventListener("click", () => { const st = STEPS[tour.i]; closeTour(true); st.expand(); });
   ST.ret.addEventListener("click", () => openTour(tour.i, false));
-  byId("tour-open").addEventListener("click", () => openTour(0, true));
+  byId("tour-open").addEventListener("click", () => {
+    if (SCOPE !== "all") { location.href = location.pathname + "#walkthrough"; return; }
+    openTour(0, true);
+  });
   document.addEventListener("keydown", e => {
     if (!tour.open) return;
     if (e.key === "Escape") { e.preventDefault(); closeTour(false); return; }
@@ -3585,7 +3745,7 @@
   paint();
   drawLegend();
   const h = location.hash;
-  const mSeat = h.match(/^#seat=(E\d+)/), mReg = h.match(/^#region=(.+)$/), mCity = h.match(/^#city=(.+)$/);
+  const mSeat = h.match(/^#seat=([EW]\d+)/), mReg = h.match(/^#region=(.+)$/), mCity = h.match(/^#city=(.+)$/);
   if (h === "#national") { renderPanel(); showTab("nat"); }
   else if (h === "#cities") showTab("cities");
   else if (mCity && CITIES.includes(decodeURIComponent(mCity[1]))) { showTab("cities"); setCity(decodeURIComponent(mCity[1])); }
@@ -3593,7 +3753,7 @@
   else if (mReg && REGIONS.includes(decodeURIComponent(mReg[1]))) setRegion(decodeURIComponent(mReg[1]));
   else renderPanel();
   // a plain visit opens the walkthrough; a shared link to a seat, city, region, or tab goes straight there
-  if (!h) openTour(0, true);
+  if ((!h && SCOPE === "all") || (h === "#walkthrough" && SCOPE === "all")) openTour(0, true);
 })();
 </script>
 </body>
