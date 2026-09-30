@@ -631,10 +631,13 @@
   .st-two { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: clamp(16px, 3vw, 40px); align-items: end; }
   .st-city { margin: 0; display: grid; gap: 10px; }
   .st-city svg { width: 100%; height: min(30vh, 300px); display: block; }
-  .st-two.countries .st-city svg { height: min(19vh, 220px); }
-  .st-two.countries .st-city { gap: 6px; }
-  .st-cmps.countries .st-cmp { gap: 3px; }
-  .st-cmps.countries { gap: 10px; }
+  .st-two.countries .st-city svg { height: min(24vh, 250px); }
+  .st-two.countries .st-city { gap: 8px; justify-items: center; text-align: center; }
+  .st-two.countries .st-cbig { font-size: clamp(1.7rem, 2.6vw, 2.3rem); }
+  .st-fly.countries { gap: 10px; max-width: none; border-top: 1px solid var(--rule); padding-top: 14px; }
+  .st-fly.countries .st-flyr { grid-template-columns: 4.6em minmax(0, 1fr) minmax(9em, 13em) minmax(0, 1fr) 4.6em; }
+  .st-fly.countries .trk { height: 18px; }
+  .st-fly.countries .trk i { background: var(--accent); }
   .st-cseat { stroke: var(--map-edge); stroke-width: 0.8; vector-effect: non-scaling-stroke; }
   .st-cseat.st-cfill { stroke-width: 0.35; transition: fill 0.8s; }
   .st-cedge { fill: none; stroke: var(--ink); stroke-width: 1.8; vector-effect: non-scaling-stroke; }
@@ -740,6 +743,9 @@
     .st-text { padding-top: calc(env(safe-area-inset-top, 0px) + 14px); padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 12px); }
     .st-body { padding-block: 12px; }
     .st-inner { gap: 14px; }
+    .st-two.countries .st-city svg { height: 19vh; }
+    .st-two.countries .st-city { gap: 4px; }
+    .st-fly.countries { gap: 6px; padding-top: 10px; }
     .st-h { font-size: clamp(1.6rem, 2.5vw, 2.3rem); }
     .st-p { font-size: clamp(1.05rem, 1.3vw, 1.2rem); }
     .st-gv { font-size: 2.6rem; }
@@ -792,6 +798,14 @@
     .st-city svg { height: 22vh; }
     .st-paysum { grid-template-columns: 1fr; }
     .st-flyh, .st-flyr { grid-template-columns: 3.2em minmax(0, 1fr) 6.6em minmax(0, 1fr) 3.2em; gap: 6px; }
+    .st-fly.countries .st-flyr { grid-template-columns: 3.9em minmax(0, 1fr) minmax(0, 1fr) 3.9em; grid-template-areas: "m m m m" "a l r b"; gap: 4px 8px; }
+    .st-fly.countries .v:first-child { grid-area: a; }
+    .st-fly.countries .trk.l { grid-area: l; }
+    .st-fly.countries .mid { grid-area: m; display: block; }
+    .st-fly.countries .trk.r { grid-area: r; }
+    .st-fly.countries .v:last-child { grid-area: b; }
+    .st-fly.countries .mid b, .st-fly.countries .mid small { display: inline; }
+    .st-fly.countries .mid small::before { content: " · "; }
     .st-flyh { font-size: 0.85rem; }
     .st-flyr .v { font-size: 0.95rem; }
     .st-flyr .mid b { font-size: 0.9rem; }
@@ -861,6 +875,7 @@
     .st-paysum { gap: 8px 18px; }
     .st-pshead, .st-pf { font-size: 0.85rem; }
     .st-flyh, .st-flyr { grid-template-columns: 3.4em minmax(0, 1fr) 7.4em minmax(0, 1fr) 3.4em; gap: 6px; }
+    .st-fly.countries .st-flyr { grid-template-columns: 3.9em minmax(0, 1fr) 8.4em minmax(0, 1fr) 3.9em; gap: 6px; }
     .st-flyh { font-size: 0.82rem; }
     .st-fly { gap: 6px; }
     .st-flyr .trk { height: 16px; }
@@ -1357,16 +1372,20 @@
     b.addEventListener("click", () => {
       const c = b.dataset.scope;
       if (c === SCOPE) return;
-      let hash = state.tab === "nat" ? "#national" : state.tab === "cities" ? "#cities" : "#map";
+      // the cities tab exists only on the combined view, so leaving it lands on the constituency map
+      let hash = state.tab === "nat" ? "#national" : "#map";
       const s = state.sel && byCode.get(state.sel);
-      if (s && state.tab === "map" && (c === "all" || s.country.toLowerCase() === c)) hash = "#seat=" + s.code;
+      if (s && state.tab !== "nat" && (c === "all" || s.country.toLowerCase() === c)) hash = "#seat=" + s.code;
       location.href = location.pathname + (c === "all" ? "" : "?c=" + c) + hash;
     });
   });
 
   // ---------- tabs ----------
-  // the map and cities tabs share one map; the national tab has its own view
-  const TAB_ORDER = ["map", "cities", "nat"];
+  // the map and cities tabs share one map; the national tab has its own view.
+  // The cities tab belongs to the combined England and Wales view only.
+  const HAS_CITIES = SCOPE === "all";
+  if (!HAS_CITIES) byId("tab-cities").remove();
+  const TAB_ORDER = HAS_CITIES ? ["map", "cities", "nat"] : ["map", "nat"];
   const tabs = Object.fromEntries(TAB_ORDER.map(k => [k, document.getElementById("tab-" + k)]));
   let natDrawn = false;
   function showTab(t, focus) {
@@ -3056,28 +3075,35 @@
     },
     countries: {
       build(el) {
-        const cmp = (label, a, b, fmt, higherGood) => {
-          const max = Math.max(a, b) * 1.12, aBetter = higherGood ? a >= b : a <= b;
-          return `<div class="st-cmp"><div class="st-cmph"><b>${label}</b></div>
-            <div class="st-pr"><span>England</span><span class="trk"><i style="width:0;background:var(--${aBetter ? "good" : "bad"})" data-w="${(a / max * 100).toFixed(1)}"></i></span><b>${fmt(a)}</b></div>
-            <div class="st-pr"><span>Wales</span><span class="trk"><i style="width:0;background:var(--${aBetter ? "bad" : "good"})" data-w="${(b / max * 100).toFixed(1)}"></i></span><b>${fmt(b)}</b></div></div>`;
-        };
-        el.innerHTML = `<div class="st-two countries">${[["England", ENG_A], ["Wales", WAL_A]].map(([name, A]) => `<figure class="st-city"><svg data-k="${name}" role="img" aria-label="Map of ${name}'s constituencies"></svg>
-            <figcaption><h3>${name}</h3><div class="st-rvc"><p class="st-cbig ${tone(A.npa)}">${sgbp(A.npa)}<small> net per adult</small></p>
-            <p>${A.surplus} of ${A.seats} seats pay in more than they receive</p><p>${ratio(A.ratio)} of welfare per £1 of tax</p></div></figcaption></figure>`).join("")}</div>
-          <div class="st-cmps countries st-rvc">${cmp("Income tax and NI per worker", ENG_A.tpw, WAL_A.tpw, gbp, true)}${cmp("Welfare spending per adult", ENG_A.wpa, WAL_A.wpa, gbp, false)}</div>`;
+        // Wales on the left and England on the right, as they sit on the map
+        const SIDES = [["Wales", WAL_A, WAL_S], ["England", ENG_A, ENG_S]];
+        const both = f => SIDES.map(([, A]) => f(A));
+        // one row of the comparison: Wales's bar grows left from the label, England's grows right
+        const row = (label, sub, [a, b], fmt, max = Math.max(a, b) * 1.1) => `<div class="st-flyr">
+            <span class="v">${fmt(a)}</span><span class="trk l"><i data-w="${(a / max * 100).toFixed(1)}"></i></span>
+            <span class="mid"><b>${label}</b>${sub ? `<small>${sub}</small>` : ""}</span>
+            <span class="trk r"><i data-w="${(b / max * 100).toFixed(1)}"></i></span><span class="v">${fmt(b)}</span></div>`;
+        el.innerHTML = `<div class="st-two countries">${SIDES.map(([name, A]) => `<figure class="st-city"><svg data-k="${name}" role="img" aria-label="Map of ${name}’s constituencies"></svg>
+            <figcaption><h3>${name}</h3><p class="st-cbig ${tone(A.npa)} st-rvc">${sgbp(A.npa)}<small> net per adult</small></p></figcaption></figure>`).join("")}</div>
+          <div class="st-fly countries st-rvc">
+            ${row("Seats that pay their way", "", both(A => A.surplus / A.seats), x => pct(x), 1)}
+            ${row("Welfare per £1 of tax", "", both(A => A.ratio), ratio)}
+            ${row("Tax per worker", "income tax and NI", both(A => A.tpw), gbp)}
+            ${row("Welfare per adult", "ten DWP benefits", both(A => A.wpa), gbp)}
+          </div>`;
         el.querySelectorAll("svg[data-k]").forEach(node => {
-          const list = node.dataset.k === "England" ? ENG_S : WAL_S;
+          const list = SIDES.find(([name]) => name === node.dataset.k)[2];
           const [[x0, y0], [x1, y1]] = boundsOf(list), pad = Math.max(x1 - x0, y1 - y0) * 0.04;
           d3.select(node).attr("viewBox", `${x0 - pad} ${y0 - pad} ${x1 - x0 + 2 * pad} ${y1 - y0 + 2 * pad}`).attr("preserveAspectRatio", "xMidYMid meet")
-            .selectAll("path").data(list).join("path").attr("class", "st-cseat st-cfill").attr("d", s => path(featBy.get(s.code))).style("fill", "var(--st-neutral)");
+            .selectAll("path").data(list).join("path").attr("class", "st-cseat st-cfill").attr("d", s => path(featBy.get(s.code))).style("fill", "var(--st-neutral)")
+            .append("title").text(s => `${s.name}: ${sgbp(s.npa)} per adult`);
         });
       },
       // colours and figures appear once the guess is in
       update(el, done) {
         d3.select(el).selectAll("path.st-cfill").style("fill", s => done ? fiscalOf(s) : "var(--st-neutral)");
         el.querySelectorAll(".st-rvc").forEach(n => n.classList.toggle("st-hidden", !done));
-        if (done) growBars(el);
+        el.querySelectorAll("i[data-w]").forEach(i => { i.style.width = done ? i.dataset.w + "%" : "0"; });
       },
     },
     pay: {
@@ -3376,11 +3402,11 @@
       reveal: () => (WAL_A.surplus
         ? `<strong>${WAL_A.surplus}.</strong> ${WAL_A.surplus} of Wales’s ${WAL_A.seats} seats pay in more in income tax and NI than they receive in welfare.`
         : `<strong>None.</strong> Every one of Wales’s ${WAL_A.seats} seats receives more in welfare than its workers pay in income tax and NI. The closest to breaking even is ${esc(WAL_BEST.name)}, at ${sgbp(WAL_BEST.npa)} per adult.`) +
-        ` Wales spends ${ratio(WAL_A.ratio)} on welfare for every £1 of tax. England spends ${ratio(ENG_A.ratio)}.`,
+        ` Wales spends ${ratio(WAL_A.ratio)} on welfare for every £1 of tax, against ${ratio(ENG_A.ratio)} in England.`,
       take: () => ({ big: `${WAL_A.surplus} of ${WAL_A.seats}`, line: `Welsh seats pay in more than they take out. In England, ${ENG_A.surplus} of ${ENG_A.seats} do.`, tone: WAL_A.surplus ? undefined : "bad" }),
       show(done) {
         stReset(); stMapOn(false); setScene("countries", done);
-        if (done) fiscalKey("Each seat coloured by income tax and NI minus welfare, per adult. The two countries are drawn at different scales.");
+        if (done) fiscalKey("Each seat coloured by income tax and NI minus welfare, per adult. The two maps are drawn at different scales.");
       },
       expandLabel: "Explore Wales", expand() { openMap("fiscal"); setRegion("Wales"); },
     }] : []),
@@ -3747,11 +3773,12 @@
   const h = location.hash;
   const mSeat = h.match(/^#seat=([EW]\d+)/), mReg = h.match(/^#region=(.+)$/), mCity = h.match(/^#city=(.+)$/);
   if (h === "#national") { renderPanel(); showTab("nat"); }
-  else if (h === "#cities") showTab("cities");
-  else if (mCity && CITIES.includes(decodeURIComponent(mCity[1]))) { showTab("cities"); setCity(decodeURIComponent(mCity[1])); }
+  else if (h === "#cities" && HAS_CITIES) showTab("cities");
+  else if (mCity && HAS_CITIES && CITIES.includes(decodeURIComponent(mCity[1]))) { showTab("cities"); setCity(decodeURIComponent(mCity[1])); }
   else if (mSeat && byCode.has(mSeat[1])) selectSeat(mSeat[1], { zoom: true });
   else if (mReg && REGIONS.includes(decodeURIComponent(mReg[1]))) setRegion(decodeURIComponent(mReg[1]));
   else renderPanel();
+  if (!HAS_CITIES && /^#cit/.test(h)) writeHash(); // a cities link opened in one country: drop the stale hash
   // a plain visit opens the walkthrough; a shared link to a seat, city, region, or tab goes straight there
   if ((!h && SCOPE === "all") || (h === "#walkthrough" && SCOPE === "all")) openTour(0, true);
 })();
