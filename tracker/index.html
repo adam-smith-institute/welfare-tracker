@@ -158,7 +158,8 @@
   h1 { font-size: clamp(2rem, 4.4vw, 3.6rem); line-height: 1.2; letter-spacing: -0.005em; }
   h1 .hl { color: var(--field-hl); }
   .lead { font-weight: 300; font-size: clamp(1.1rem, 1.5vw, 1.3rem); line-height: 1.4; max-width: 62ch; }
-  .scope { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: clamp(20px, 3vw, 32px); }
+  .scopes { display: flex; flex-wrap: wrap; align-items: center; gap: 10px clamp(20px, 3.5vw, 44px); margin-top: clamp(20px, 3vw, 32px); }
+  .scope { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
   .scope-l { font-size: 0.95rem; color: var(--field-ink-2); margin-right: 4px; }
   .scope button {
     background: none; border: 1.5px solid var(--field-ink-2); color: var(--field-ink); cursor: pointer;
@@ -167,6 +168,7 @@
   .scope button:hover { border-color: var(--field-ink); }
   .scope button[aria-pressed="true"] { background: var(--field-ink); color: var(--field); border-color: var(--field-ink); font-weight: 600; }
   @media (max-width: 480px) {
+    .scopes { gap: 8px 16px; }
     .scope { gap: 6px; }
     .scope-l { display: none; }
     .scope button { padding: 6px 10px 5px; font-size: 0.9rem; }
@@ -625,6 +627,13 @@
   .st-bt { position: relative; height: 34px; background: var(--track); }
   .st-bt i { position: absolute; top: 0; bottom: 0; transition: width 1s cubic-bezier(0.2, 0.7, 0.2, 1); }
   .st-gapmark { position: relative; height: 34px; }
+  .st-years { gap: clamp(22px, 4vh, 40px); }
+  .st-yr { display: grid; gap: 12px; }
+  .st-yh { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; padding-bottom: 6px; border-bottom: 2px solid var(--ink); }
+  .st-yh b { font-weight: 600; font-size: 2rem; font-variant-numeric: tabular-nums; }
+  .st-yh span { font-size: 1.15rem; text-align: right; }
+  .st-yh strong { font-weight: 600; }
+  .st-ygap { font-size: 1.05rem; font-weight: 600; color: var(--bad-ink); text-align: right; }
   .st-gapmark span { position: absolute; right: 0; top: 0; border-top: 4px solid var(--bad); padding-top: 6px; font-size: 1.15rem; font-weight: 600; color: var(--bad-ink); text-align: right; white-space: nowrap; transition: opacity 0.6s 0.6s; }
 
   /* two cities */
@@ -864,6 +873,9 @@
     .st-bl { font-size: 0.92rem; }
     .st-bl b { font-size: 1.15rem; }
     .st-bt, .st-gapmark { height: 22px; }
+    .st-yr { gap: 8px; }
+    .st-yh b { font-size: 1.4rem; }
+    .st-yh span, .st-ygap { font-size: 0.92rem; }
     .st-gapmark span { font-size: 0.9rem; }
     .st-city svg { height: 32vh; }
     .st-city h3 { font-size: 1.1rem; }
@@ -1002,11 +1014,16 @@
       </div>
       <img class="mark" src="asi_logo_white.svg" alt="Adam Smith Institute" width="88" height="88">
     </div>
+    <div class="scopes">
     <div class="scope" role="group" aria-labelledby="scope-l">
       <span class="scope-l" id="scope-l">Show</span>
       <button type="button" data-scope="all" aria-pressed="true">England and Wales</button>
       <button type="button" data-scope="england" aria-pressed="false">England</button>
       <button type="button" data-scope="wales" aria-pressed="false">Wales</button>
+    </div>
+    <div class="scope" role="group" aria-labelledby="year-l" id="year-ctl">
+      <span class="scope-l" id="year-l">Year</span>
+    </div>
     </div>
     <div class="mast-nav">
     <div class="tabs" role="tablist" aria-label="Tracker views">
@@ -1216,12 +1233,24 @@
 <script>
 (function () {
   "use strict";
-  const W = window.WT, GEO = window.GEO;
+  // the year shown: ?y=2025 for an earlier year, otherwise the latest
+  const YEARS = Object.keys(window.WT.years).map(Number).sort((a, b) => b - a), LATEST = window.WT.latest;
+  const YEAR = (() => { const y = +new URLSearchParams(location.search).get("y"); return YEARS.includes(y) ? y : LATEST; })();
+  const W = window.WT.years[YEAR], GEO = window.GEO;
+  // the year before, which the walkthrough compares against when it shows the latest year
+  const PREV = YEAR === LATEST && window.WT.years[YEAR - 1] || null;
   const byId = id => document.getElementById(id);
   // The area shown: England and Wales together (the default), or one of them, chosen with ?c=england or ?c=wales.
   const SCOPE = (() => { const c = new URLSearchParams(location.search).get("c"); return c === "england" || c === "wales" ? c : "all"; })();
   const AREA = { all: "England and Wales", england: "England", wales: "Wales" }[SCOPE];
   const IN_AREA = "in " + AREA;
+  // the address of this page for an area and a year, with a hash
+  const pageURL = (c, y, hash) => {
+    const q = new URLSearchParams();
+    if (c !== "all") q.set("c", c);
+    if (y !== LATEST) q.set("y", y);
+    return location.pathname + (q.toString() ? "?" + q : "") + hash;
+  };
   const ofArea = noun => SCOPE === "all" ? `of all ${noun} in England and Wales` : `of ${AREA}’s ${noun}`;
   const seats = SCOPE === "all" ? W.seats : W.seats.filter(s => s.country.toLowerCase() === SCOPE);
   const byCode = new Map(seats.map(s => [s.code, s]));
@@ -1376,9 +1405,21 @@
       let hash = state.tab === "nat" ? "#national" : "#map";
       const s = state.sel && byCode.get(state.sel);
       if (s && state.tab !== "nat" && (c === "all" || s.country.toLowerCase() === c)) hash = "#seat=" + s.code;
-      location.href = location.pathname + (c === "all" ? "" : "?c=" + c) + hash;
+      location.href = pageURL(c, YEAR, hash);
     });
   });
+
+  // ---------- year toggle ----------
+  // each year reloads the page for that year's data, keeping the area, the tab, and the selection
+  const yearCtl = byId("year-ctl");
+  yearCtl.insertAdjacentHTML("beforeend", YEARS.map(y => {
+    const D = window.WT.years[y];
+    return `<button type="button" data-year="${y}" aria-pressed="${y === YEAR}" title="Pay from ONS ${esc(D.ashe)}">${y}</button>`;
+  }).join(""));
+  yearCtl.querySelectorAll("[data-year]").forEach(b => b.addEventListener("click", () => {
+    const y = +b.dataset.year;
+    if (y !== YEAR) location.href = pageURL(SCOPE, y, location.hash || "#map");
+  }));
 
   // ---------- tabs ----------
   // the map and cities tabs share one map; the national tab has its own view.
@@ -2458,7 +2499,7 @@
   }
 
   document.getElementById("sources").textContent =
-    `Data: Adam Smith Institute modelling, using DWP Stat-Xplore, ONS ASHE 2025, and ONS mid-2024 population estimates, and, for England only, Census 2021, ONS APS, and NHS QOF 2024/25. Party of sitting MP as at ${W.partyAsOf}; MP names from the UK Parliament Members API, ${monthYear(W.mpAsOf)}. Boundaries: ONS Westminster Parliamentary Constituencies (July 2024), Open Government Licence v3.0; contains OS data © Crown copyright and database right 2024.`;
+    `Data: Adam Smith Institute modelling, using DWP Stat-Xplore, ONS ${W.ashe}, and ONS mid-2024 population estimates, and, for England only, Census 2021, ONS APS, and NHS QOF 2024/25. Party of sitting MP as at ${W.partyAsOf}; MP names from the UK Parliament Members API, ${monthYear(W.mpAsOf)}. Boundaries: ONS Westminster Parliamentary Constituencies (July 2024), Open Government Licence v3.0; contains OS data © Crown copyright and database right 2024.`;
 
   // ---------- resize & theme ----------
   let rT, lastW = 0;
@@ -2800,7 +2841,7 @@
     // header: the flat ASI field, with the mark top right
     ctx.fillStyle = XC.field; ctx.fillRect(0, 0, XW, 164);
     ctx.font = xFont(600, 14); ctx.fillStyle = XC.fieldHl; ctx.textAlign = "left";
-    xSpaced(ctx, "WELFARE SUSTAINABILITY TRACKER 2026: ENGLAND AND WALES", 40, 48, 5);
+    xSpaced(ctx, "WELFARE SUSTAINABILITY TRACKER 2026: ENGLAND AND WALES" + (YEAR !== LATEST ? ` · ${YEAR} FIGURES` : ""), 40, 48, 5);
     let ts = 52;
     ctx.font = xFont(600, ts);
     while (ctx.measureText(sc.title).width > 1360 && ts > 30) { ts -= 2; ctx.font = xFont(600, ts); }
@@ -2852,7 +2893,7 @@
     xText(ctx, "adamsmith.org", 40, 966, 600, 19, XC.ink);
     ctx.font = xFont(400, 12.5); ctx.fillStyle = XC.ink3; ctx.textAlign = "left";
     const today = new Date().toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
-    xWrap(ctx, `Source: Adam Smith Institute modelling, using DWP Stat-Xplore, ONS ASHE 2025, and ONS mid-2024 population estimates, and, for England only, Census 2021, ONS APS, and NHS QOF 2024/25. Tax is income tax and employee National Insurance on wages; welfare is ten DWP benefits. Party of sitting MP as at ${W.partyAsOf}. Boundaries: ONS, contains OS data © Crown copyright and database right 2024. Exported ${today}.`, 260, 944, 1300, 18, 3);
+    xWrap(ctx, `Source: Adam Smith Institute modelling, using DWP Stat-Xplore, ONS ${W.ashe}, and ONS mid-2024 population estimates, and, for England only, Census 2021, ONS APS, and NHS QOF 2024/25. Tax is income tax and employee National Insurance on wages; welfare is ten DWP benefits. Party of sitting MP as at ${W.partyAsOf}. Boundaries: ONS, contains OS data © Crown copyright and database right 2024. Exported ${today}.`, 260, 944, 1300, 18, 3);
     return { cv, sc };
   }
 
@@ -2946,7 +2987,9 @@
   const REG = W.regions.slice().sort((a, b) => b.npa - a.npa);
   const REG_BY = Object.fromEntries(W.regions.map(r => [r.name, r]));
   const TOP_REG = REG[0], LOW_REG = REG[REG.length - 1];
-  const EVEN = REG.filter(r => r !== TOP_REG && Math.abs(r.net / r.tax) < 0.05);
+  // other regions whose tax clearly covers their welfare (under 95p per £1, as in the national view), and those near break-even
+  const ALSO_REG = REG.filter(r => r !== TOP_REG && r.ratio < 0.95);
+  const EVEN = REG.filter(r => r !== TOP_REG && !ALSO_REG.includes(r) && Math.abs(r.net / r.tax) < 0.05);
   // the walkthrough always covers both countries; in a one-country view these can be missing, and are never shown
   const LON = CITY_AGG.London || agg([]), BHAM = CITY_AGG.Birmingham || agg([]);
   const HI_PAY = seats.filter(s => s.tpw > E.tpw), LO_PAY = seats.filter(s => s.tpw <= E.tpw);
@@ -2971,6 +3014,12 @@
   const ENG_S = seats.filter(s => s.country === "England"), WAL_S = seats.filter(s => s.country === "Wales");
   const ENG_A = agg(ENG_S), WAL_A = agg(WAL_S);
   const WAL_BEST = WAL_S.slice().sort((a, b) => b.npa - a.npa)[0];
+  const WAL_PAY = WAL_S.filter(s => s.net > 0).sort((a, b) => b.npa - a.npa);
+  // the year before, for the change between years (the walkthrough always covers both countries)
+  const PY = PREV && PREV.year;
+  const PREV_S = PREV ? PREV.seats.filter(s => byCode.has(s.code)) : [];
+  const PREV_A = agg(PREV_S), PREV_WAL = agg(PREV_S.filter(s => s.country === "Wales"));
+  const SAME_WEL = PREV && Math.abs(PREV_A.wel - E.wel) < 1e6;
 
   // ----- the walkthrough's own map -----
   const stSvg = d3.select("#st-map").attr("viewBox", `0 0 ${VW} ${VH}`).attr("preserveAspectRatio", "xMidYMid meet");
@@ -3053,6 +3102,19 @@
         el.querySelector(".st-wv").textContent = done ? bn(E.wel) : "?";
         el.querySelector(".st-gapmark span").style.opacity = done ? 1 : 0;
       },
+    },
+    years: {
+      build(el) {
+        const rows = [[PY, PREV_A], [YEAR, E]], max = d3.max(rows, ([, A]) => Math.max(A.tax, A.wel));
+        const bar = (label, v, colour) => `<div class="st-bar"><div class="st-bl"><span>${label}</span><b>${bn(v)}</b></div>
+            <div class="st-bt"><i data-w="${(v / max * 100).toFixed(1)}" style="left:0;width:0;background:${colour}"></i></div></div>`;
+        el.innerHTML = `<div class="st-bars st-years">${rows.map(([y, A]) => `<div class="st-yr">
+            <div class="st-yh"><b>${y}</b><span><strong>${ratio(A.ratio)}</strong> of welfare per £1 of tax</span></div>
+            ${bar("Income tax and NI", A.tax, "var(--good)")}
+            ${bar("Welfare spending", A.wel, "var(--bad)")}
+            <p class="st-ygap">Gap: ${bn(A.wel - A.tax)} a year</p></div>`).join("")}</div>`;
+      },
+      update(el) { growBars(el); },
     },
     cities: {
       build(el) {
@@ -3347,6 +3409,23 @@
       show(done) { stReset(); stMapOn(false); setScene("bars", done); },
       expandLabel: "See the national figures", expand() { openNat("view-nat"); },
     },
+    ...(PREV ? [{
+      key: "change",
+      h: `In ${YEAR}, ${ratio(E.ratio)} is spent on welfare for every £1 of tax. In ${PY}, this stood at ${ratio(PREV_A.ratio)}.`,
+      p: `Income tax and National Insurance on wages ${E.tax >= PREV_A.tax ? "rose" : "fell"} from ${bn(PREV_A.tax)} to ${bn(E.tax)}. ` +
+        (SAME_WEL ? `Welfare spending is the same ${bn(E.wel)} in both years, because both use the same welfare data. `
+          : `Welfare spending ${E.wel >= PREV_A.wel ? "rose" : "fell"} from ${bn(PREV_A.wel)} to ${bn(E.wel)}. `) +
+        `The number of seats that pay their way ${surplusSeats >= PREV_A.surplus ? "rose" : "fell"} from ${PREV_A.surplus} to ${surplusSeats}.` +
+        (SAME_WEL ? (E.ratio < PREV_A.ratio ? ` This improvement can in part be explained by the welfare spending data not being as up to date as the ${YEAR} earnings data: ` +
+          `most benefits are measured in ${W.welDate}, and pay in ${W.payDate}.` : "")
+          : ` Each year's welfare figures match its tax year: benefits are measured in ${PREV.welDate} for ${PY} and ${W.welDate} for ${YEAR}.`),
+      take: () => ({ big: `${ratio(PREV_A.ratio)} → ${ratio(E.ratio)}`, line: `spent on welfare for every £1 of income tax and National Insurance, ${PY} to ${YEAR}.`, tone: E.ratio < PREV_A.ratio ? "good" : "bad" }),
+      show() {
+        stReset(); stMapOn(false); setScene("years");
+        ST.legend.innerHTML = `<p class="st-cap">Pay from ONS ${esc(PREV.ashe)} for ${PY}, and ${esc(W.ashe)} for ${YEAR}.${SAME_WEL ? " Welfare spending uses the same data in both years." : ` Welfare from DWP Stat-Xplore, ${PREV.welDate} and ${W.welDate}.`}</p>`;
+      },
+      expandLabel: `See the ${PY} figures`, expand() { location.href = pageURL(SCOPE, PY, "#national"); },
+    }] : []),
     {
       key: "seats",
       h: `How many of the ${seats.length} constituencies ${IN_AREA} pay in more than they take out?`,
@@ -3366,20 +3445,23 @@
     },
     {
       key: "region", pick: "region",
-      h: `Only one region clearly pays its way. Which?`,
+      h: ALSO_REG.length ? `Which region pays its way most clearly?` : `Only one region clearly pays its way. Which?`,
       p: `Click it on the map, or choose from the list.`,
       choices: REGIONS.map(r => ({ v: r, label: r })), answer: TOP_REG.name, small: true,
       feedback: v => {
         if (!v) return "";
         if (v === TOP_REG.name) return `You chose ${theRegion(v)}, which is right.`;
         const r = REG_BY[v];
-        return r.npa < 0 ? `You chose ${theRegion(v)}, which runs a deficit of ${gbp(-r.npa)} per adult.` : `You chose ${theRegion(v)}, which pays in ${gbp(r.npa)} per adult, close to break-even.`;
+        return r.npa < 0 ? `You chose ${theRegion(v)}, which runs a deficit of ${gbp(-r.npa)} per adult.`
+          : ALSO_REG.includes(r) ? `You chose ${theRegion(v)}, which also pays its way, at ${gbp(r.npa)} per adult.`
+          : `You chose ${theRegion(v)}, which pays in ${gbp(r.npa)} per adult, close to break-even.`;
       },
       reveal: () => `<strong>${TOP_REG.name}.</strong> Its seats pay in ${bn(TOP_REG.net)} more than they receive, or ${gbp(TOP_REG.npa)} per adult. ` +
+        (ALSO_REG.length ? `${cap(listOf(ALSO_REG.map(r => theRegion(r.name))))} also ${ALSO_REG.length > 1 ? "pay their" : "pays its"} way, at ${listOf(ALSO_REG.map(r => gbp(r.npa)))} per adult. ` : "") +
         (EVEN.length ? `${cap(listOf(EVEN.map(r => theRegion(r.name))))} roughly ${EVEN.length > 1 ? "break" : "breaks"} even. ` : "") +
         `Every other region runs a deficit, deepest in ${theRegion(LOW_REG.name)} at ${gbp(-LOW_REG.npa)} per adult.`,
       after: () => `<div class="st-rank st-pop">${REG.map(r => `<div class="st-ri"><span class="sw" style="background:${fiscalOf(r)}"></span><span>${esc(r.name)}${r.name === tour.ans.region ? "<em>your pick</em>" : ""}</span><b>${sgbp(r.npa)}</b></div>`).join("")}</div>`,
-      take: () => ({ big: TOP_REG.name, line: `is the only region that clearly pays its way, at ${sgbp(TOP_REG.npa)} per adult. ${cap(theRegion(LOW_REG.name))} has the deepest deficit, at ${gbp(-LOW_REG.npa)} per adult.`, tone: "good" }),
+      take: () => ({ big: TOP_REG.name, line: `${ALSO_REG.length ? "pays its way most clearly" : "is the only region that clearly pays its way"}, at ${sgbp(TOP_REG.npa)} per adult. ${cap(theRegion(LOW_REG.name))} has the deepest deficit, at ${gbp(-LOW_REG.npa)} per adult.`, tone: "good" }),
       show(done) {
         stReset(); setScene(null); stMapOn(true);
         stEdges.selectAll("path").data(REGIONS).join("path").attr("class", "st-edge").attr("d", r => regionEdge(r));
@@ -3400,10 +3482,14 @@
         gap: d => d === 0 ? "Your guess is exactly right." : `Your guess was ${f0(Math.abs(d))} too ${d < 0 ? "low" : "high"}.`,
       },
       reveal: () => (WAL_A.surplus
-        ? `<strong>${WAL_A.surplus}.</strong> ${WAL_A.surplus} of Wales’s ${WAL_A.seats} seats pay in more in income tax and NI than they receive in welfare.`
+        ? `<strong>${WAL_A.surplus}.</strong> ${WAL_A.surplus} of Wales’s ${WAL_A.seats} seats pay in more in income tax and NI than they receive in welfare` +
+          (WAL_PAY.length <= 3 ? `: ${listOf(WAL_PAY.map(s => `${esc(s.name)} (${sgbp(s.npa)} per adult)`))}.` : ".")
         : `<strong>None.</strong> Every one of Wales’s ${WAL_A.seats} seats receives more in welfare than its workers pay in income tax and NI. The closest to breaking even is ${esc(WAL_BEST.name)}, at ${sgbp(WAL_BEST.npa)} per adult.`) +
+        (PREV ? (PREV_WAL.surplus ? ` In ${PY}, ${PREV_WAL.surplus} did.` : WAL_A.surplus ? ` In ${PY}, no Welsh constituency did.` : ` None did in ${PY} either.`) : "") +
         ` Wales spends ${ratio(WAL_A.ratio)} on welfare for every £1 of tax, against ${ratio(ENG_A.ratio)} in England.`,
-      take: () => ({ big: `${WAL_A.surplus} of ${WAL_A.seats}`, line: `Welsh seats pay in more than they take out. In England, ${ENG_A.surplus} of ${ENG_A.seats} do.`, tone: WAL_A.surplus ? undefined : "bad" }),
+      take: () => ({ big: `${WAL_A.surplus} of ${WAL_A.seats}`, line: `Welsh seats pay in more than they take out` +
+        (PREV && PREV_WAL.surplus !== WAL_A.surplus ? `, ${WAL_A.surplus > PREV_WAL.surplus ? "up" : "down"} from ${PREV_WAL.surplus ? PREV_WAL.surplus : "none"} in ${PY}` : "") +
+        `. In England, ${ENG_A.surplus} of ${ENG_A.seats} do.`, tone: WAL_A.surplus ? undefined : "bad" }),
       show(done) {
         stReset(); stMapOn(false); setScene("countries", done);
         if (done) fiscalKey("Each seat coloured by income tax and NI minus welfare, per adult. The two maps are drawn at different scales.");
@@ -3739,7 +3825,8 @@
   ST.expand.addEventListener("click", () => { const st = STEPS[tour.i]; closeTour(true); st.expand(); });
   ST.ret.addEventListener("click", () => openTour(tour.i, false));
   byId("tour-open").addEventListener("click", () => {
-    if (SCOPE !== "all") { location.href = location.pathname + "#walkthrough"; return; }
+    // the walkthrough tells the latest year's story, for England and Wales together
+    if (SCOPE !== "all" || YEAR !== LATEST) { location.href = pageURL("all", LATEST, "#walkthrough"); return; }
     openTour(0, true);
   });
   document.addEventListener("keydown", e => {
@@ -3780,7 +3867,7 @@
   else renderPanel();
   if (!HAS_CITIES && /^#cit/.test(h)) writeHash(); // a cities link opened in one country: drop the stale hash
   // a plain visit opens the walkthrough; a shared link to a seat, city, region, or tab goes straight there
-  if ((!h && SCOPE === "all") || (h === "#walkthrough" && SCOPE === "all")) openTour(0, true);
+  if ((!h || h === "#walkthrough") && SCOPE === "all" && YEAR === LATEST) openTour(0, true);
 })();
 </script>
 </body>

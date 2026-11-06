@@ -311,7 +311,7 @@ def check_england(path):
 if __name__ == "__main__":
     here = os.path.dirname(os.path.abspath(__file__))
     root = os.environ.get("WT_ROOT", os.path.join(here, ".."))
-    n, k, worst = check_england(os.path.join(root, "A Tale of Two Cities (Welfare Analysis) 2026.xlsx"))
+    n, k, worst = check_england(os.path.join(root, "new_data", "A Tale of Two Cities Welfare Analysis 2026 Provisional.xlsx"))
     print(f"England check: {n} constituency pay blocks and {k} job-mover rows recomputed.")
     print(f"  largest differences from the saved results: band tax £{worst['band']:.6f}, Pareto band tax £{worst['pareto']:.6f}, "
           f"implied Pareto parameter {worst['alpha']:.2e} (relative), average tax per job £{worst['avg']:.6f}, "
