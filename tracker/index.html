@@ -2499,7 +2499,7 @@
   }
 
   document.getElementById("sources").textContent =
-    `Data: Adam Smith Institute modelling, using DWP Stat-Xplore, ONS ${W.ashe}, and ONS mid-2024 population estimates, and, for England only, Census 2021, ONS APS, and NHS QOF 2024/25. Party of sitting MP as at ${W.partyAsOf}; MP names from the UK Parliament Members API, ${monthYear(W.mpAsOf)}. Boundaries: ONS Westminster Parliamentary Constituencies (July 2024), Open Government Licence v3.0; contains OS data © Crown copyright and database right 2024.`;
+    `Data: Adam Smith Institute modelling, using DWP Stat-Xplore, ONS ${W.ashe}, and ONS mid-2024 population estimates, and, for England only, Census 2021, ONS APS, and NHS QOF 2024/25. Tax is income tax and employee National Insurance on wages, after an assumed ${Math.round(W.sacPct * 100)}% salary sacrifice. Party of sitting MP as at ${W.partyAsOf}; MP names from the UK Parliament Members API, ${monthYear(W.mpAsOf)}. Boundaries: ONS Westminster Parliamentary Constituencies (July 2024), Open Government Licence v3.0; contains OS data © Crown copyright and database right 2024.`;
 
   // ---------- resize & theme ----------
   let rT, lastW = 0;
@@ -2893,7 +2893,7 @@
     xText(ctx, "adamsmith.org", 40, 966, 600, 19, XC.ink);
     ctx.font = xFont(400, 12.5); ctx.fillStyle = XC.ink3; ctx.textAlign = "left";
     const today = new Date().toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
-    xWrap(ctx, `Source: Adam Smith Institute modelling, using DWP Stat-Xplore, ONS ${W.ashe}, and ONS mid-2024 population estimates, and, for England only, Census 2021, ONS APS, and NHS QOF 2024/25. Tax is income tax and employee National Insurance on wages; welfare is ten DWP benefits. Party of sitting MP as at ${W.partyAsOf}. Boundaries: ONS, contains OS data © Crown copyright and database right 2024. Exported ${today}.`, 260, 944, 1300, 18, 3);
+    xWrap(ctx, `Source: Adam Smith Institute modelling, using DWP Stat-Xplore, ONS ${W.ashe}, and ONS mid-2024 population estimates, and, for England only, Census 2021, ONS APS, and NHS QOF 2024/25. Tax is income tax and employee National Insurance on wages, after an assumed ${Math.round(W.sacPct * 100)}% salary sacrifice; welfare is ten DWP benefits. Party of sitting MP as at ${W.partyAsOf}. Boundaries: ONS, contains OS data © Crown copyright and database right 2024. Exported ${today}.`, 260, 944, 1300, 18, 3);
     return { cv, sc };
   }
 

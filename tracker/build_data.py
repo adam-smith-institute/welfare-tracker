@@ -174,6 +174,8 @@ def build(year, cfg):
         assert gap < 1e-6, gap  # £1,000
     wales_method = [list(r[:2]) for r in wwb["Methodology & Scope"].iter_rows(min_row=3, values_only=True)]
     wales_tax_note = wwb["Tax Assumptions"]["A23"].value
+    tax_p = model.params(wb)
+    assert tax_p["Tax_SacPct"] == model.params(wwb)["Tax_SacPct"], "England and Wales salary sacrifice differ"
     for w in wales_seats:
         tax, welfare, adults = w["tax"], w["wel"], w["adults"]
         seats[key(w["name"])] = {
@@ -286,7 +288,16 @@ def build(year, cfg):
             method.append([r[0], None])
         elif r[1]:
             method.append([None, r[1]])
-    wm = {r[0]: r[1] for r in wales_method if r[0] and r[1]}
+    # Salary sacrifice sits in the Tax Assumptions sheet but not the workbook's methodology text: state it after "Tax side".
+    sac = f"{tax_p['Tax_SacPct'] * 100:g}%"
+    sac_ni = (f"There is no National Insurance cap on salary sacrifice in {cfg['taxYear']}." if tax_p["Tax_NISacCap"] >= 1e5
+              else f"For National Insurance, the sacrifice is capped at £{tax_p['Tax_NISacCap']:,.0f}.")
+    i = next(n for n, (k, _) in enumerate(method) if k == "Tax side") + 1
+    method.insert(i, ["Salary sacrifice", f"Every employee is assumed to give up {sac} of gross pay through salary sacrifice (for example, "
+                                          f"pension contributions). That {sac} is taken off pay before both income tax and employee National "
+                                          f"Insurance are worked out, in England and Wales. {sac_ni} Without this assumption the tax side "
+                                          f"would be higher."])
+    wm ={r[0]: r[1] for r in wales_method if r[0] and r[1]}
     wales_sources = next((r[1] for i, r in enumerate(wales_method) if not r[0] and r[1] and i and
                           str(wales_method[i - 1][0]).startswith("5.")), None)
     method += [["6. Wales", None],
@@ -325,7 +336,7 @@ def build(year, cfg):
     if party_mismatch:
         print("  Party differs from Parliament API (workbook, API):", party_mismatch)
 
-    return {"year": year, "ashe": cfg["ashe"], "payDate": cfg["payDate"], "welDate": cfg["welDate"],
+    return {"year": year, "ashe": cfg["ashe"], "payDate": cfg["payDate"], "welDate": cfg["welDate"], "sacPct": tax_p["Tax_SacPct"],
             "partyAsOf": PARTY_AS_OF, "mpAsOf": date.today().isoformat(), "benefits": BENEFITS, "pcts": PCTS,
             "england": england, "wales": wales, "regions": regions, "parties": parties, "seats": out_seats,
             "dumbbell": dumbbell, "method": method}
