@@ -1244,11 +1244,12 @@
   const SCOPE = (() => { const c = new URLSearchParams(location.search).get("c"); return c === "england" || c === "wales" ? c : "all"; })();
   const AREA = { all: "England and Wales", england: "England", wales: "Wales" }[SCOPE];
   const IN_AREA = "in " + AREA;
-  // the address of this page for an area and a year, with a hash
+  // the address of this page for an area and a year, with the current map colouring and a hash
   const pageURL = (c, y, hash) => {
     const q = new URLSearchParams();
     if (c !== "all") q.set("c", c);
     if (y !== LATEST) q.set("y", y);
+    for (const k in VIEW_DEFAULT) if (state[k] !== VIEW_DEFAULT[k]) q.set(k, state[k]);
     return location.pathname + (q.toString() ? "?" + q : "") + hash;
   };
   const ofArea = noun => SCOPE === "all" ? `of all ${noun} in England and Wales` : `of ${AREA}’s ${noun}`;
@@ -1383,7 +1384,9 @@
   // ---------- state ----------
   // scope: a selected seat beats an isolated party, which beats a region, which beats the whole area.
   // On the cities tab: a selected seat beats a city, which beats all cities.
-  const state = { mode: "party", metric: "npa", share: "tax", basis: "share", sel: null, iso: null, region: null, city: null, tab: "map" };
+  // The map colouring is kept in the address (?mode=fiscal&metric=ratio), so a year or area switch keeps it.
+  const VIEW_DEFAULT = { mode: "party", metric: "npa", share: "tax", basis: "share" };
+  const state = { ...VIEW_DEFAULT, sel: null, iso: null, region: null, city: null, tab: "map" };
   let mapScope = "map"; // which map tab was shown last: "map" or "cities"
   const inCities = () => mapScope === "cities";
 
@@ -1456,7 +1459,7 @@
       : state.sel ? "#seat=" + state.sel
       : state.tab === "cities" ? (state.city ? "#city=" + encodeURIComponent(state.city) : "#cities")
       : state.region ? "#region=" + encodeURIComponent(state.region) : "";
-    try { history.replaceState(null, "", h || location.pathname + location.search); } catch (e) { /* sandboxed viewer */ }
+    try { history.replaceState(null, "", pageURL(SCOPE, YEAR, h)); } catch (e) { /* sandboxed viewer */ }
   }
 
   // ---------- map ----------
@@ -1716,26 +1719,29 @@
   }
 
   function setSeg(attr, val) { document.querySelectorAll(`[data-${attr}]`).forEach(x => x.setAttribute("aria-pressed", x.dataset[attr] === val)); }
-  document.querySelectorAll("[data-mode]").forEach(b => b.addEventListener("click", () => {
-    state.mode = b.dataset.mode;
-    setSeg("mode", state.mode);
+  function showModeCtls() {
     document.getElementById("metric-ctl").hidden = state.mode !== "fiscal";
     document.getElementById("share-ctl").hidden = state.mode !== "share";
     document.getElementById("basis-ctl").hidden = state.mode !== "share";
+  }
+  document.querySelectorAll("[data-mode]").forEach(b => b.addEventListener("click", () => {
+    state.mode = b.dataset.mode;
+    setSeg("mode", state.mode);
+    showModeCtls();
     if (state.mode !== "party" && state.iso) { state.iso = null; if (!state.sel) zoomScope(); }
-    paint(); drawLegend(); renderPanel();
+    paint(); drawLegend(); renderPanel(); writeHash();
   }));
   document.querySelectorAll("[data-metric]").forEach(b => b.addEventListener("click", () => {
     state.metric = b.dataset.metric; setSeg("metric", state.metric);
-    paint(); drawLegend(); renderPanel();
+    paint(); drawLegend(); renderPanel(); writeHash();
   }));
   document.querySelectorAll("[data-share]").forEach(b => b.addEventListener("click", () => {
     state.share = b.dataset.share; setSeg("share", state.share);
-    paint(); drawLegend(); renderPanel();
+    paint(); drawLegend(); renderPanel(); writeHash();
   }));
   document.querySelectorAll("[data-basis]").forEach(b => b.addEventListener("click", () => {
     state.basis = b.dataset.basis; setSeg("basis", state.basis);
-    paint(); drawLegend(); renderPanel();
+    paint(); drawLegend(); renderPanel(); writeHash();
   }));
 
   // ---------- search ----------
@@ -3855,6 +3861,13 @@
 
   // ---------- boot ----------
   buildScales();
+  const qv = new URLSearchParams(location.search);
+  const viewInURL = Object.keys(VIEW_DEFAULT).filter(k => {
+    const v = qv.get(k);
+    if (!v || !document.querySelector(`[data-${k}="${CSS.escape(v)}"]`)) return false;
+    state[k] = v; setSeg(k, v); return true;
+  }).length > 0;
+  showModeCtls();
   paint();
   drawLegend();
   const h = location.hash;
@@ -3866,8 +3879,8 @@
   else if (mReg && REGIONS.includes(decodeURIComponent(mReg[1]))) setRegion(decodeURIComponent(mReg[1]));
   else renderPanel();
   if (!HAS_CITIES && /^#cit/.test(h)) writeHash(); // a cities link opened in one country: drop the stale hash
-  // a plain visit opens the walkthrough; a shared link to a seat, city, region, or tab goes straight there
-  if ((!h || h === "#walkthrough") && SCOPE === "all" && YEAR === LATEST) openTour(0, true);
+  // a plain visit opens the walkthrough; a shared link to a seat, city, region, tab, or map colouring goes straight there
+  if ((!h && !viewInURL || h === "#walkthrough") && SCOPE === "all" && YEAR === LATEST) openTour(0, true);
 })();
 </script>
 </body>
