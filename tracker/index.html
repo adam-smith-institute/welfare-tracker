@@ -1413,8 +1413,10 @@
   });
 
   // ---------- year toggle ----------
-  // each year reloads the page for that year's data, keeping the area, the tab, and the selection
+  // each year reloads the page for that year's data, keeping the area, the tab, and the selection.
+  // A single-year edition has nothing to switch, so it shows no year control.
   const yearCtl = byId("year-ctl");
+  if (YEARS.length < 2) yearCtl.remove();
   yearCtl.insertAdjacentHTML("beforeend", YEARS.map(y => {
     const D = window.WT.years[y];
     return `<button type="button" data-year="${y}" aria-pressed="${y === YEAR}" title="Pay from ONS ${esc(D.ashe)}">${y}</button>`;

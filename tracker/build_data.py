@@ -1,8 +1,10 @@
 """Build the tracker's data files from the England and Wales welfare workbooks, one pair per year.
 
     pip install openpyxl
-    python3 build_data.py
+    python3 build_data.py                  the main tracker (this folder): 2026 and 2025, from ../new_data
+    python3 build_data.py tracker-2025     a 2025-only edition in ../tracker-2025, from ../old-data (see EDITIONS)
 
+The main tracker
 Reads  ../new_data/A Tale of Two Cities Welfare Analysis 2026 Provisional.xlsx          (2026: England, 543 seats)
        ../new_data/A Tale of Two Cities Welfare Analysis 2026 - Wales Provisional.xlsx  (2026: Wales, 32 seats)
        ../new_data/A Tale of Two Cities Welfare Analysis 2026 Revised.xlsx              (2025: England)
@@ -17,6 +19,9 @@ Reads  ../new_data/A Tale of Two Cities Welfare Analysis 2026 Provisional.xlsx  
        UK Parliament Members API (current MPs, fetched live)
 Writes data.js   window.WT  = {latest: 2026, years: {2026: {england, wales, regions, parties, seats, dumbbell, method, ...},
                                                       2025: {...}}}
+       (another edition writes its data.js and geo.js into its own folder, beside copies of index.html and
+       the logo, so each edition is a complete page at its own address; the page hides the year switch when
+       an edition has only one year)
        geo.js    window.GEO = constituency boundaries, pre-projected to a flat plane
                              (x = lon * cos 52.7deg, y = lat) so the page can draw them with
                              d3.geoIdentity and no winding-order issues.
@@ -28,7 +33,7 @@ follows the workbook's own formulas.
 Re-run whenever a workbook changes. The page reads only data.js and geo.js.
 Set WT_ROOT to read the input files from another folder.
 """
-import glob, json, math, os, re, unicodedata, urllib.request
+import glob, json, math, os, re, shutil, sys, unicodedata, urllib.request
 from datetime import date
 
 import openpyxl
@@ -37,20 +42,35 @@ import model
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.environ.get("WT_ROOT", os.path.join(HERE, ".."))
-DATA = os.path.join(ROOT, "new_data")
-# tracker year -> England workbook, Wales workbook, and the pay, tax and welfare periods behind them (for credits and notes)
-YEARS = {
-    2026: {"xlsx": "A Tale of Two Cities Welfare Analysis 2026 Provisional.xlsx",
-           "wales": "A Tale of Two Cities Welfare Analysis 2026 - Wales Provisional.xlsx",
-           "ashe": "ASHE 2026 (provisional)", "payDate": "April 2026", "taxYear": "2025/26", "welDate": "March 2026"},
-    2025: {"xlsx": "A Tale of Two Cities Welfare Analysis 2026 Revised.xlsx",
-           "wales": "A Tale of Two Cities Welfare Analysis 2026 - Wales Revised.xlsx",
-           "ashe": "ASHE 2025 (revised)", "payDate": "April 2025", "taxYear": "2024/25", "welDate": "February 2025"},
+# Each edition is one published page. Its years map a tracker year to the England and Wales workbooks and the
+# pay, tax and welfare periods behind them (for credits and notes); welPulled is the Stat-Xplore download date
+# and partyAsOf the MP party check behind its workbooks.
+EDITIONS = {
+    "tracker": {"data": "new_data", "welPulled": "6 November 2026", "partyAsOf": "November 2026", "years": {
+        2026: {"xlsx": "A Tale of Two Cities Welfare Analysis 2026 Provisional.xlsx",
+               "wales": "A Tale of Two Cities Welfare Analysis 2026 - Wales Provisional.xlsx",
+               "ashe": "ASHE 2026 (provisional)", "payDate": "April 2026", "taxYear": "2025/26", "welDate": "March 2026"},
+        2025: {"xlsx": "A Tale of Two Cities Welfare Analysis 2026 Revised.xlsx",
+               "wales": "A Tale of Two Cities Welfare Analysis 2026 - Wales Revised.xlsx",
+               "ashe": "ASHE 2025 (revised)", "payDate": "April 2025", "taxYear": "2024/25", "welDate": "February 2025"},
+    }},
+    # the earlier single-year model: ASHE 2025 pay with 2025/26 tax rules and the latest welfare
+    # (Mar-26 for most benefits, May-26 for UC, Jul-26 for PIP)
+    "tracker-2025": {"data": "old-data", "welPulled": "30 September 2026", "partyAsOf": "November 2026", "years": {
+        2025: {"xlsx": "A Tale of Two Cities Welfare Analysis 2026 1 (corrected).xlsx",
+               "wales": "A Tale of Two Cities Welfare Analysis 2026 - Wales 1 (corrected).xlsx",
+               "ashe": "ASHE 2025 (provisional)", "payDate": "April 2025", "taxYear": "2025/26", "welDate": "March 2026"},
+    }},
 }
+EDITION = sys.argv[1] if len(sys.argv) > 1 else "tracker"
+assert EDITION in EDITIONS, f"unknown edition {EDITION!r}: choose from {', '.join(EDITIONS)}"
+ED = EDITIONS[EDITION]
+DATA = os.path.join(ROOT, ED["data"])
+YEARS = ED["years"]
 LATEST = max(YEARS)
-# Stat-Xplore extract and MP party check behind both years' workbooks
-WELFARE_PULLED = "6 November 2026"
-PARTY_AS_OF = "November 2026"
+WELFARE_PULLED = ED["welPulled"]
+PARTY_AS_OF = ED["partyAsOf"]
+OUT = HERE if EDITION == "tracker" else os.path.join(os.path.dirname(HERE), EDITION)
 GEOJSON = glob.glob(os.path.join(ROOT, "Westminster_Parliamentary_Constituencies_July_2024_*.geojson"))[0]
 WALES_GEOJSON = os.path.join(ROOT, "wales_pcon2024_simplified.geojson")
 MEMBERS_URL = "https://members-api.parliament.uk/api/Members/Search?House=1&IsCurrentMember=true&skip={}&take=20"
@@ -311,13 +331,14 @@ def build(year, cfg):
                ["Demographics", "The demographic, health, and work comparisons in the tracker cover England only."],
                ["Sources", wales_sources]]
     assert all(v for _, v in method[-8:]), [k for k, v in method[-8:] if not v]
-    pay = "; ".join(f"{y} uses ONS {c['ashe']}, for {c['payDate']}" for y, c in sorted(YEARS.items(), reverse=True))
-    method += [["7. Years", None],
-               ["Pay", f"The tracker shows {len(YEARS)} years of pay data: {pay}."],
-               ["Welfare", "Each year's welfare data and tax rules match the tax year its pay covers: " +
-                           "; ".join(f"{y} uses Stat-Xplore {c['welDate']} for all ten benefits and {c['taxYear']} tax rules"
-                                     for y, c in sorted(YEARS.items(), reverse=True)) +
-                           ". The change between years therefore reflects pay, benefit claims and awards together."]]
+    if len(YEARS) > 1:
+        pay = "; ".join(f"{y} uses ONS {c['ashe']}, for {c['payDate']}" for y, c in sorted(YEARS.items(), reverse=True))
+        method += [["7. Years", None],
+                   ["Pay", f"The tracker shows {len(YEARS)} years of pay data: {pay}."],
+                   ["Welfare", "Each year's welfare data and tax rules match the tax year its pay covers: " +
+                               "; ".join(f"{y} uses Stat-Xplore {c['welDate']} for all ten benefits and {c['taxYear']} tax rules"
+                                         for y, c in sorted(YEARS.items(), reverse=True)) +
+                               ". The change between years therefore reflects pay, benefit claims and awards together."]]
 
     # ---------- This year's data ----------
     out_seats = []
@@ -347,7 +368,8 @@ years = {y: build(y, cfg) for y, cfg in sorted(YEARS.items(), reverse=True)}
 codes = {s["code"] for s in years[LATEST]["seats"]}
 assert all({s["code"] for s in y["seats"]} == codes for y in years.values())
 WT = {"latest": LATEST, "years": years}
-with open(os.path.join(HERE, "data.js"), "w", encoding="utf-8") as f:
+os.makedirs(OUT, exist_ok=True)
+with open(os.path.join(OUT, "data.js"), "w", encoding="utf-8") as f:
     f.write("window.WT=")
     json.dump(WT, f, separators=(",", ":"), ensure_ascii=False)
     f.write(";\n")
@@ -380,10 +402,15 @@ for f in geo["features"]:
         coords = [[ring(r) for r in poly] for poly in g["coordinates"]]
     feats.append({"type": "Feature", "id": code, "geometry": {"type": g["type"], "coordinates": coords}})
 assert len(feats) == 575, len(feats)
-with open(os.path.join(HERE, "geo.js"), "w", encoding="utf-8") as f:
+with open(os.path.join(OUT, "geo.js"), "w", encoding="utf-8") as f:
     f.write("window.GEO=")
     json.dump({"type": "FeatureCollection", "features": feats}, f, separators=(",", ":"))
     f.write(";\n")
 
-print(f"{len(codes)} seats x {len(years)} years -> data.js ({os.path.getsize(os.path.join(HERE, 'data.js')) / 1e3:.0f} KB); "
-      f"geo.js ({os.path.getsize(os.path.join(HERE, 'geo.js')) / 1e3:.0f} KB)")
+# another edition gets its own copy of the page, so it is complete at its own address
+if OUT != HERE:
+    for name in ("index.html", "asi_logo_white.svg"):
+        shutil.copyfile(os.path.join(HERE, name), os.path.join(OUT, name))
+
+print(f"{EDITION}: {len(codes)} seats x {len(years)} years -> data.js ({os.path.getsize(os.path.join(OUT, 'data.js')) / 1e3:.0f} KB); "
+      f"geo.js ({os.path.getsize(os.path.join(OUT, 'geo.js')) / 1e3:.0f} KB) in {os.path.normpath(OUT)}")

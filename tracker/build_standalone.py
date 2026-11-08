@@ -1,22 +1,27 @@
 """Build a single self-contained HTML file for sharing by email, Teams or USB.
 
-    python3 build_standalone.py
+    python3 build_standalone.py                  the main tracker
+    python3 build_standalone.py tracker-2025     another edition built by build_data.py (its data from ../tracker-2025)
 
 index.html is the published page: it loads data.js, geo.js and the logo
 from sibling files and d3 and Josefin Sans from CDNs. Opened on its own (an email
 attachment, or a file double-clicked inside a zip) those are missing and the page is blank.
 
 This script inlines everything - data, boundaries, d3, logo and fonts - into one file.
-Output: ../Welfare-Sustainability-Tracker-2026.html. Works offline in any modern browser.
+Output: ../Welfare-Sustainability-Tracker-2026.html, or ../Welfare-Sustainability-Tracker-2026-<edition>.html.
+Works offline in any modern browser.
 """
-import base64, os
+import base64, os, sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-OUT = os.path.join(HERE, "..", "Welfare-Sustainability-Tracker-2026.html")
+EDITION = sys.argv[1] if len(sys.argv) > 1 else "tracker"
+# an edition's data files sit in its own folder; the page, fonts, d3 and logo are shared
+DATA = HERE if EDITION == "tracker" else os.path.join(os.path.dirname(HERE), EDITION)
+OUT = os.path.join(HERE, "..", "Welfare-Sustainability-Tracker-2026" + ("" if EDITION == "tracker" else "-" + EDITION) + ".html")
 
 
-def read(name, mode="r"):
-    with open(os.path.join(HERE, name), mode, **({} if "b" in mode else {"encoding": "utf-8"})) as f:
+def read(name, mode="r", folder=HERE):
+    with open(os.path.join(folder, name), mode, **({} if "b" in mode else {"encoding": "utf-8"})) as f:
         return f.read()
 
 
@@ -47,8 +52,8 @@ page = swap(page, "<style>\n", "<style>\n" + fonts)
 
 # Library, data and boundaries.
 page = swap(page, '<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>', inline_script(read("vendor/d3.min.js")))
-page = swap(page, '<script src="data.js"></script>', inline_script(read("data.js")))
-page = swap(page, '<script src="geo.js"></script>', inline_script(read("geo.js")))
+page = swap(page, '<script src="data.js"></script>', inline_script(read("data.js", folder=DATA)))
+page = swap(page, '<script src="geo.js"></script>', inline_script(read("geo.js", folder=DATA)))
 
 # Logo as a data URI.
 logo = "data:image/svg+xml;base64," + base64.b64encode(read("asi_logo_white.svg", "rb")).decode()
